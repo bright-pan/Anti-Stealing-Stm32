@@ -1,0 +1,22 @@
+######################################################################
+## Filename:      README
+## Version:       
+##                
+## Author:        Bright Pan <loststriker@gmail.com>
+## Created at:    Mon Mar 28 19:14:22 2011
+##                
+##                
+## Modified by:   Bright Pan <loststriker@gmail.com>
+## Modified at:   Mon Mar 28 19:50:30 2011
+##                
+## Description:   
+## Copyright (C) 2010-2011,  Bright Pan
+######################################################################
+
+1. openocd configure file.
+
+   openjtag.cfg for jtag device.
+   stm32_h103_rb.cfg for stm32 mcu.
+   init.cfg for newboot.
+
+   sudo openocd -d 3 -l openocd.log -f openjtag.cfg -f stm32_h103_rb.cfg -f init.cfg
