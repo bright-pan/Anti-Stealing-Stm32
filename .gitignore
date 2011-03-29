@@ -1,0 +1,20 @@
+######################################################################
+## Filename:      .gitignore
+## Version:       
+##                
+## Author:        Bright Pan <loststriker@gmail.com>
+## Created at:    Tue Mar 29 09:32:13 2011
+##                
+##                
+## Modified by:   Bright Pan <loststriker@gmail.com>
+## Modified at:   Tue Mar 29 09:37:57 2011
+##                
+## Description:   
+## Copyright (C) 2010-2011,  Bright Pan
+######################################################################
+
+*.o
+*.bin
+*.elf
+*.out
+*.log
