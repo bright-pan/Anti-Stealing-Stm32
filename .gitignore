@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Tue Mar 29 09:37:57 2011
+## Modified at:   Tue Apr 12 17:00:58 2011
 ##                
 ## Description:   
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -18,3 +18,15 @@
 *.elf
 *.out
 *.log
+*.in
+*.guess
+*.sub
+*.m4
+install-sh
+ltmain.sh
+configure
+missing
+depcomp
+m4/
+autom4te.cache/
+build/

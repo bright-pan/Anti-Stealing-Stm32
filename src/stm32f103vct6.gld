@@ -1,0 +1,50 @@
+/*
+######################################################################
+## Filename:      stm32f103vct6.gld
+## Version:       
+##                
+## Author:        Bright Pan <loststriker@gmail.com>
+## Created at:    Tue Apr 12 14:18:39 2011
+##                
+##                
+## Modified by:   Bright Pan <loststriker@gmail.com>
+## Modified at:   Tue Apr 12 15:11:32 2011
+##                
+## Description:   link scripts
+## Copyright (C) 2010-2011,  Bright Pan
+######################################################################
+*/
+
+MEMORY
+{
+		FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 256k
+		SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 48k
+}
+/* Section Definitions */
+SECTIONS
+{
+		.text :
+		{
+				KEEP(*(.isr_vector))
+				*(.text)
+				*(.rodata)
+				. = ALIGN(4);
+				_etext = .;
+		} > FLASH
+		.data : AT (_etext)
+		{
+				_data = .;
+				*(.data)
+				. = ALIGN(4);
+				_edata = . ;
+		} > SRAM
+		/* .bss section which is used for uninitialized data */
+		.bss (NOLOAD) :
+		{
+				_bss = . ;
+				*(.bss)
+				. = ALIGN(4);
+				_ebss = . ;
+		} > SRAM
+		_end = . ;
+}
