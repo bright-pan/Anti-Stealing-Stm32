@@ -7,7 +7,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for programs.
 AC_PROG_CC
-
+AM_PROG_AS
 # Checks for libraries.
 AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
@@ -29,5 +29,12 @@ AC_CONFIG_FILES([Makefile
 				 lib/bsp/system/src/Makefile
 				 lib/bsp/interrupt/Makefile
 				 lib/bsp/interrupt/src/Makefile
+				 lib/bsp/init/Makefile
+				 lib/bsp/init/src/Makefile
+				 lib/ucos/Makefile
+				 lib/ucos/ports/Makefile
+				 lib/ucos/ports/src/Makefile
+				 lib/ucos/core/Makefile
+				 lib/ucos/core/src/Makefile
 				 src/Makefile])
 AC_OUTPUT

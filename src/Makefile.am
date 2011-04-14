@@ -19,9 +19,14 @@ main_elf_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/bsp/system/inc \
 	-I$(top_srcdir)/lib/cm3/inc \
 	-I$(top_srcdir)/lib/std_periph/inc \
-	-I$(top_srcdir)/lib/bsp/interrupt/inc
+	-I$(top_srcdir)/lib/bsp/interrupt/inc \
+	-I$(top_srcdir)/lib/bsp/init/inc \
+	-I$(top_srcdir)/lib/ucos/ports/inc \
+	-I$(top_srcdir)/lib/ucos/core/inc \
+	-I$(top_srcdir)/lib/bsp/system/inc
 main_elf_LDADD = $(top_builddir)/lib/std_periph/src/libstm32periph.la \
-	$(top_builddir)/lib/bsp/interrupt/src/libinterrput.la
+	$(top_builddir)/lib/bsp/interrupt/src/libinterrput.la \
+	$(top_builddir)/lib/bsp/system/src/libsystem.la
 main_elf_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) \
 	$(main_elf_LDFLAGS) $(LDFLAGS) -o $@

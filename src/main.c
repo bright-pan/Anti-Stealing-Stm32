@@ -1,9 +1,23 @@
-#include "stm32f10x.h"
-#include "stm32f10x_it.h"
-#include "bits.h"
+/*********************************************************************
+ * Filename:      main.c
+ * Version:       
+ *                
+ * Author:        Bright Pan <loststriker@gmail.com>
+ * Created at:    Tue Apr 12 17:07:41 2011
+ *                
+ *                
+ * Modified by:   Bright Pan <loststriker@gmail.com>
+ * Modified at:   Thu Apr 14 15:13:12 2011
+ *                
+ * Description:   application main program.
+ * Copyright (C) 2010-2011,  Bright Pan
+ ********************************************************************/
+
+#include "includes.h"
 
 #define STACK_TOP 0x20000800
 #define NVIC_CCR ((volatile unsigned long *)(0xE000ED14))
+
 // 声明函数原型
 int main(void);
 void myDelay(unsigned long delay );
@@ -15,20 +29,18 @@ void Clk_Init (void);
 GPIO_InitTypeDef GPIO_InitStructure;
 
 
-/*************************************************************************
- * Function Name: main
- * Parameters: none
- * Return: Int32U
+/*
+ * Function main ()
  *
- * Description: The main subroutine
+ *    application start entry
  *
- *************************************************************************/
+ */
 int main(void)
 {
 	
   *NVIC_CCR = *NVIC_CCR | 0x200; /* 设置NVIC 的STKALIGN */
 	// Init clock system
-	  Clk_Init();
+  SystemInit();
 
 	  RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
       RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOA, ENABLE);
@@ -59,14 +71,12 @@ void myDelay(unsigned long delay )
   while(delay) delay--;
 }
 
-/*************************************************************************
- * Function Name: Clk_Init
- * Parameters: Int32U Frequency
- * Return: Int32U
+/*
+ * Function Clk_Init ()
  *
- * Description: Init clock system
+ *    System clock initialize.
  *
- *************************************************************************/
+ */
 void Clk_Init (void)
 {
   // 1. Cloking the controller from internal HSI RC (8 MHz)

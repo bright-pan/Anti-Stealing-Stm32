@@ -1,1 +1,1 @@
-SUBDIRS = std_periph cm3 bsp
+SUBDIRS = std_periph cm3 bsp ucos

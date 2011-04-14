@@ -1,1 +1,1 @@
-SUBDIRS = system interrupt
+SUBDIRS = system interrupt init
