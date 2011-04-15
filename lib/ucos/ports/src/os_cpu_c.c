@@ -355,7 +355,7 @@ void  OS_CPU_SysTickInit (void)
     INT32U  cnts;
 
 
-    cnts = OS_CPU_SysTickClkFreq() / OS_TICKS_PER_SEC;
+	//    cnts = OS_CPU_SysTickClkFreq() / OS_TICKS_PER_SEC;
 
     OS_CPU_CM3_NVIC_ST_RELOAD = (cnts - 1);
                                                  /* Enable timer.                                      */

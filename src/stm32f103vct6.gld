@@ -8,7 +8,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Tue Apr 12 15:11:32 2011
+## Modified at:   Fri Apr 15 11:42:41 2011
 ##                
 ## Description:   link scripts
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -26,15 +26,15 @@ SECTIONS
 		.text :
 		{
 				KEEP(*(.isr_vector))
-				*(.text)
-				*(.rodata)
+				*(.text .text.*)
+				*(.rodata .rodata.*)
 				. = ALIGN(4);
 				_etext = .;
 		} > FLASH
 		.data : AT (_etext)
 		{
 				_data = .;
-				*(.data)
+				*(.data .data.*)
 				. = ALIGN(4);
 				_edata = . ;
 		} > SRAM
@@ -42,9 +42,19 @@ SECTIONS
 		.bss (NOLOAD) :
 		{
 				_bss = . ;
-				*(.bss)
+				*(.bss .bss.*)
 				. = ALIGN(4);
 				_ebss = . ;
 		} > SRAM
-		_end = . ;
+
+		.stackarea (NOLOAD) : 
+        { 
+				. = ALIGN(8); 
+          		*(.stackarea .stackarea.*) 
+          		. = ALIGN(8); 
+        } > SRAM 
+
+        . = ALIGN(4); 
+        _end = . ;
 }
+

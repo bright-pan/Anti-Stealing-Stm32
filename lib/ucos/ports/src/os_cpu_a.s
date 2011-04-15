@@ -39,7 +39,7 @@
 	    .global  OSStartHighRdy
 	    .global  OSCtxSw
 	    .global  OSIntCtxSw
-	    .global  OS_CPU_PendSVHandler
+	    .global  OSPendSV_Handler
 
 	@********************************************************************************************************
 	@                                                EQUATES
@@ -198,7 +198,7 @@ OSIntCtxSw:
 	@              therefore safe to assume that context being switched out was using the process stack (PSP).
 	@********************************************************************************************************
 
-OS_CPU_PendSVHandler:	
+OSPendSV_Handler:
 	    CPSID   I                                                   @ Prevent interruption during context switch
 	    MRS     R0, PSP                                             @ PSP is process stack pointer
 	    CBZ     R0, OS_CPU_PendSVHandler_nosave                     @ Skip register save the first time

@@ -6,12 +6,15 @@ OD = arm-none-eabi-objdump
 
 CCLD = arm-none-eabi-ld
 
-lib_LTLIBRARIES = libinterrput.la
-libinterrput_la_SOURCES = stm32f10x_it.c
-libinterrput_la_CFLAGS  = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
+lib_LTLIBRARIES = libbsp-interrput.la
+libbsp_interrput_la_SOURCES = stm32f10x_it.c
+libbsp_interrput_la_CFLAGS  = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(srcdir)/../inc \
 	-I$(top_srcdir)/inc \
 	-I$(top_srcdir)/lib/cm3/inc \
 	-I$(top_srcdir)/lib/std_periph/inc \
-	-I$(top_srcdir)/lib/bsp/system/inc
-libinterrput_la_LDFLAGS = -all-static -static-libtool-libs
+	-I$(top_srcdir)/lib/bsp/system/inc \
+	-I$(top_srcdir)/lib/ucos/core/inc \
+	-I$(top_srcdir)/lib/ucos/ports/inc \
+	-I$(top_srcdir)/lib/bsp/init/inc
+libbsp_interrput_la_LDFLAGS = -all-static -static-libtool-libs
