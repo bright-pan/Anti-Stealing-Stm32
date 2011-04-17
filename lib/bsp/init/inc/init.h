@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 14 15:26:28 2011
+ * Modified at:   Fri Apr 15 15:07:32 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -16,6 +16,6 @@
 #ifndef INIT_H
 #define INIT_H
 
-void init(void);
+void bsp_init(void);
 
 #endif

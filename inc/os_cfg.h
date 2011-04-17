@@ -63,8 +63,8 @@
 #define OS_TASK_NAME_SIZE        16    /*     Determine the size of a task name                        */
 #define OS_TASK_PROFILE_EN        1    /*     Include variables in OS_TCB for profiling                */
 #define OS_TASK_QUERY_EN          1    /*     Include code for OSTaskQuery()                           */
-#define OS_TASK_STAT_EN           1    /*     Enable (1) or Disable(0) the statistics task             */
-#define OS_TASK_STAT_STK_CHK_EN   1    /*     Check task stacks from statistic task                    */
+#define OS_TASK_STAT_EN           0    /*     Enable (1) or Disable(0) the statistics task             */
+#define OS_TASK_STAT_STK_CHK_EN   0    /*     Check task stacks from statistic task                    */
 #define OS_TASK_SUSPEND_EN        1    /*     Include code for OSTaskSuspend() and OSTaskResume()      */
 #define OS_TASK_SW_HOOK_EN        1    /*     Include code for OSTaskSwHook()                          */
 

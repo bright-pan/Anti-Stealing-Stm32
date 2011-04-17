@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Tue Apr 12 15:17:25 2011
+## Modified at:   Sun Apr 17 10:18:47 2011
 ##                
 ## Description:   
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -29,3 +29,8 @@
    cd build
    ../configure --host=arm-none-eabi --build=i486-linux-gnu
    make
+
+3. libraries linking sequence
+
+   if you want to link library a and b, but they are exist call relations of a call b,
+   so you want to link the two libraries, you should link a first, then link b.

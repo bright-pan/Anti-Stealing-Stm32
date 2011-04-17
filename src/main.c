@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri Apr 15 11:54:59 2011
+ * Modified at:   Sun Apr 17 10:08:49 2011
  *                
  * Description:   application main program.
  * Copyright (C) 2010-2011,  Bright Pan
@@ -18,99 +18,81 @@
 #define STACK_SIZE 1024
 #define BOOT_RAM 0xF1E0F85F
 #define NVIC_CCR ((volatile unsigned long *)(0xE000ED14))
+typedef void (* const pfn_ISR)(void);
+
+static  void  AppTaskCreate(void);
+
+static  void  AppTaskStart (void *p_arg);
 
 // 声明函数原型
 int main(void);
-void myDelay(unsigned long delay );
-void Clk_Init (void);
-
 
 // VARIABLES
+__attribute__ ((section(".stackarea"))) static unsigned long Stack[STACK_SIZE];
+static OS_STK AppTaskStartStk[APP_TASK_START_STK_SIZE];
 
-GPIO_InitTypeDef GPIO_InitStructure;
-
-
-/*
- * Function main ()
- *
- *    application start entry
- *
- */
-int main(void)
+int  main (void)
 {
-	
-  *NVIC_CCR = *NVIC_CCR | 0x200; /* 设置NVIC 的STKALIGN */
-  // Init clock system
   SystemInit();
+    INT8U  err;
+	/* Set the Vector Table base location at 0x08000000 */ 
+  	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);   
 
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOA, ENABLE);
-					
+    //BSP_IntDisAll();                   /* Disable all interrupts until we are ready to accept them */
 
-  // Configure PC.12 as output push-pull (LED)
-  GPIO_WriteBit(GPIOC,GPIO_Pin_12,Bit_SET);
-  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_12;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
+    OSInit();                          /* Initialize "uC/OS-II, The Real-Time Kernel"              */
 
-	    
+   /* Create the start task */
+	err = OSTaskCreateExt(AppTaskStart,(void *)0,
+					(OS_STK *)&AppTaskStartStk[APP_TASK_START_STK_SIZE-1],
+					APP_TASK_START_PRIO,APP_TASK_START_PRIO,
+					(OS_STK *)&AppTaskStartStk[0],
+					APP_TASK_START_STK_SIZE,(void *)0,
+					OS_TASK_OPT_STK_CHK|OS_TASK_OPT_STK_CLR
+					);
 
-  while(1)
-	{
-		  
-	  GPIOC->BRR |= 0x00001000;
-	  myDelay(500000);
-	  GPIOC->BSRR |= 0x00001000;
-	  myDelay(500000);
-	      
-	}
+#if (OS_TASK_NAME_SIZE > 13)
+    OSTaskNameSet(APP_TASK_START_PRIO, (INT8U *)"Start Task", &err);
+#endif
+
+//	OSTimeSet(0);
+    OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)       */
+	return 0;
 }
-//Functions definitions
-void myDelay(unsigned long delay )
-{ 
-  while(delay) delay--;
-}
-
-/*
- * Function Clk_Init ()
- *
- *    System clock initialize.
- *
- */
-void Clk_Init (void)
+static  void  AppTaskCreate(void)
 {
-  // 1. Cloking the controller from internal HSI RC (8 MHz)
-  RCC_HSICmd(ENABLE);
-  // wait until the HSI is ready
-  while(RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == RESET);
-  RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
-  // 2. Enable ext. high frequency OSC
-  RCC_HSEConfig(RCC_HSE_ON);
-  // wait until the HSE is ready
-  while(RCC_GetFlagStatus(RCC_FLAG_HSERDY) == RESET);
-  // 3. Init PLL
-  RCC_PLLConfig(RCC_PLLSource_HSE_Div1,RCC_PLLMul_9); // 72MHz
-  //  RCC_PLLConfig(RCC_PLLSource_HSE_Div2,RCC_PLLMul_9); // 72MHz
-  RCC_PLLCmd(ENABLE);
-  // wait until the PLL is ready
-  while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
-  // 4. Set system clock divders
-  RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
-  RCC_ADCCLKConfig(RCC_PCLK2_Div8);
-  RCC_PCLK2Config(RCC_HCLK_Div1);
-  RCC_PCLK1Config(RCC_HCLK_Div2);
-  RCC_HCLKConfig(RCC_SYSCLK_Div1);
-  // Flash 1 wait state 
-  *(vu32 *)0x40022000 = 0x12;
-  // 5. Clock system from PLL
-  RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
 }
 
-typedef void (* const pfn_ISR)(void);
+static  void  AppTaskStart (void *p_arg)
+{
+  (void)p_arg;
+
+      bsp_init();                                                 /* Initialize BSP functions                                 */
+
+   #if (OS_TASK_STAT_EN > 0)
+    OSStatInit();                                               /* Determine CPU capacity                                   */
+   #endif
+
+//   AppUserIFMbox = OSMboxCreate((void *)0);                  /* Create MBOX for communication between Kbd and UserIF     */
+   AppTaskCreate();                                            /* Create application tasks                                 */
+    
+   while(DEF_TRUE)
+	 {  
+	  /* Task body, always written as an infinite loop. */
+	   //  OSTaskSuspend(OS_PRIO_SELF);
+	 //OSTimeDlyHMSM(0,0,0,200); 
+	// GPIO_SetBits(GPIOC,GPIO_Pin_6);
+	 //OSTimeDlyHMSM(0,0,0,200);
+	// GPIO_ResetBits(GPIOC,GPIO_Pin_6);
+	  /* ExTick=TPReadY();
+	   GUI_DispDecAt(ExTick,20,40,4);
+	  */
+	  
+     }
+}
+
+
 // mthomas: added section -> alignment thru linker-script 
-__attribute__ ((section(".stackarea"))) 
-static unsigned long Stack[STACK_SIZE];
 
 __attribute__ ((section(".isr_vector")))
 pfn_ISR VectorArray[] = {

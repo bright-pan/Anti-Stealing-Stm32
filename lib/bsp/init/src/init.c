@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 14 15:38:00 2011
+ * Modified at:   Sun Apr 17 09:47:24 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -18,9 +18,11 @@
 static void systick_config(void);
 static void interrupt_config(void);
 
-void init(void)
+void bsp_init(void)
 {
   SystemInit();
+  interrupt_config();
+  systick_config();
 }
 
 static void systick_config(void)
@@ -28,9 +30,10 @@ static void systick_config(void)
     RCC_ClocksTypeDef  rcc_clocks;
     INT32U         cnts;
 
-    RCC_GetClocksFreq(&rcc_clocks);
+	//    RCC_GetClocksFreq(&rcc_clocks);
     cnts = (INT32U)rcc_clocks.HCLK_Frequency/OS_TICKS_PER_SEC;
     SysTick_Config(cnts);
+	OSInit();
 }
 
 static void interrupt_config(void)

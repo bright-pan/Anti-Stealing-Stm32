@@ -9,7 +9,7 @@ CCLD = $(LD)
 
 lib_LTLIBRARIES = libbsp-init.la
 libbsp_init_la_SOURCES = init.c
-libbsp_init_la_CFLAGS  = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
+libbsp_init_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(srcdir)/../inc \
 	-I$(top_srcdir)/inc \
 	-I$(top_srcdir)/lib/cm3/inc \
@@ -19,5 +19,9 @@ libbsp_init_la_CFLAGS  = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \
 	-I$(top_srcdir)/lib/std_periph/inc
-libbsp_init_la_LDFLAGS = -all-static -static-libtool-libs
+libbsp_init_la_LDFLAGS = -all-static -static-libtool-libs 
+#	-L$(top_builddir)/lib/std_periph/src \
+#	-lstd_periph.la \
+#	-L$(top_builddir)/lib/cm3/src \
+#	-lcm3.la
 

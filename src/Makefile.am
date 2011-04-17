@@ -24,10 +24,11 @@ main_elf_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \
 	-I$(top_srcdir)/lib/bsp/system/inc
-main_elf_LDADD = $(top_builddir)/lib/std_periph/src/libstd_periph.la \
+main_elf_LDADD = $(top_builddir)/lib/bsp/init/src/libbsp-init.la \
 	$(top_builddir)/lib/bsp/interrupt/src/libbsp-interrput.la \
+	$(top_builddir)/lib/cm3/src/libcm3.la \
+	$(top_builddir)/lib/std_periph/src/libstd_periph.la \
 	$(top_builddir)/lib/bsp/system/src/libbsp-system.la \
-	$(top_builddir)/lib/bsp/init/src/libbsp-init.la \
 	$(top_builddir)/lib/ucos/ports/src/libucos-ports.la \
 	$(top_builddir)/lib/ucos/core/src/libucos-core.la
 main_elf_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
