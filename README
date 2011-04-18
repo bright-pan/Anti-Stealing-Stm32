@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Sun Apr 17 10:18:47 2011
+## Modified at:   Mon Apr 18 16:56:26 2011
 ##                
 ## Description:   
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -34,3 +34,11 @@
 
    if you want to link library a and b, but they are exist call relations of a call b,
    so you want to link the two libraries, you should link a first, then link b.
+
+4. gdb
+
+   if you want reburn flash, you can write:
+   	  monitor newboot
+   if you want reset cpu, you can write:
+   	  monitor reset halt
+   
