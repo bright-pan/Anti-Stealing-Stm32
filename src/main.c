@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Sun Apr 17 10:08:49 2011
+ * Modified at:   Mon Apr 18 16:00:37 2011
  *                
  * Description:   application main program.
  * Copyright (C) 2010-2011,  Bright Pan
@@ -33,7 +33,7 @@ static OS_STK AppTaskStartStk[APP_TASK_START_STK_SIZE];
 
 int  main (void)
 {
-  SystemInit();
+  //  SystemInit();
     INT8U  err;
 	/* Set the Vector Table base location at 0x08000000 */ 
   	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);   
@@ -61,6 +61,7 @@ int  main (void)
 }
 static  void  AppTaskCreate(void)
 {
+  
 }
 
 static  void  AppTaskStart (void *p_arg)
@@ -80,7 +81,7 @@ static  void  AppTaskStart (void *p_arg)
 	 {  
 	  /* Task body, always written as an infinite loop. */
 	   //  OSTaskSuspend(OS_PRIO_SELF);
-	 //OSTimeDlyHMSM(0,0,0,200); 
+	 OSTimeDlyHMSM(0,0,0,200); 
 	// GPIO_SetBits(GPIOC,GPIO_Pin_6);
 	 //OSTimeDlyHMSM(0,0,0,200);
 	// GPIO_ResetBits(GPIOC,GPIO_Pin_6);

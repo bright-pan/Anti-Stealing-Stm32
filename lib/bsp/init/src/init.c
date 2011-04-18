@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Sun Apr 17 09:47:24 2011
+ * Modified at:   Mon Apr 18 16:01:06 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -33,7 +33,6 @@ static void systick_config(void)
 	//    RCC_GetClocksFreq(&rcc_clocks);
     cnts = (INT32U)rcc_clocks.HCLK_Frequency/OS_TICKS_PER_SEC;
     SysTick_Config(cnts);
-	OSInit();
 }
 
 static void interrupt_config(void)

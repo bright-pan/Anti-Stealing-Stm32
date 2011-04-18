@@ -35,6 +35,9 @@ main_elf_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) \
 	$(main_elf_LDFLAGS) $(LDFLAGS) -o $@
 
+
 copy:
 	$(CP) $(CPFLAGS) main.elf main.bin
 	$(OD) $(ODFLAGS) main.elf > main.list
+
+all: $(all) copy

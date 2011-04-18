@@ -24,14 +24,14 @@
 	@                                           PUBLIC FUNCTIONS
 	@********************************************************************************************************
 		
-		.global  OSRunning                                           @ External references
-		.global  OSPrioCur
-		.global  OSPrioHighRdy
-	    .global  OSTCBCur
-	    .global  OSTCBHighRdy
-	    .global  OSIntNesting
-	    .global  OSIntExit
-	    .global  OSTaskSwHook
+		.extern  OSRunning                                           @ External references
+		.extern  OSPrioCur
+		.extern  OSPrioHighRdy
+	    .extern  OSTCBCur
+	    .extern  OSTCBHighRdy
+	    .extern  OSIntNesting
+	    .extern  OSIntExit
+	    .extern  OSTaskSwHook
 
 
 	    .global  OS_CPU_SR_Save                                      @ Functions declared in this file
@@ -87,12 +87,13 @@
 	@                          :
 	@                 }
 	@********************************************************************************************************
-
+.thumb_func
 OS_CPU_SR_Save:	
 	    MRS     R0, PRIMASK                                         @ Set prio int mask to mask all (except faults)
 	    CPSID   I
 	    BX      LR
-
+		
+.thumb_func
 OS_CPU_SR_Restore:		
 	    MSR     PRIMASK, R0
 	    BX      LR
@@ -111,7 +112,7 @@ OS_CPU_SR_Restore:
 	@              d) Trigger PendSV exception@
 	@              e) Enable interrupts (tasks will run with interrupts enabled).
 	@********************************************************************************************************
-
+.thumb_func
 OSStartHighRdy:	
 	    LDR     R0, =NVIC_SYSPRI14                                  @ Set the PendSV exception priority
 	    LDR     R1, =NVIC_PENDSV_PRI
@@ -141,7 +142,7 @@ OSStartHang:
 	@ Note(s) : 1) OSCtxSw() is called when OS wants to perform a task context switch.  This function
 	@              triggers the PendSV exception which is where the real work is done.
 	@********************************************************************************************************
-
+.thumb_func
 OSCtxSw:		
 	    LDR     R0, =NVIC_INT_CTRL                                  @ Trigger the PendSV exception (causes context switch)
 	    LDR     R1, =NVIC_PENDSVSET
@@ -156,7 +157,7 @@ OSCtxSw:
 	@              the result of an interrupt.  This function simply triggers a PendSV exception which will
 	@              be handled when there are no more interrupts active and interrupts are enabled.
 	@********************************************************************************************************
-
+.thumb_func
 OSIntCtxSw:		
 	    LDR     R0, =NVIC_INT_CTRL                                  @ Trigger the PendSV exception (causes context switch)
 	    LDR     R1, =NVIC_PENDSVSET
@@ -197,7 +198,7 @@ OSIntCtxSw:
 	@              know that it will only be run when no other exception or interrupt is active, and
 	@              therefore safe to assume that context being switched out was using the process stack (PSP).
 	@********************************************************************************************************
-
+.thumb_func
 OSPendSV_Handler:
 	    CPSID   I                                                   @ Prevent interruption during context switch
 	    MRS     R0, PSP                                             @ PSP is process stack pointer
