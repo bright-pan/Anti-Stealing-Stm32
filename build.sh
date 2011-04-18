@@ -1,6 +1,6 @@
 libtoolize
 autoreconf --install
-mkdir build
+rm -rf build && mkdir build
 cd build
 ../configure --host=arm-none-eabi --build=i686-linux-gnu
 make
