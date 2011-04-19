@@ -7,7 +7,7 @@ OD = arm-none-eabi-objdump
 
 CCLD = $(LD)
 CCAS = $(CC)
-CCASFLAGS = -Wall -mcpu=cortex-m3 -mthumb
+CCASFLAGS = -Wall -mcpu=cortex-m3 -mthumb -g
 
 lib_LTLIBRARIES = libucos-ports.la
 libucos_ports_la_SOURCES = os_cpu_a.s os_cpu_c.c os_dbg.c
