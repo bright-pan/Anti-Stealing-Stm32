@@ -1,3 +1,18 @@
+######################################################################
+## Filename:      Makefile.am
+## Version:       
+##                
+## Author:        Bright Pan <loststriker@gmail.com>
+## Created at:    Tue Apr 19 17:24:48 2011
+##                
+##                
+## Modified by:   Bright Pan <loststriker@gmail.com>
+## Modified at:   Tue Apr 19 17:26:22 2011
+##                
+## Description:   for main.elf program, linking some libraries.
+## Copyright (C) 2010-2011,  Bright Pan
+######################################################################
+
 CC = arm-none-eabi-gcc
 AR = arm-none-eabi-ar
 AS = arm-none-eabi-as
@@ -23,8 +38,10 @@ main_elf_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/bsp/init/inc \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \
-	-I$(top_srcdir)/lib/bsp/system/inc
+	-I$(top_srcdir)/lib/bsp/system/inc \
+	-I$(top_srcdir)/lib/bsp/led/inc
 main_elf_LDADD = $(top_builddir)/lib/bsp/init/src/libbsp-init.la \
+	$(top_builddir)/lib/bsp/led/src/libbsp-led.la \
 	$(top_builddir)/lib/bsp/interrupt/src/libbsp-interrput.la \
 	$(top_builddir)/lib/cm3/src/libcm3.la \
 	$(top_builddir)/lib/std_periph/src/libstd_periph.la \
@@ -34,7 +51,6 @@ main_elf_LDADD = $(top_builddir)/lib/bsp/init/src/libbsp-init.la \
 main_elf_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) \
 	$(main_elf_LDFLAGS) $(LDFLAGS) -o $@
-
 
 copy:
 	$(CP) $(CPFLAGS) main.elf main.bin

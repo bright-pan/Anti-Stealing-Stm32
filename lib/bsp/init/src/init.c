@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue Apr 19 09:43:25 2011
+ * Modified at:   Tue Apr 19 17:44:41 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -17,10 +17,12 @@
 
 static void systick_config(void);
 static void interrupt_config(void);
+static void gpio_config(void);
 
 void bsp_init(void)
 {
   SystemInit();
+  gpio_config();
   interrupt_config();
   systick_config();
 }
@@ -67,4 +69,28 @@ static void interrupt_config(void)
   EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
   EXTI_InitStructure.EXTI_LineCmd = ENABLE;
   EXTI_Init(&EXTI_InitStructure);  */
+}
+
+GPIO_InitTypeDef GPIO_InitStructure;
+
+static void gpio_config(void)
+{
+  /* Configure all unused GPIO port pins in Analog Input mode (floating input
+     trigger OFF), this will reduce the power consumption and increase the device
+     immunity against EMI/EMC *************************************************/
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
+                         RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
+                         RCC_APB2Periph_GPIOE, ENABLE);
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
+  GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
+                         RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
+                         RCC_APB2Periph_GPIOE, DISABLE);  
 }

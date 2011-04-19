@@ -31,6 +31,8 @@ AC_CONFIG_FILES([Makefile
 				 lib/bsp/interrupt/src/Makefile
 				 lib/bsp/init/Makefile
 				 lib/bsp/init/src/Makefile
+				 lib/bsp/led/Makefile
+				 lib/bsp/led/src/Makefile
 				 lib/ucos/Makefile
 				 lib/ucos/ports/Makefile
 				 lib/ucos/ports/src/Makefile

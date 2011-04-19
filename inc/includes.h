@@ -32,13 +32,14 @@
 #define   DEF_FALSE 0
 #define   DEF_TRUE  1
 
-#include    <stdio.h>
-#include    <string.h>
-#include    <ctype.h>
-#include    <stdlib.h>
-#include    <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdint.h>
 
-#include    "ucos_ii.h"
+#include "ucos_ii.h"
 
 //#include    "cpu.h"
 //#include    "lib_def.h"
@@ -50,10 +51,9 @@
 #include "stm32f10x_it.h"
 #include "core_cm3.h"
 
-#include    <stdint.h>
-
-#include    "app_cfg.h"
-#include    "init.h"
+#include "app_cfg.h"
+#include "init.h"
+#include "led.h"
 //#include    "GUI.h"
 //#include    "ili9320.h"
 //#include    "GUIDemo.h"

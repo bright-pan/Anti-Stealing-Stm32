@@ -1,3 +1,18 @@
+######################################################################
+## Filename:      Makefile.am
+## Version:       
+##                
+## Author:        Bright Pan <loststriker@gmail.com>
+## Created at:    Tue Apr 19 17:45:49 2011
+##                
+##                
+## Modified by:   Bright Pan <loststriker@gmail.com>
+## Modified at:   Tue Apr 19 17:46:13 2011
+##                
+## Description:   for init library
+## Copyright (C) 2010-2011,  Bright Pan
+######################################################################
+
 CC = arm-none-eabi-gcc
 AR = arm-none-eabi-ar
 AS = arm-none-eabi-as
@@ -15,13 +30,10 @@ libbsp_init_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/cm3/inc \
 	-I$(top_srcdir)/lib/bsp/system/inc \
 	-I$(top_srcdir)/lib/bsp/init/inc \
+	-I$(top_srcdir)/lib/bsp/led/inc \
 	-I$(top_srcdir)/lib/bsp/interrupt/inc \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \
 	-I$(top_srcdir)/lib/std_periph/inc
 libbsp_init_la_LDFLAGS = -all-static -static-libtool-libs 
-#	-L$(top_builddir)/lib/std_periph/src \
-#	-lstd_periph.la \
-#	-L$(top_builddir)/lib/cm3/src \
-#	-lcm3.la
 
