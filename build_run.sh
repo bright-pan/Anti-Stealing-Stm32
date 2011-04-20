@@ -1,3 +1,5 @@
+#!/bin/bash
+
 libtoolize
 autoreconf --install
 rm -rf build && mkdir build

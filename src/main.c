@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon Apr 18 16:00:37 2011
+ * Modified at:   Wed Apr 20 10:42:49 2011
  *                
  * Description:   application main program.
  * Copyright (C) 2010-2011,  Bright Pan
@@ -81,7 +81,14 @@ static  void  AppTaskStart (void *p_arg)
 	 {  
 	  /* Task body, always written as an infinite loop. */
 	   //  OSTaskSuspend(OS_PRIO_SELF);
-	 OSTimeDlyHMSM(0,0,0,200); 
+	 OSTimeDlyHMSM(0,0,0,200);
+	 led_toggle(LED_1);
+	 OSTimeDlyHMSM(0,0,0,200);
+	 led_toggle(LED_2);
+	 OSTimeDlyHMSM(0,0,0,200);
+	 led_toggle(LED_3);
+	 OSTimeDlyHMSM(0,0,0,200);
+	 led_toggle(LED_4);
 	// GPIO_SetBits(GPIOC,GPIO_Pin_6);
 	 //OSTimeDlyHMSM(0,0,0,200);
 	// GPIO_ResetBits(GPIOC,GPIO_Pin_6);

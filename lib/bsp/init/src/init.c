@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue Apr 19 17:44:41 2011
+ * Modified at:   Wed Apr 20 11:26:31 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -18,15 +18,36 @@
 static void systick_config(void);
 static void interrupt_config(void);
 static void gpio_config(void);
+static void led_config(void);
 
+
+/*
+ * Function bsp_init ()
+ *
+ *    芯片初始化
+ *
+ *    1. 时钟频率配置
+ *    2. IO端口配置
+ *    3. 中断配置
+ *    4. led配置
+ *    5. 系统定时器配置
+ *
+ */
 void bsp_init(void)
 {
   SystemInit();
   gpio_config();
   interrupt_config();
+  led_config();
   systick_config();
 }
 
+/*
+ * Function systick_config ()
+ *
+ *    系统定时器配置
+ *
+ */
 static void systick_config(void)
 {
     RCC_ClocksTypeDef  rcc_clocks;
@@ -37,6 +58,12 @@ static void systick_config(void)
     SysTick_Config(cnts);
 }
 
+/*
+ * Function interrupt_config ()
+ *
+ *    中断初始化配置
+ *
+ */
 static void interrupt_config(void)
 {
  // NVIC_InitTypeDef NVIC_InitStructure;
@@ -71,13 +98,16 @@ static void interrupt_config(void)
   EXTI_Init(&EXTI_InitStructure);  */
 }
 
-GPIO_InitTypeDef GPIO_InitStructure;
 
+/*
+ * Function gpio_config ()
+ *
+ *    将IO端口都设置成模拟输入，以降低功耗以及增强电磁兼容
+ *
+ */
 static void gpio_config(void)
 {
-  /* Configure all unused GPIO port pins in Analog Input mode (floating input
-     trigger OFF), this will reduce the power consumption and increase the device
-     immunity against EMI/EMC *************************************************/
+  GPIO_InitTypeDef GPIO_InitStructure;
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
                          RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
                          RCC_APB2Periph_GPIOE, ENABLE);
@@ -93,4 +123,18 @@ static void gpio_config(void)
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
                          RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
                          RCC_APB2Periph_GPIOE, DISABLE);  
+}
+
+/*
+ * Function led_config ()
+ *
+ *    LED灯配置
+ *
+ */
+static void led_config(void)
+{
+  led_init(LED_1);
+  led_init(LED_2);
+  led_init(LED_3);
+  led_init(LED_4);
 }
