@@ -1,8 +1,20 @@
-#                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
+######################################################################
+## Filename:      configure.ac
+## Version:       
+##                
+## Author:        Bright Pan <loststriker@gmail.com>
+## Created at:    Thu Apr 21 10:06:28 2011
+##                
+##                
+## Modified by:   Bright Pan <loststriker@gmail.com>
+## Modified at:   Thu Apr 21 10:07:06 2011
+##                
+## Description:   configuration for autoconf.
+## Copyright (C) 2010-2011,  Bright Pan
+######################################################################
 
 AC_PREREQ([2.65])
-AC_INIT([stm32], [1.0], [loststriker@gmail.com])
+AC_INIT([anti_stealing_stm32], [1.0], [loststriker@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for programs.
@@ -33,6 +45,8 @@ AC_CONFIG_FILES([Makefile
 				 lib/bsp/init/src/Makefile
 				 lib/bsp/led/Makefile
 				 lib/bsp/led/src/Makefile
+				 lib/bsp/calender/Makefile
+				 lib/bsp/calender/src/Makefile
 				 lib/ucos/Makefile
 				 lib/ucos/ports/Makefile
 				 lib/ucos/ports/src/Makefile

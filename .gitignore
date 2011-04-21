@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Tue Apr 12 17:12:59 2011
+## Modified at:   Thu Apr 21 14:14:24 2011
 ##                
 ## Description:   
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -24,6 +24,7 @@
 *.guess
 *.sub
 *.m4
+*.files
 install-sh
 ltmain.sh
 configure

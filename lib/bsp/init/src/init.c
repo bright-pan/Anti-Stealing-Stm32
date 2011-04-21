@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed Apr 20 11:26:31 2011
+ * Modified at:   Thu Apr 21 11:46:27 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -19,7 +19,7 @@ static void systick_config(void);
 static void interrupt_config(void);
 static void gpio_config(void);
 static void led_config(void);
-
+static void calender_config(void);
 
 /*
  * Function bsp_init ()
@@ -39,6 +39,7 @@ void bsp_init(void)
   gpio_config();
   interrupt_config();
   led_config();
+  calender_config();
   systick_config();
 }
 
@@ -50,8 +51,8 @@ void bsp_init(void)
  */
 static void systick_config(void)
 {
-    RCC_ClocksTypeDef  rcc_clocks;
-    INT32U         cnts;
+    RCC_ClocksTypeDef rcc_clocks;
+    uint32_t cnts = 0;
 
 	RCC_GetClocksFreq(&rcc_clocks);
     cnts = (INT32U)rcc_clocks.HCLK_Frequency/OS_TICKS_PER_SEC;
@@ -66,13 +67,22 @@ static void systick_config(void)
  */
 static void interrupt_config(void)
 {
- // NVIC_InitTypeDef NVIC_InitStructure;
-  //EXTI_InitTypeDef EXTI_InitStructure;
+  //定义中断初始化结构
   NVIC_InitTypeDef NVIC_InitStructure;
   //EXTI_InitTypeDef EXTI_InitStructure;
 
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+  //中断优先级分组为从第0位开始分组，
+  //这就意味着本系统最多支持128个抢占优先级，
+  //每个抢占优先级中包含有2个子优先级。
+  //但是由于STM32为4位中断优先级实现，
+  //则最多有16个中断优先级,
+  //子优先级在这里没有作用。
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
 
+  //设置系统定时器中断优先级
+  //抢占优先级为0
+  //子优先级为0
+  //不屏蔽这个中断
   NVIC_InitStructure.NVIC_IRQChannel = SysTick_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
@@ -137,4 +147,15 @@ static void led_config(void)
   led_init(LED_2);
   led_init(LED_3);
   led_init(LED_4);
+}
+
+/*
+ * Function calender_config ()
+ *
+ *    日历始终初始化
+ *
+ */
+static void calender_config(void)
+{
+  calender_init();
 }

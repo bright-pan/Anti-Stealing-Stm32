@@ -7,14 +7,14 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed Apr 20 10:34:06 2011
+ * Modified at:   Thu Apr 21 10:00:01 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
  ********************************************************************/
 
-#ifndef LED_H
-#define LED_H
+#ifndef __LED_H__
+#define __LED_H__
 
 typedef enum {
   LED_1 = 0,

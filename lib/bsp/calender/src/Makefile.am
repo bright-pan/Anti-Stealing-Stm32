@@ -3,13 +3,13 @@
 ## Version:       
 ##                
 ## Author:        Bright Pan <loststriker@gmail.com>
-## Created at:    Tue Apr 19 17:08:35 2011
+## Created at:    Wed Apr 20 16:26:41 2011
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Thu Apr 21 10:10:23 2011
+## Modified at:   Thu Apr 21 10:20:49 2011
 ##                
-## Description:   for led function library
+## Description:   for calender library
 ## Copyright (C) 2010-2011,  Bright Pan
 ######################################################################
 
@@ -22,18 +22,19 @@ LD = arm-none-eabi-ld
 
 CCLD = $(LD)
 
-lib_LTLIBRARIES = libbsp-led.la
-libbsp_led_la_SOURCES = led.c
-libbsp_led_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
+lib_LTLIBRARIES = libbsp-calender.la
+libbsp_calender_la_SOURCES = calender.c
+libbsp_calender_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(srcdir)/../inc \
 	-I$(top_srcdir)/inc \
 	-I$(top_srcdir)/lib/cm3/inc \
 	-I$(top_srcdir)/lib/bsp/system/inc \
 	-I$(top_srcdir)/lib/bsp/init/inc \
+	-I$(top_srcdir)/lib/bsp/led/inc \
+	-I$(top_srcdir)/lib/bsp/calender/inc \
 	-I$(top_srcdir)/lib/bsp/interrupt/inc \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \
-	-I$(top_srcdir)/lib/std_periph/inc \
-	-I$(top_srcdir)/lib/bsp/calender/inc
-libbsp_led_la_LDFLAGS = -all-static -static-libtool-libs 
+	-I$(top_srcdir)/lib/std_periph/inc
+libbsp_calender_la_LDFLAGS = -all-static -static-libtool-libs 
 
