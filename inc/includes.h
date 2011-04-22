@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 21 10:04:48 2011
+ * Modified at:   Fri Apr 22 14:37:18 2011
  *                
  * Description:   all include file
  * Copyright (C) 2010-2011,  Bright Pan
@@ -38,6 +38,7 @@
 #include "init.h"
 #include "led.h"
 #include "calender.h"
+#include "signal.h"
 
 #endif
 

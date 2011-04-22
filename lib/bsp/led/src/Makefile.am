@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Thu Apr 21 10:10:23 2011
+## Modified at:   Fri Apr 22 14:35:29 2011
 ##                
 ## Description:   for led function library
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -34,6 +34,7 @@ libbsp_led_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \
 	-I$(top_srcdir)/lib/std_periph/inc \
-	-I$(top_srcdir)/lib/bsp/calender/inc
+	-I$(top_srcdir)/lib/bsp/calender/inc \
+	-I$(top_srcdir)/lib/bsp/signal/inc
 libbsp_led_la_LDFLAGS = -all-static -static-libtool-libs 
 

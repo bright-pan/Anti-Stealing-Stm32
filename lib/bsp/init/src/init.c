@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 21 11:46:27 2011
+ * Modified at:   Fri Apr 22 14:52:42 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -20,6 +20,7 @@ static void interrupt_config(void);
 static void gpio_config(void);
 static void led_config(void);
 static void calender_config(void);
+static void signal_config(void);
 
 /*
  * Function bsp_init ()
@@ -30,7 +31,9 @@ static void calender_config(void);
  *    2. IO端口配置
  *    3. 中断配置
  *    4. led配置
- *    5. 系统定时器配置
+ *    5. 日历配置
+ *    6. 信号配置
+ *    7. 系统定时器配置
  *
  */
 void bsp_init(void)
@@ -40,6 +43,7 @@ void bsp_init(void)
   interrupt_config();
   led_config();
   calender_config();
+  signal_config();
   systick_config();
 }
 
@@ -152,10 +156,22 @@ static void led_config(void)
 /*
  * Function calender_config ()
  *
- *    日历始终初始化
+ *    日历功能初始化
  *
  */
 static void calender_config(void)
 {
   calender_init();
+}
+
+/*
+ * Function signal_config ()
+ *
+ *    信号功能初始化
+ *
+ */
+static void signal_config(void)
+{
+  signal_init();
+  signal_send();
 }
