@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri Apr 22 14:31:17 2011
+ * Modified at:   Mon Apr 25 15:56:40 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -20,10 +20,13 @@
 #define DHR12R2_OFFSET             ((uint32_t)0x00000014)
 #define DHR12RD_OFFSET             ((uint32_t)0x00000020)
 
+#define POINT_PER_PERIOD 32
+
 //信号点发生周期
-uint16_t period = 0x19;
+uint16_t period = 2250;
+
 //信号点数据
-uint32_t sine12bit[32] = {
+uint32_t sine12bit[POINT_PER_PERIOD] = {
 
   2047, 2447, 2831, 3185, 3498, 3750, 3939, 4056, 4095, 4056,
   3939, 3750, 3495, 3185, 2831, 2447, 2047, 1647, 1263, 909, 
@@ -31,6 +34,8 @@ uint32_t sine12bit[32] = {
 
 };
 
+//DAC初始化结构体定义
+DAC_InitTypeDef            DAC_InitStructure;
 
 /*
  * Function signal_init ()
@@ -44,14 +49,11 @@ uint32_t sine12bit[32] = {
 void signal_init(void)
 {
   //变量定义
-  //DAC初始化结构体定义
-  DAC_InitTypeDef            DAC_InitStructure;
   //DMA初始化结构体定义
   DMA_InitTypeDef            DMA_InitStructure;
   //TIM初始化结构体定义
   TIM_TimeBaseInitTypeDef    TIM_TimeBaseStructure;
 
-  //时钟初始化
   //DMA时钟使能
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
   //GPIOA时钟使能
@@ -69,6 +71,7 @@ void signal_init(void)
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);//TIM2定时器配置初始化
   TIM_SelectOutputTrigger(TIM2, TIM_TRGOSource_Update);//TIM2定时器为输出触发
+
   //DAC1配置初始化
   DAC_InitStructure.DAC_Trigger = DAC_Trigger_T2_TRGO;//设置DAC触发器为TIM2
   DAC_InitStructure.DAC_WaveGeneration = DAC_WaveGeneration_None;//不产生波形
@@ -81,7 +84,7 @@ void signal_init(void)
   DMA_InitStructure.DMA_PeripheralBaseAddr = DAC_BASE + DHR12R1_OFFSET;//DAC1通道右对齐寄存器地址
   DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&sine12bit;
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-  DMA_InitStructure.DMA_BufferSize = 32;
+  DMA_InitStructure.DMA_BufferSize = sizeof(sine12bit) / sizeof(uint32_t);
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
@@ -109,6 +112,7 @@ void signal_send(void)
   DAC_DMACmd(DAC_Channel_1, ENABLE);
   //TIM2使能
   TIM_Cmd(TIM2, ENABLE);
+
 }
 
 void signal_receive(void)

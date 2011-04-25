@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri Apr 22 14:52:42 2011
+ * Modified at:   Mon Apr 25 15:40:02 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -53,14 +53,16 @@ void bsp_init(void)
  *    系统定时器配置
  *
  */
+//时钟配置结构体变量
+
 static void systick_config(void)
 {
-    RCC_ClocksTypeDef rcc_clocks;
-    uint32_t cnts = 0;
+  RCC_ClocksTypeDef rcc_clocks;
+  uint32_t cnts = 0;
 
-	RCC_GetClocksFreq(&rcc_clocks);
-    cnts = (INT32U)rcc_clocks.HCLK_Frequency/OS_TICKS_PER_SEC;
-    SysTick_Config(cnts);
+  RCC_GetClocksFreq(&rcc_clocks);
+  cnts = (INT32U)rcc_clocks.HCLK_Frequency/OS_TICKS_PER_SEC;
+  SysTick_Config(cnts);
 }
 
 /*
@@ -69,10 +71,12 @@ static void systick_config(void)
  *    中断初始化配置
  *
  */
+//定义中断初始化结构
+
 static void interrupt_config(void)
 {
-  //定义中断初始化结构
   NVIC_InitTypeDef NVIC_InitStructure;
+
   //EXTI_InitTypeDef EXTI_InitStructure;
 
   //中断优先级分组为从第0位开始分组，
@@ -119,9 +123,12 @@ static void interrupt_config(void)
  *    将IO端口都设置成模拟输入，以降低功耗以及增强电磁兼容
  *
  */
+//IO端口配置结构体变量
+
 static void gpio_config(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
+
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
                          RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
                          RCC_APB2Periph_GPIOE, ENABLE);
@@ -133,10 +140,11 @@ static void gpio_config(void)
   GPIO_Init(GPIOC, &GPIO_InitStructure);
   GPIO_Init(GPIOD, &GPIO_InitStructure);
   GPIO_Init(GPIOE, &GPIO_InitStructure);
-
+  
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
                          RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
-                         RCC_APB2Periph_GPIOE, DISABLE);  
+                         RCC_APB2Periph_GPIOE, DISABLE);
+  
 }
 
 /*

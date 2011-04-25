@@ -7,13 +7,15 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed Apr 20 10:48:22 2011
+ * Modified at:   Mon Apr 25 15:40:36 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
  ********************************************************************/
 
 #include "includes.h"
+
+
 
 #define LEDn                             4
 #define LED1_PIN                         GPIO_Pin_8
@@ -50,7 +52,7 @@ const uint32_t GPIO_CLK[LEDn] = {LED1_GPIO_CLK, LED2_GPIO_CLK, LED3_GPIO_CLK,
  */
 void led_init(LED_TypeDef led_name)
 {
-  GPIO_InitTypeDef  GPIO_InitStructure;
+  GPIO_InitTypeDef GPIO_InitStructure;
   
   /* Enable the GPIO_LED Clock */
   RCC_APB2PeriphClockCmd(GPIO_CLK[led_name], ENABLE);
