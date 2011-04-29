@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon Apr 25 15:40:02 2011
+ * Modified at:   Thu Apr 28 13:34:19 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -21,7 +21,7 @@ static void gpio_config(void);
 static void led_config(void);
 static void calender_config(void);
 static void signal_config(void);
-
+static void sflash_config(void);
 /*
  * Function bsp_init ()
  *
@@ -44,6 +44,7 @@ void bsp_init(void)
   led_config();
   calender_config();
   signal_config();
+  sflash_config();
   systick_config();
 }
 
@@ -159,6 +160,7 @@ static void led_config(void)
   led_init(LED_2);
   led_init(LED_3);
   led_init(LED_4);
+  led_init(LED_5);
 }
 
 /*
@@ -180,6 +182,19 @@ static void calender_config(void)
  */
 static void signal_config(void)
 {
+  signal_frequency_set(SIGNAL_FREQ);
   signal_init();
   signal_send();
+}
+
+/*
+ * Function sflash_config ()
+ *
+ *    sflash 功能初始化
+ *
+ */
+static void sflash_config(void)
+{
+  sFLASH_Init();
+  sFLASH_PageSizeSet();
 }

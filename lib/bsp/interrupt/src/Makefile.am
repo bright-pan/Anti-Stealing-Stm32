@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Fri Apr 22 14:34:58 2011
+## Modified at:   Thu Apr 28 11:50:27 2011
 ##                
 ## Description:   for interrupt library
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -33,6 +33,7 @@ libbsp_interrput_la_CFLAGS  = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/bsp/init/inc \
 	-I$(top_srcdir)/lib/bsp/led/inc \
+	-I$(top_srcdir)/lib/bsp/sflash/inc \
 	-I$(top_srcdir)/lib/bsp/calender/inc \
 	-I$(top_srcdir)/lib/bsp/signal/inc
 libbsp_interrput_la_LDFLAGS = -all-static -static-libtool-libs

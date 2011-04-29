@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 21 10:00:01 2011
+ * Modified at:   Wed Apr 27 09:32:01 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -21,6 +21,7 @@ typedef enum {
   LED_2 = 1,
   LED_3 = 2,
   LED_4 = 3,
+  LED_5 = 4,
 }LED_TypeDef;
 
 void led_init(LED_TypeDef led_name);

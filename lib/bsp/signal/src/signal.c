@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon Apr 25 15:56:40 2011
+ * Modified at:   Wed Apr 27 13:22:58 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -23,10 +23,10 @@
 #define POINT_PER_PERIOD 32
 
 //信号点发生周期
-uint16_t period = 2250;
+static uint16_t period = 2250;
 
 //信号点数据
-uint32_t sine12bit[POINT_PER_PERIOD] = {
+static uint32_t sine12bit[POINT_PER_PERIOD] = {
 
   2047, 2447, 2831, 3185, 3498, 3750, 3939, 4056, 4095, 4056,
   3939, 3750, 3495, 3185, 2831, 2447, 2047, 1647, 1263, 909, 
@@ -135,5 +135,15 @@ void signal_off(void)
   DAC_DMACmd(DAC_Channel_1, DISABLE);
   //TIM2使能
   TIM_Cmd(TIM2, DISABLE);
+}
+
+void signal_frequency_set(uint32_t freq)
+{
+  if(freq == 0)
+	{
+	  freq = 32000;
+	}
+  SystemCoreClockUpdate();
+  period = SystemCoreClock / (freq * POINT_PER_PERIOD);
 }
 

@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Fri Apr 22 14:39:09 2011
+## Modified at:   Wed Apr 27 13:28:10 2011
 ##                
 ## Description:   configuration for autoconf.
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -49,6 +49,8 @@ AC_CONFIG_FILES([Makefile
 				 lib/bsp/calender/src/Makefile
 				 lib/bsp/signal/Makefile
 				 lib/bsp/signal/src/Makefile
+				 lib/bsp/sflash/Makefile
+				 lib/bsp/sflash/src/Makefile
 				 lib/ucos/Makefile
 				 lib/ucos/ports/Makefile
 				 lib/ucos/ports/src/Makefile

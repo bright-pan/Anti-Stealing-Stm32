@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 21 14:08:31 2011
+ * Modified at:   Fri Apr 29 15:56:33 2011
  *                
  * Description:   application main program.
  * Copyright (C) 2010-2011,  Bright Pan
@@ -23,7 +23,7 @@ typedef void (* const pfn_ISR)(void);
 static  void  AppTaskCreate(void);
 
 static  void  AppTaskStart (void *p_arg);
-
+uint8_t data[1000] = {0,};
 // 声明函数原型
 int main(void);
 
@@ -91,8 +91,27 @@ static  void  AppTaskStart (void *p_arg)
 	   OSTimeDlyHMSM(0,0,0,200);
 	   led_toggle(LED_4);
 	   OSTimeDlyHMSM(0,0,0,200);
+	   led_toggle(LED_5);
+	   OSTimeDlyHMSM(0,0,0,200);
 	   calender_get(&calender);
-	// GPIO_SetBits(GPIOC,GPIO_Pin_6);
+	   OSTimeDlyHMSM(0,0,0,200);
+	   uint16_t index = 0;
+	   uint16_t length = sizeof(data)/sizeof(uint8_t);
+	   
+	   for (index = 0; index <=length; index++)
+		 {
+		   *(data + index) = index;
+		 }
+	   sFLASH_WriteBuffer(data, 0, length);
+	   for (index = 0; index <=length; index++)
+		 {
+		   *(data + index) = 0;
+		 }
+	   sFLASH_ReadBuffer(data, 0, length);
+	   __NOP();
+	   __NOP();
+	   __NOP();
+	   // GPIO_SetBits(GPIOC,GPIO_Pin_6);
 	 //OSTimeDlyHMSM(0,0,0,200);
 	// GPIO_ResetBits(GPIOC,GPIO_Pin_6);
 	  /* ExTick=TPReadY();

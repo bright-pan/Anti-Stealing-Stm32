@@ -3,13 +3,13 @@
 ## Version:       
 ##                
 ## Author:        Bright Pan <loststriker@gmail.com>
-## Created at:    Wed Apr 20 16:26:41 2011
+## Created at:    Tue Apr 19 17:45:49 2011
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Thu Apr 28 11:51:23 2011
-##           n     
-## Description:   for signal library
+## Modified at:   Thu Apr 28 11:51:05 2011
+##                
+## Description:   for sflash library
 ## Copyright (C) 2010-2011,  Bright Pan
 ######################################################################
 
@@ -22,9 +22,9 @@ LD = arm-none-eabi-ld
 
 CCLD = $(LD)
 
-lib_LTLIBRARIES = libbsp-signal.la
-libbsp_signal_la_SOURCES = signal.c
-libbsp_signal_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
+lib_LTLIBRARIES = libbsp-sflash.la
+libbsp_sflash_la_SOURCES = sflash.c
+libbsp_sflash_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(srcdir)/../inc \
 	-I$(top_srcdir)/inc \
 	-I$(top_srcdir)/lib/cm3/inc \
@@ -33,10 +33,9 @@ libbsp_signal_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/bsp/led/inc \
 	-I$(top_srcdir)/lib/bsp/calender/inc \
 	-I$(top_srcdir)/lib/bsp/signal/inc \
-	-I$(top_srcdir)/lib/bsp/sflash/inc \
 	-I$(top_srcdir)/lib/bsp/interrupt/inc \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \
 	-I$(top_srcdir)/lib/std_periph/inc
-libbsp_signal_la_LDFLAGS = -all-static -static-libtool-libs 
+libbsp_sflash_la_LDFLAGS = -all-static -static-libtool-libs 
 

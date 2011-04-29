@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Fri Apr 22 14:36:46 2011
+## Modified at:   Thu Apr 28 11:49:04 2011
 ##                
 ## Description:   for main.elf program, linking some libraries.
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -44,11 +44,13 @@ main_elf_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/bsp/system/inc \
 	-I$(top_srcdir)/lib/bsp/led/inc \
 	-I$(top_srcdir)/lib/bsp/signal/inc \
+	-I$(top_srcdir)/lib/bsp/sflash/inc \
 	-I$(top_srcdir)/lib/bsp/calender/inc
 main_elf_LDADD = $(top_builddir)/lib/bsp/init/src/libbsp-init.la \
 	$(top_builddir)/lib/bsp/led/src/libbsp-led.la \
 	$(top_builddir)/lib/bsp/calender/src/libbsp-calender.la \
 	$(top_builddir)/lib/bsp/signal/src/libbsp-signal.la \
+	$(top_builddir)/lib/bsp/sflash/src/libbsp-sflash.la \
 	$(top_builddir)/lib/bsp/interrupt/src/libbsp-interrput.la \
 	$(top_builddir)/lib/cm3/src/libcm3.la \
 	$(top_builddir)/lib/std_periph/src/libstd_periph.la \

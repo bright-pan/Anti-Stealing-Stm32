@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 21 14:06:33 2011
+ * Modified at:   Wed Apr 27 11:48:23 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -26,7 +26,7 @@ static void RTC_Configuration(void);
  *
  *    日历初始化
  *    1. 设置RTC参数为一秒递增
- *    2. 使用备份寄存器BKP1
+ *    2. 使用备份寄存器BKP_DR1
  *       初始化后为0xA5A5
  *       
  *
@@ -35,8 +35,8 @@ void calender_init(void)
 {
   if (BKP_ReadBackupRegister(BKP_DR1) != 0xA5A5)
   {
-    /* RTC Configuration */
-    RTC_Configuration();
+	// RTC Configuration
+	RTC_Configuration();
 	//设置初始化时间为2011年1月1日1时1分1秒
 	calender.tm_sec = 1;
 	calender.tm_min = 1;
@@ -48,8 +48,11 @@ void calender_init(void)
 	calender.tm_yday = 0;
 	calender.tm_isdst = 0;
 	calender_set(&calender);
-	
-    BKP_WriteBackupRegister(BKP_DR1, 0xA5A5);
+	// Enable PWR and BKP clocks
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+	// Allow access to BKP Domain
+	PWR_BackupAccessCmd(ENABLE);
+	BKP_WriteBackupRegister(BKP_DR1, 0xA5A5);
   }
 }
 

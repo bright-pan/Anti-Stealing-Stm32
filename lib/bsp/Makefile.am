@@ -7,10 +7,10 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Fri Apr 22 14:38:36 2011
+## Modified at:   Wed Apr 27 13:27:31 2011
 ##                
 ## Description:   for bsp directory
 ## Copyright (C) 2010-2011,  Bright Pan
 ######################################################################
 
-SUBDIRS = system interrupt init led calender signal
+SUBDIRS = system interrupt init led calender signal sflash
