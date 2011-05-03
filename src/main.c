@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri Apr 29 15:56:33 2011
+ * Modified at:   Tue May  3 14:00:03 2011
  *                
  * Description:   application main program.
  * Copyright (C) 2010-2011,  Bright Pan
@@ -81,7 +81,24 @@ static  void  AppTaskStart (void *p_arg)
 	 {  
 	  /* Task body, always written as an infinite loop. */
 	   //  OSTaskSuspend(OS_PRIO_SELF);
+	   /*
+		 GPIO_InitTypeDef GPIO_InitStructure;
+  
+		 //Enable the GPIO_LED Clock
+		 RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
+		 //Configure the GPIO_LED pin
+		 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+  
+		 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		 GPIO_Init(GPIOC, &GPIO_InitStructure);
+	   OSTimeDlyHMSM(0,0,0,200);
+
+	   GPIOC->BSRR = GPIO_Pin_2;
+	   OSTimeDlyHMSM(0,0,0,200);
+	   GPIOC->BRR = GPIO_Pin_2;
+	   */
 	   OSTimeDlyHMSM(0,0,0,200);
 	   led_toggle(LED_1);
 	   OSTimeDlyHMSM(0,0,0,200);
@@ -95,6 +112,7 @@ static  void  AppTaskStart (void *p_arg)
 	   OSTimeDlyHMSM(0,0,0,200);
 	   calender_get(&calender);
 	   OSTimeDlyHMSM(0,0,0,200);
+	   /*
 	   uint16_t index = 0;
 	   uint16_t length = sizeof(data)/sizeof(uint8_t);
 	   
@@ -111,6 +129,14 @@ static  void  AppTaskStart (void *p_arg)
 	   __NOP();
 	   __NOP();
 	   __NOP();
+	   */
+	   uint16_t temp = 0;
+	   if(TP_convert())
+		 {
+		   __NOP();
+		   __NOP();
+		   temp=TP_read();
+		 }
 	   // GPIO_SetBits(GPIOC,GPIO_Pin_6);
 	 //OSTimeDlyHMSM(0,0,0,200);
 	// GPIO_ResetBits(GPIOC,GPIO_Pin_6);

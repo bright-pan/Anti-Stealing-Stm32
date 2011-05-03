@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Wed Apr 27 13:28:10 2011
+## Modified at:   Tue May  3 09:43:58 2011
 ##                
 ## Description:   configuration for autoconf.
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -51,6 +51,8 @@ AC_CONFIG_FILES([Makefile
 				 lib/bsp/signal/src/Makefile
 				 lib/bsp/sflash/Makefile
 				 lib/bsp/sflash/src/Makefile
+				 lib/bsp/temperature/Makefile
+				 lib/bsp/temperature/src/Makefile
 				 lib/ucos/Makefile
 				 lib/ucos/ports/Makefile
 				 lib/ucos/ports/src/Makefile

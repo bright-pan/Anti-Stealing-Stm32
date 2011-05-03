@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Thu Apr 28 11:57:56 2011
+## Modified at:   Tue May  3 13:39:10 2011
 ##                
 ## Description:   for calender library
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -34,6 +34,7 @@ libbsp_calender_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
 	-I$(top_srcdir)/lib/bsp/calender/inc \
 	-I$(top_srcdir)/lib/bsp/signal/inc \
 	-I$(top_srcdir)/lib/bsp/sflash/inc \
+	-I$(top_srcdir)/lib/bsp/temperature/inc \
 	-I$(top_srcdir)/lib/bsp/interrupt/inc \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \

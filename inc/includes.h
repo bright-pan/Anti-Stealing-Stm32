@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 28 11:47:21 2011
+ * Modified at:   Tue May  3 09:44:57 2011
  *                
  * Description:   all include file
  * Copyright (C) 2010-2011,  Bright Pan
@@ -40,6 +40,7 @@
 #include "calender.h"
 #include "signal.h"
 #include "sflash.h"
+#include "temperature.h"
 
 #endif
 

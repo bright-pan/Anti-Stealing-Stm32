@@ -178,19 +178,19 @@ void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
   assert_param(IS_GPIO_MODE(GPIO_InitStruct->GPIO_Mode));
   assert_param(IS_GPIO_PIN(GPIO_InitStruct->GPIO_Pin));  
   
-/*---------------------------- GPIO Mode Configuration -----------------------*/
+  /*---------------------------- GPIO Mode Configuration -----------------------*/
   currentmode = ((uint32_t)GPIO_InitStruct->GPIO_Mode) & ((uint32_t)0x0F);
   if ((((uint32_t)GPIO_InitStruct->GPIO_Mode) & ((uint32_t)0x10)) != 0x00)
-  { 
-    /* Check the parameters */
-    assert_param(IS_GPIO_SPEED(GPIO_InitStruct->GPIO_Speed));
-    /* Output mode */
-    currentmode |= (uint32_t)GPIO_InitStruct->GPIO_Speed;
-  }
-/*---------------------------- GPIO CRL Configuration ------------------------*/
+	{ 
+	  /* Check the parameters */
+	  assert_param(IS_GPIO_SPEED(GPIO_InitStruct->GPIO_Speed));
+	  /* Output mode */
+	  currentmode |= (uint32_t)GPIO_InitStruct->GPIO_Speed;
+	}
+  /*---------------------------- GPIO CRL Configuration ------------------------*/
   /* Configure the eight low port pins */
   if (((uint32_t)GPIO_InitStruct->GPIO_Pin & ((uint32_t)0x00FF)) != 0x00)
-  {
+	{
     tmpreg = GPIOx->CRL;
     for (pinpos = 0x00; pinpos < 0x08; pinpos++)
     {
