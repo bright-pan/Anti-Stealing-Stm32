@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May  3 10:22:08 2011
+ * Modified at:   Wed May  4 09:25:47 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -15,10 +15,7 @@
 
 #include "includes.h"
 
-
-
 #define LEDn                             5
-
 #define LED1_PIN                         GPIO_Pin_0
 #define LED1_GPIO_PORT                   GPIOD
 #define LED1_GPIO_CLK                    RCC_APB2Periph_GPIOD

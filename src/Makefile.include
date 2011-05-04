@@ -1,0 +1,31 @@
+######################################################################
+## Filename:      Makefile.include
+## Version:       
+##                
+## Author:        Bright Pan <loststriker@gmail.com>
+## Created at:    Wed May  4 09:31:50 2011
+##                
+##                
+## Modified by:   Bright Pan <loststriker@gmail.com>
+## Modified at:   Wed May  4 09:43:42 2011
+##                
+## Description:   
+## Copyright (C) 2010-2011,  Bright Pan
+######################################################################
+
+INCLUDE_PATH = -I$(top_srcdir)/inc \
+	-I$(srcdir)/../inc \
+	-I$(top_srcdir)/lib/cm3/inc \
+	-I$(top_srcdir)/lib/bsp/system/inc \
+	-I$(top_srcdir)/lib/bsp/interrupt/inc \
+	-I$(top_srcdir)/lib/bsp/init/inc \
+	-I$(top_srcdir)/lib/bsp/system/inc \
+	-I$(top_srcdir)/lib/bsp/led/inc \
+	-I$(top_srcdir)/lib/bsp/signal/inc \
+	-I$(top_srcdir)/lib/bsp/sflash/inc \
+	-I$(top_srcdir)/lib/bsp/temperature/inc \
+	-I$(top_srcdir)/lib/bsp/calender/inc \
+	-I$(top_srcdir)/lib/ucos/ports/inc \
+	-I$(top_srcdir)/lib/ucos/core/inc \
+	-I$(top_srcdir)/lib/std_periph/inc
+

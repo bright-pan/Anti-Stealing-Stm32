@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Tue May  3 13:40:37 2011
+## Modified at:   Wed May  4 09:49:40 2011
 ##           n     
 ## Description:   for signal library
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -21,23 +21,11 @@ OD = arm-none-eabi-objdump
 LD = arm-none-eabi-ld
 
 CCLD = $(LD)
+include $(top_srcdir)/src/Makefile.include
 
 lib_LTLIBRARIES = libbsp-signal.la
 libbsp_signal_la_SOURCES = signal.c
 libbsp_signal_la_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
-	-I$(srcdir)/../inc \
-	-I$(top_srcdir)/inc \
-	-I$(top_srcdir)/lib/cm3/inc \
-	-I$(top_srcdir)/lib/bsp/system/inc \
-	-I$(top_srcdir)/lib/bsp/init/inc \
-	-I$(top_srcdir)/lib/bsp/led/inc \
-	-I$(top_srcdir)/lib/bsp/calender/inc \
-	-I$(top_srcdir)/lib/bsp/signal/inc \
-	-I$(top_srcdir)/lib/bsp/sflash/inc \
-	-I$(top_srcdir)/lib/bsp/temperature/inc \
-	-I$(top_srcdir)/lib/bsp/interrupt/inc \
-	-I$(top_srcdir)/lib/ucos/ports/inc \
-	-I$(top_srcdir)/lib/ucos/core/inc \
-	-I$(top_srcdir)/lib/std_periph/inc
+	$(INCLUDE_PATH)
 libbsp_signal_la_LDFLAGS = -all-static -static-libtool-libs 
 

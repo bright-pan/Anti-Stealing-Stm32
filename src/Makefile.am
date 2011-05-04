@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Tue May  3 13:43:32 2011
+## Modified at:   Wed May  4 09:52:04 2011
 ##                
 ## Description:   for main.elf program, linking some libraries.
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -26,6 +26,7 @@ CCLD = arm-none-eabi-ld
 
 LIBPATH = /usr/local/stm32/arm-none-eabi/lib/thumb
 
+include $(top_srcdir)/src/Makefile.include
 
 bin_PROGRAMS = main.elf
 main_elf_SOURCES = main.c
@@ -33,20 +34,7 @@ main_elf_LDFLAGS = -T$(srcdir)/stm32f103vct6.gld \
 	-nostartfiles -static -static-libtool-libs
 
 main_elf_CFLAGS = -Wall -c -fno-common -mcpu=cortex-m3 -mthumb \
-	-I$(top_srcdir)/inc \
-	-I$(top_srcdir)/lib/bsp/system/inc \
-	-I$(top_srcdir)/lib/cm3/inc \
-	-I$(top_srcdir)/lib/std_periph/inc \
-	-I$(top_srcdir)/lib/bsp/interrupt/inc \
-	-I$(top_srcdir)/lib/bsp/init/inc \
-	-I$(top_srcdir)/lib/ucos/ports/inc \
-	-I$(top_srcdir)/lib/ucos/core/inc \
-	-I$(top_srcdir)/lib/bsp/system/inc \
-	-I$(top_srcdir)/lib/bsp/led/inc \
-	-I$(top_srcdir)/lib/bsp/signal/inc \
-	-I$(top_srcdir)/lib/bsp/sflash/inc \
-	-I$(top_srcdir)/lib/bsp/temperature/inc \
-	-I$(top_srcdir)/lib/bsp/calender/inc
+	$(INCLUDE_PATH)
 main_elf_LDADD = $(top_builddir)/lib/bsp/init/src/libbsp-init.la \
 	$(top_builddir)/lib/bsp/led/src/libbsp-led.la \
 	$(top_builddir)/lib/bsp/calender/src/libbsp-calender.la \
