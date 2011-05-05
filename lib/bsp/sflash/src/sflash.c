@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May  3 09:47:57 2011
+ * Modified at:   Thu May  5 17:24:38 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -167,7 +167,7 @@ void sFLASH_PageSizeSet(void)
  *    Write a buffer to sFLASH
  *
  */
-void sFLASH_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t NumByteToWrite)
+static void sFLASH_WritePage(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite)
 {
   sFLASH_CS_LOW();  // Select the FLASH: Chip Select low
   sFLASH_SendByte(sFLASH_CMD_WRITE);  // Send "Write to Memory " instruction
@@ -184,6 +184,77 @@ void sFLASH_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t NumByteTo
 
   sFLASH_CS_HIGH();//  Deselect the FLASH: Chip Select high
   sFLASH_WaitForWriteEnd();// Wait the end of Flash writing
+}
+
+void sFLASH_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t NumByteToWrite)
+{
+  uint16_t NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0, temp = 0;
+
+  Addr = WriteAddr % sFLASH_SPI_PAGESIZE;
+  count = sFLASH_SPI_PAGESIZE - Addr;
+  NumOfPage =  NumByteToWrite / sFLASH_SPI_PAGESIZE;
+  NumOfSingle = NumByteToWrite % sFLASH_SPI_PAGESIZE;
+
+  if (Addr == 0) /*!< WriteAddr is sFLASH_PAGESIZE aligned  */
+  {
+    if (NumOfPage == 0) /*!< NumByteToWrite < sFLASH_PAGESIZE */
+    {
+      sFLASH_WritePage(pBuffer, WriteAddr, NumByteToWrite);
+    }
+    else /*!< NumByteToWrite > sFLASH_PAGESIZE */
+    {
+      while (NumOfPage--)
+      {
+        sFLASH_WritePage(pBuffer, WriteAddr, sFLASH_SPI_PAGESIZE);
+        WriteAddr +=  sFLASH_SPI_PAGESIZE;
+        pBuffer += sFLASH_SPI_PAGESIZE;
+      }
+
+      sFLASH_WritePage(pBuffer, WriteAddr, NumOfSingle);
+    }
+  }
+  else /*!< WriteAddr is not sFLASH_PAGESIZE aligned  */
+  {
+    if (NumOfPage == 0) /*!< NumByteToWrite < sFLASH_PAGESIZE */
+    {
+      if (NumOfSingle > count) /*!< (NumByteToWrite + WriteAddr) > sFLASH_PAGESIZE */
+      {
+        temp = NumOfSingle - count;
+
+        sFLASH_WritePage(pBuffer, WriteAddr, count);
+        WriteAddr +=  count;
+        pBuffer += count;
+
+        sFLASH_WritePage(pBuffer, WriteAddr, temp);
+      }
+      else
+      {
+        sFLASH_WritePage(pBuffer, WriteAddr, NumByteToWrite);
+      }
+    }
+    else /*!< NumByteToWrite > sFLASH_PAGESIZE */
+    {
+      NumByteToWrite -= count;
+      NumOfPage =  NumByteToWrite / sFLASH_SPI_PAGESIZE;
+      NumOfSingle = NumByteToWrite % sFLASH_SPI_PAGESIZE;
+
+      sFLASH_WritePage(pBuffer, WriteAddr, count);
+      WriteAddr +=  count;
+      pBuffer += count;
+
+      while (NumOfPage--)
+      {
+        sFLASH_WritePage(pBuffer, WriteAddr, sFLASH_SPI_PAGESIZE);
+        WriteAddr +=  sFLASH_SPI_PAGESIZE;
+        pBuffer += sFLASH_SPI_PAGESIZE;
+      }
+
+      if (NumOfSingle != 0)
+      {
+        sFLASH_WritePage(pBuffer, WriteAddr, NumOfSingle);
+      }
+    }
+  }
 }
 
 /*

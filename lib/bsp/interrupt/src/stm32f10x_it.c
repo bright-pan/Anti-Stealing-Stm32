@@ -7,13 +7,12 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri Apr 15 10:01:39 2011
+ * Modified at:   Thu May  5 14:56:56 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
  ********************************************************************/
 
-#include "stm32f10x_it.h"
 #include "includes.h"
 // 定义向量表
 extern unsigned long _etext;
@@ -148,7 +147,33 @@ void SPI1_IRQHandler(void){}
 void SPI2_IRQHandler(void){}
 void USART1_IRQHandler(void){}
 void USART2_IRQHandler(void){}
-void USART3_IRQHandler(void){}
+
+void USART3_IRQHandler(void){
+  //  TimingDelay_Decrement();
+  OS_CPU_SR  cpu_sr;
+  
+   
+  OS_ENTER_CRITICAL();  /* Tell uC/OS-II that we are starting an ISR*/
+  OSIntNesting++;
+  OS_EXIT_CRITICAL();	  
+
+  uint8_t temp; 
+  if(USART_GetITStatus(GSM_USART3, USART_IT_ORE) != RESET)
+	{
+	  /* Read one byte from the receive data register */
+	  temp = USART_ReceiveData(GSM_USART3);
+	  PUTCH(temp, gsm_buf);
+	  //记录溢出标识
+	}
+  if(USART_GetITStatus(GSM_USART3, USART_IT_RXNE) != RESET)
+	{
+	  /* Read one byte from the receive data register */
+	  temp = USART_ReceiveData(GSM_USART3);
+	  PUTCH(temp, gsm_buf);
+	}
+  
+  OSIntExit();
+}
 void EXTI15_10_IRQHandler(void){}
 void RTCAlarm_IRQHandler(void){}
 void USBWakeUp_IRQHandler(void){}

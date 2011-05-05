@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May  3 13:57:14 2011
+ * Modified at:   Wed May  4 15:01:54 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -20,6 +20,6 @@
 
 uint16_t TP_read(void);
 uint8_t TP_convert(void);
-
+void delay_us(uint32_t time);
 
 #endif

@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri Apr 29 14:07:20 2011
+ * Modified at:   Thu May  5 16:10:09 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -15,6 +15,13 @@
 
 #ifndef __SFLASH_H__
 #define __SFLASH_H__
+
+#define OFF_SET(addr, type, step)		((addr) + (step) * sizeof(type))
+#define OFF_SET_OF(TYPE, MEMBER) 		((uint16_t)&((TYPE *)0)->MEMBER)
+
+#define SFLASH_DEVICE_INIT_PARAMATERS_START		0
+#define SFLASH_DEVICE_INIT_PARAMATERS_END			\
+	OFF_SET(EEPROM_DEVICE_INIT_PARAMATERS_START, DEVICE_INIT_PARAMATERS, 1)
 
 void sFLASH_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t NumByteToWrite);
 void sFLASH_ReadBuffer(uint8_t* pBuffer, uint32_t ReadAddr, uint32_t NumByteToRead);
@@ -24,5 +31,8 @@ void sFLASH_Init(void);
 void sFLASH_DeInit(void);
 void sFLASH_DP_RS(void);
 void sFLASH_DP(void);
+
+//#define sflash_read(addr, data, len) sFLASH_ReadBuffer((data), (addr), (len))
+//#define sflash_write(addr, data, len) sFLASH_ReadBuffer((data), (addr), (len))
 
 #endif

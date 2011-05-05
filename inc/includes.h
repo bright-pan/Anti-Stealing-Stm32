@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May  3 09:44:57 2011
+ * Modified at:   Thu May  5 15:09:28 2011
  *                
  * Description:   all include file
  * Copyright (C) 2010-2011,  Bright Pan
@@ -33,14 +33,16 @@
 #include "system_stm32f10x.h"
 #include "core_cm3.h"
 //用户自定义头文件
-#include "stm32f10x_it.h"
 #include "app_cfg.h"
+#include "stm32f10x_it.h"
 #include "init.h"
 #include "led.h"
 #include "calender.h"
 #include "signal.h"
 #include "sflash.h"
 #include "temperature.h"
+#include "gsm.h"
+#include "sms.h"
 
 #endif
 

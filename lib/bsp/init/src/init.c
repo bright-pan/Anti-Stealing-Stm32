@@ -7,13 +7,15 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 28 13:34:19 2011
+ * Modified at:   Thu May  5 17:28:25 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
  ********************************************************************/
 
 #include "includes.h"
+
+int16_t temperature = 0;
 
 static void systick_config(void);
 static void interrupt_config(void);
@@ -22,6 +24,9 @@ static void led_config(void);
 static void calender_config(void);
 static void signal_config(void);
 static void sflash_config(void);
+static void temperature_config(void);
+static void gsm_config(void);
+
 /*
  * Function bsp_init ()
  *
@@ -45,6 +50,8 @@ void bsp_init(void)
   calender_config();
   signal_config();
   sflash_config();
+  temperature_config();
+  gsm_config();
   systick_config();
 }
 
@@ -97,9 +104,14 @@ static void interrupt_config(void)
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure); 
- // NVIC_SystemHandlerPriorityConfig(SystemHandler_PSV,3,3);
-
-   /* Enable the EXTI4 Interrupt */
+  // NVIC_SystemHandlerPriorityConfig(SystemHandler_PSV,3,3);
+  //设置USART3中断优先级
+  NVIC_InitStructure.NVIC_IRQChannel = GSM_USART3_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+  /* Enable the EXTI4 Interrupt */
    /*
   NVIC_InitStructure.NVIC_IRQChannel = EXTI4_IRQChannel;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
@@ -198,3 +210,30 @@ static void sflash_config(void)
   sFLASH_Init();
   sFLASH_PageSizeSet();
 }
+
+static void temperature_config(void)
+{
+  if(TP_convert())
+	{
+	  temperature = (int16_t)TP_read();
+	}
+  else
+	{
+	  //温度模块故障
+	}
+}
+static void gsm_config(void)
+{
+  gsm_init();
+  gsm_power(ENABLE);
+  gsm_setup(ENABLE);
+  //  send_to_gsm("AT\r", SEND_ALL);
+  //  send_to_gsm("AT\r", SEND_ALL);
+  //  send_to_gsm("AT\r", SEND_ALL);
+  //  send_to_gsm("AT\r", SEND_ALL);
+  //  send_to_gsm("AT\r", SEND_ALL);
+  //gsm_setup(DISABLE);
+  //gsm_setup(ENABLE);
+
+}
+

@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Wed May  4 09:52:04 2011
+## Modified at:   Wed May  4 09:59:23 2011
 ##                
 ## Description:   for main.elf program, linking some libraries.
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -42,9 +42,10 @@ main_elf_LDADD = $(top_builddir)/lib/bsp/init/src/libbsp-init.la \
 	$(top_builddir)/lib/bsp/sflash/src/libbsp-sflash.la \
 	$(top_builddir)/lib/bsp/temperature/src/libbsp-temperature.la \
 	$(top_builddir)/lib/bsp/interrupt/src/libbsp-interrput.la \
+	$(top_builddir)/lib/bsp/gsm/src/libbsp-gsm.la \
+	$(top_builddir)/lib/bsp/system/src/libbsp-system.la \
 	$(top_builddir)/lib/cm3/src/libcm3.la \
 	$(top_builddir)/lib/std_periph/src/libstd_periph.la \
-	$(top_builddir)/lib/bsp/system/src/libbsp-system.la \
 	$(top_builddir)/lib/ucos/ports/src/libucos-ports.la \
 	$(top_builddir)/lib/ucos/core/src/libucos-core.la \
 	$(LIBPATH)/libc.a
