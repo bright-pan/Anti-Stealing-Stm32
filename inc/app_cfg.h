@@ -1,30 +1,17 @@
-/*
-*********************************************************************************************************
-*                                              EXAMPLE CODE
-*
-*                          (c) Copyright 2003-2006; Micrium, Inc.; Weston, FL
-*
-*               All rights reserved.  Protected by international copyright laws.
-*               Knowledge of the source code may NOT be used to develop a similar product.
-*               Please help us continue to provide the Embedded community with the finest
-*               software available.  Your honesty is greatly appreciated.
-*********************************************************************************************************
-*/
-
-/*
-*********************************************************************************************************
-*
-*                                      APPLICATION CONFIGURATION
-*
-*                                     ST Microelectronics STM32
-*                                              with the
-*                                   STM3210B-EVAL Evaluation Board
-*
-* Filename      : app_cfg.h
-* Version       : V1.00
-* Programmer(s) : Brian Nagel
-*********************************************************************************************************
-*/
+/*********************************************************************
+ * Filename:      app_cfg.h
+ * Version:       
+ *                
+ * Author:        Bright Pan <loststriker@gmail.com>
+ * Created at:    Thu May 12 16:13:28 2011
+ *                
+ *                
+ * Modified by:   Bright Pan <loststriker@gmail.com>
+ * Modified at:   Thu May 12 16:28:08 2011
+ *                
+ * Description:   
+ * Copyright (C) 2010-2011,  Bright Pan
+ ********************************************************************/
 
 #ifndef  __APP_CFG_H__
 #define  __APP_CFG_H__
@@ -48,14 +35,14 @@
 */
 
 #define  APP_TASK_START_PRIO                    		0 /* Lower numbers are of higher priority                 */
-#define  MUTEX_GR64_PIP					  		1
+#define  MUTEX_GSM_PIP					  		1
 #define  MUTEX_RS485_PIP				  		2		
 #define  MUTEX_SFLASH_PIP							3
 #define  MUTEX_DEVICE_INIT_PARAMETERS_PIP 		4
 
 //#define  APP_TASK_LCD_PRIO                      6
 #define  APP_TASK_RS485_PRIO                     8                       /* RS485 发送任务 */
-#define  APP_TASK_GR64_PRIO                       9				/* GR64 发送任务 */
+#define  APP_TASK_GSM_PRIO                       9				/* GR64 发送任务 */
 #define  APP_TASK_SMSSend_PRIO			 10				/* SMS 发送任务 */
 #define  APP_TASK_SMSReceive_PRIO		 7				/* SMS 接收任务 */
 
@@ -76,13 +63,13 @@
 *********************************************************************************************************
 */
 
-#define  APP_TASK_START_STK_SIZE              128
+#define  APP_TASK_START_STK_SIZE              256
 //#define  APP_TASK_LCD_STK_SIZE                256
 //#define  OS_PROBE_TASK_STK_SIZE               160                       /* See probe_com_cfg for RS-232 commication task stack size */
-#define  APP_TASK_GR64_STK_SIZE		128
+#define  APP_TASK_GSM_STK_SIZE		128
 #define APP_TASK_RS485_STK_SIZE		128
-#define APP_TASK_SMSSend_STK_SIZE		256
-#define APP_TASK_SMSReceive_STK_SIZE	256
+#define APP_TASK_SMSSend_STK_SIZE		512
+#define APP_TASK_SMSReceive_STK_SIZE	512
 
 
 
@@ -122,20 +109,32 @@
 *********************************************************************************************************
 */
 typedef struct {
-	uint8_t	device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
-	uint8_t	primary_device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
-	uint8_t	slave_device_numbers;//从设备数量,且必须小于SLAVE_DEVICE_MAX_NUMBERS;
-	uint8_t slave_device_id[SLAVE_DEVICE_MAX_NUMBERS];//从设备ID数组,大小为SLAVE_DEVICE_MAX_NUMBERS;
-	uint8_t slave_device_name[SLAVE_DEVICE_MAX_NUMBERS][DEVICE_NAME_MAX_LENGTH];
-  	SMS_ALARM_FRAME slave_device_history_alarm[SLAVE_DEVICE_MAX_NUMBERS];
-	uint8_t alarm_telephone_numbers;
-	uint8_t alarm_telephone[ALARM_TELEPHONE_MAX_NUMBERS][ALARM_TELEPHONE_NUMBER_SIZE];
-	uint8_t service_center_address[ALARM_TELEPHONE_NUMBER_SIZE];
-	uint8_t password[DEVICE_PASSWORD_MAX_LENGTH];
-	uint8_t gps[GPS_MAX_LENGTH];//主设备名称;
-	uint8_t sms_on_off;
+  uint8_t	device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
+  uint8_t	primary_device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
+  uint8_t	slave_device_numbers;//从设备数量,且必须小于SLAVE_DEVICE_MAX_NUMBERS;
+  uint8_t slave_device_id[SLAVE_DEVICE_MAX_NUMBERS];//从设备ID数组,大小为SLAVE_DEVICE_MAX_NUMBERS;
+  uint8_t slave_device_name[SLAVE_DEVICE_MAX_NUMBERS][DEVICE_NAME_MAX_LENGTH];
+  SMS_ALARM_FRAME slave_device_history_alarm[SLAVE_DEVICE_MAX_NUMBERS];
+  uint8_t alarm_telephone_numbers;
+  uint8_t alarm_telephone[ALARM_TELEPHONE_MAX_NUMBERS][ALARM_TELEPHONE_NUMBER_SIZE];
+  uint8_t service_center_address[ALARM_TELEPHONE_NUMBER_SIZE];
+  uint8_t password[DEVICE_PASSWORD_MAX_LENGTH];
+  uint8_t gps[GPS_MAX_LENGTH];//主设备名称;
+  uint8_t sms_on_off;
 	
 }DEVICE_INIT_PARAMATERS;
 
+typedef struct {
+  uint8_t device_id;
+  uint8_t function_code;
+  uint8_t length;
+  uint8_t cable_fault_type;
+  struct tm time;
+  uint8_t current_on_off;
+  uint16_t temperature;
+  uint16_t current_intensity;
+  uint16_t current_frequency;
+  uint16_t crc;
+}SLAVE_DEVICE_STATE_FRAME;
  
 #endif

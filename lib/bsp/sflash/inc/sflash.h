@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May  5 16:10:09 2011
+ * Modified at:   Mon May  9 09:12:27 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -17,7 +17,7 @@
 #define __SFLASH_H__
 
 #define OFF_SET(addr, type, step)		((addr) + (step) * sizeof(type))
-#define OFF_SET_OF(TYPE, MEMBER) 		((uint16_t)&((TYPE *)0)->MEMBER)
+#define OFF_SET_OF(TYPE, MEMBER) 		((uint32_t)&((TYPE *)0)->MEMBER)
 
 #define SFLASH_DEVICE_INIT_PARAMATERS_START		0
 #define SFLASH_DEVICE_INIT_PARAMATERS_END			\

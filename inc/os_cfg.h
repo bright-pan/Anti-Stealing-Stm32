@@ -37,11 +37,11 @@
 #define OS_LOWEST_PRIO           63    /* Defines the lowest priority that can be assigned ...         */
                                        /* ... MUST NEVER be higher than 254!                           */
 
-#define OS_MAX_EVENTS            10    /* Max. number of event control blocks in your application      */
+#define OS_MAX_EVENTS            20    /* Max. number of event control blocks in your application      */
 #define OS_MAX_FLAGS              5    /* Max. number of Event Flag Groups    in your application      */
 #define OS_MAX_MEM_PART           5    /* Max. number of memory partitions                             */
 #define OS_MAX_QS                 4    /* Max. number of queue control blocks in your application      */
-#define OS_MAX_TASKS             16    /* Max. number of tasks in your application, MUST be >= 2       */
+#define OS_MAX_TASKS             20    /* Max. number of tasks in your application, MUST be >= 2       */
 
 #define OS_SCHED_LOCK_EN          1    /*     Include code for OSSchedLock() and OSSchedUnlock()       */
 
@@ -57,7 +57,7 @@
 
                                        /* --------------------- TASK MANAGEMENT ---------------------- */
 #define OS_TASK_CHANGE_PRIO_EN    1    /*     Include code for OSTaskChangePrio()                      */
-#define OS_TASK_CREATE_EN         1    /*     Include code for OSTaskCreate()                          */
+#define OS_TASK_CREATE_EN         0    /*     Include code for OSTaskCreate()                          */
 #define OS_TASK_CREATE_EXT_EN     1    /*     Include code for OSTaskCreateExt()                       */
 #define OS_TASK_DEL_EN            1    /*     Include code for OSTaskDel()                             */
 #define OS_TASK_NAME_SIZE        16    /*     Determine the size of a task name                        */

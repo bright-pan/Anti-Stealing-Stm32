@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May  5 14:41:23 2011
+ * Modified at:   Thu May 12 13:09:33 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -74,7 +74,7 @@
 
 BUFFER gsm_buf;
 
-uint8_t gsm_init(void)
+void gsm_init(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
   USART_InitTypeDef USART_InitStructure;
@@ -160,12 +160,12 @@ uint8_t gsm_init(void)
   RCC_APB1PeriphClockCmd(GSM_USART3_CLK, ENABLE);
 
   /* USART3 configured as follow:
-        - BaudRate = 115200 baud  
-        - Word Length = 8 Bits
-        - One Stop Bit
-        - No parity
-        - Hardware flow control enabled (RTS and CTS signals)
-        - Receive and transmit enabled
+	 - BaudRate = 115200 baud  
+	 - Word Length = 8 Bits
+	 - One Stop Bit
+	 - No parity
+	 - Hardware flow control enabled (RTS and CTS signals)
+	 - Receive and transmit enabled
   */
   USART_InitStructure.USART_BaudRate = 115200;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -204,10 +204,10 @@ uint8_t gsm_setup(FunctionalState state)
 	{
 	  if(GSM_VIO_READ() != GSM_VIO_PIN)
 		{
-		  GSM_TERM_ON_PORT->BRR = GSM_TERM_ON_PIN;//0
+		  //GSM_TERM_ON_PORT->BRR = GSM_TERM_ON_PIN;//0
 		  GSM_TERM_ON_PORT->BSRR = GSM_TERM_ON_PIN;//1
 		  delay_us(1000 * 1000);
-		  GSM_TERM_ON_PORT->BRR = GSM_TERM_ON_PIN;//0
+		  //GSM_TERM_ON_PORT->BRR = GSM_TERM_ON_PIN;//0
 		}
 	  if(GSM_VIO_READ() == GSM_VIO_PIN)
 		{
@@ -223,9 +223,14 @@ uint8_t gsm_setup(FunctionalState state)
 	  if(GSM_VIO_READ() == GSM_VIO_PIN)
 		{
 		  GSM_TERM_ON_PORT->BRR = GSM_TERM_ON_PIN;//0
+		  //GSM_TERM_ON_PORT->BRR = GSM_TERM_ON_PIN;//0
+		  //
+		  delay_us(1000 * 1000);
 		  GSM_TERM_ON_PORT->BSRR = GSM_TERM_ON_PIN;//1
 		  delay_us(1000 * 1000);
 		  GSM_TERM_ON_PORT->BRR = GSM_TERM_ON_PIN;//0
+		  //GSM_TERM_ON_PORT->BRR = GSM_TERM_ON_PIN;//0
+		  //
 		}
 	  if(GSM_VIO_READ() != GSM_VIO_PIN)
 		{
@@ -238,7 +243,8 @@ uint8_t gsm_setup(FunctionalState state)
 	}
   else
 	{
-
+	  return GSM_SETUP_DISABLE_FAILURE;
+  
 	}
 }
 
@@ -260,12 +266,12 @@ uint8_t gsm_reset(void)
 
 }
 
-void send_to_gsm(uint8_t *str, uint16_t str_len)
+void send_to_gsm(const char *str, uint16_t str_len)
 {
-	uint8_t err;
-	if(str_len)
+  //	uint8_t err;
+  if(str_len)
 	{
-		while(str_len--)
+	  while(str_len--)
 		{
 		  USART_SendData(GSM_USART3, *str++);
 		  while(USART_GetFlagStatus(GSM_USART3, USART_FLAG_TXE) == RESET)
@@ -273,10 +279,10 @@ void send_to_gsm(uint8_t *str, uint16_t str_len)
 			}
 		}
 	}
-	else
+  else
 	{
-		str_len = strlen(str);
-		while(str_len--)
+	  str_len = strlen(str);
+	  while(str_len--)
 		{
 		  USART_SendData(GSM_USART3, *str++);
 		  while(USART_GetFlagStatus(GSM_USART3, USART_FLAG_TXE) == RESET)
@@ -286,39 +292,40 @@ void send_to_gsm(uint8_t *str, uint16_t str_len)
 	}
 }
 
-uint8_t *receive_from_gsm(uint8_t *str, uint16_t str_len)
+char *receive_from_gsm(char *str, uint16_t str_len)
 {
-	uint8_t *str_bk = str;
-	uint8_t buf_length = 0;
+  char *str_bk = str;
+  uint8_t buf_length = 0;
 
-	buf_length = CHARS(gsm_buf);
-	if(buf_length == 0)
-			return NULL;
+  buf_length = CHARS(gsm_buf);
 
-	if(str_len)
+  if(buf_length == 0)
+	return NULL;
+
+  if(str_len)
 	{
 
-		if(str_len > buf_length)
-			return NULL;	
-		
-		while(str_len--)
-		{
-			GETCH(gsm_buf, *str_bk++);
-		}
-	}
-	else
-	{
+	  if(str_len > buf_length)
 		str_len = buf_length;
-		while(str_len--)
+		
+	  while(str_len--)
 		{
-			GETCH(gsm_buf, *str_bk++);
+		  GETCH(gsm_buf, *str_bk++);
+		}
+	}
+  else
+	{
+	  str_len = buf_length;
+	  while(str_len--)
+		{
+		  GETCH(gsm_buf, *str_bk++);
 		}
 		
 	}
-	return str;
+  return str;
 }
 
 void flush_gsm_buffer(void)
 {
-	FLUSH(gsm_buf);
+  FLUSH(gsm_buf);
 }

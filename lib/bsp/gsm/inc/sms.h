@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May  5 14:47:10 2011
+ * Modified at:   Thu May 12 15:45:18 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -124,10 +124,10 @@ typedef struct{
 typedef struct {
 
   uint8_t First_Octet;
-  //  TP_OA_TYPE TP_OA;//9字节;
+  TP_OA_TYPE TP_OA;//9字节;
   uint8_t TP_PID;
   uint8_t TP_DCS;
-  //  TP_SCTS_TYPE TP_SCTS;//7字节;
+  TP_SCTS_TYPE TP_SCTS;//7字节;
   uint8_t TP_UDL;//用户长度必须小于140 个字节;
   uint8_t TP_UD[140];
 }SMS_RECEIVE_TPDU_TYPE;
@@ -190,6 +190,7 @@ typedef struct {
 	uint16_t DATA[50];
 	
 }SMS_LIST_FRAME;
+/*
 typedef struct{
 	uint8_t second;
 	uint8_t minute;
@@ -199,7 +200,7 @@ typedef struct{
 	uint8_t week;
 	uint8_t year;
 }TIME_FRAME;
-
+*/
 
 typedef struct {
  
@@ -215,7 +216,7 @@ typedef struct {
 	uint8_t	cable_fault_type;
 	uint16_t temperature;
 	uint8_t current_on_off;
-	TIME_FRAME 	time;
+	struct tm time;
 }SMS_ALARM_FRAME;
 typedef struct {
 	TP_OA_TYPE		TP_OA;//9字节;

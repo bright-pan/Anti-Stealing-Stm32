@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May  5 14:46:51 2011
+ * Modified at:   Thu May 12 10:12:09 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -23,7 +23,7 @@
 #define	SEND_ALL 0
 #define	RECEIVE_ALL	0 
 
-#define BUF_SIZE 256
+#define BUF_SIZE 512
 
 #define INC(a) ((a) = ((a)+1) & (BUF_SIZE-1))
 #define DEC(a) ((a) = ((a)-1) & (BUF_SIZE-1))
@@ -63,9 +63,9 @@ extern BUFFER gsm_buf;
 uint8_t gsm_reset(void);
 uint8_t gsm_setup(FunctionalState state);
 void gsm_power(FunctionalState state);
-uint8_t gsm_init(void);
-uint8_t *receive_from_gsm(uint8_t *str, uint16_t str_len);
+void gsm_init(void);
+char *receive_from_gsm(char *str, uint16_t str_len);
 void flush_gsm_buffer(void);
-void send_to_gsm(uint8_t *str, uint16_t str_len);
+void send_to_gsm(const char *str, uint16_t str_len);
 
 #endif

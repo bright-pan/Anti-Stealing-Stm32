@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May  5 17:28:25 2011
+ * Modified at:   Mon May  9 09:17:44 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -222,18 +222,14 @@ static void temperature_config(void)
 	  //温度模块故障
 	}
 }
+#define GSM_VIO_PIN                      GPIO_Pin_6
+#define GSM_VIO_PORT                     GPIOE
+#define GSM_VIO_CLK                      RCC_APB2Periph_GPIOE
+
 static void gsm_config(void)
 {
   gsm_init();
   gsm_power(ENABLE);
   gsm_setup(ENABLE);
-  //  send_to_gsm("AT\r", SEND_ALL);
-  //  send_to_gsm("AT\r", SEND_ALL);
-  //  send_to_gsm("AT\r", SEND_ALL);
-  //  send_to_gsm("AT\r", SEND_ALL);
-  //  send_to_gsm("AT\r", SEND_ALL);
-  //gsm_setup(DISABLE);
-  //gsm_setup(ENABLE);
-
 }
 

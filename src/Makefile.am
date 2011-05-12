@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Wed May  4 09:59:23 2011
+## Modified at:   Wed May 11 13:50:29 2011
 ##                
 ## Description:   for main.elf program, linking some libraries.
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -29,7 +29,7 @@ LIBPATH = /usr/local/stm32/arm-none-eabi/lib/thumb
 include $(top_srcdir)/src/Makefile.include
 
 bin_PROGRAMS = main.elf
-main_elf_SOURCES = main.c
+main_elf_SOURCES = main.c syscalls.c
 main_elf_LDFLAGS = -T$(srcdir)/stm32f103vct6.gld \
 	-nostartfiles -static -static-libtool-libs
 

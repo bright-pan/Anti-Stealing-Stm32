@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Wed May  4 09:58:33 2011
+## Modified at:   Tue May 10 16:27:05 2011
 ##                
 ## Description:   configuration for autoconf.
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -18,7 +18,7 @@ AC_INIT([anti_stealing_stm32], [1.0], [loststriker@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for programs.
-AC_PROG_CC
+#AC_PROG_CC
 AM_PROG_AS
 # Checks for libraries.
 AC_DISABLE_SHARED
