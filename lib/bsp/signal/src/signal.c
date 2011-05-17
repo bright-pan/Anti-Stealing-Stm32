@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May  3 13:15:02 2011
+ * Modified at:   Tue May 17 17:18:52 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -22,8 +22,26 @@
 
 #define POINT_PER_PERIOD 32
 
+//发送电源引脚
+#define SIGNAL_SEND_POWER_PIN                    GPIO_Pin_5
+#define SIGNAL_SEND_POWER_PORT                   GPIOE
+#define SIGNAL_SEND_POWER_CLK                    RCC_APB2Periph_GPIOE
+//接收电源引脚
+#define SIGNAL_RECEIVE_POWER_PIN                 GPIO_Pin_6
+#define SIGNAL_RECEIVE_POWER_PORT                GPIOE
+#define SIGNAL_RECEIVE_POWER_CLK                 RCC_APB2Periph_GPIOE
+
+//发送信号频率检测引脚
+#define SIGNAL_SEND_FREQ_PIN                 GPIO_Pin_6
+#define SIGNAL_SEND_FREQ_PORT                GPIOB
+#define SIGNAL_SEND_FREQ_CLK                 RCC_APB2Periph_GPIOB
+//接收信号频率检测引脚
+#define SIGNAL_RECEIVE_FREQ_PIN                 GPIO_Pin_5
+#define SIGNAL_RECEIVE_FREQ_PORT                GPIOB
+#define SIGNAL_RECEIVE_FREQ_CLK                 RCC_APB2Periph_GPIOB
+
 //信号点发生周期
-static uint16_t period = 2250;
+static uint16_t period;
 
 //信号点数据
 static uint32_t sine12bit[POINT_PER_PERIOD] = {
@@ -34,8 +52,28 @@ static uint32_t sine12bit[POINT_PER_PERIOD] = {
 
 };
 
+const static uint32_t signal_freq[] = {
+  4000,
+  8000,
+  12000,
+  16000,
+  20000,
+  24000,
+  28000,
+  32000,
+  36000,
+  40000,
+  44000,
+  48000,
+  52000,
+  56000,
+  60000,
+  64000,
+};
+
 //DAC初始化结构体定义
 DAC_InitTypeDef            DAC_InitStructure;
+TIM_ICInitTypeDef  TIM_ICInitStructure;
 
 /*
  * Function signal_init ()
@@ -54,6 +92,66 @@ void signal_init(void)
   //TIM初始化结构体定义
   TIM_TimeBaseInitTypeDef    TIM_TimeBaseStructure;
 
+  GPIO_InitTypeDef GPIO_InitStructure;
+  
+  //使能发送电源引脚时钟
+  RCC_APB2PeriphClockCmd(SIGNAL_SEND_POWER_CLK, ENABLE);
+  //配置发生电源引脚为输出
+  GPIO_InitStructure.GPIO_Pin = SIGNAL_SEND_POWER_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(SIGNAL_SEND_POWER_PORT, &GPIO_InitStructure);
+  SIGNAL_SEND_POWER_PORT->BRR = SIGNAL_SEND_POWER_PIN;//默认为0,关闭状态
+  //使能接收电源引脚时钟
+  RCC_APB2PeriphClockCmd(SIGNAL_RECEIVE_POWER_CLK, ENABLE);
+  //配置发生电源引脚为输出
+  GPIO_InitStructure.GPIO_Pin = SIGNAL_RECEIVE_POWER_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(SIGNAL_RECEIVE_POWER_PORT, &GPIO_InitStructure);
+  SIGNAL_RECEIVE_POWER_PORT->BRR = SIGNAL_RECEIVE_POWER_PIN;//默认为关闭状态
+
+  //发送频率检测引脚时钟
+  RCC_APB2PeriphClockCmd(SIGNAL_SEND_FREQ_CLK, ENABLE);
+  //设置成模拟输入
+  GPIO_InitStructure.GPIO_Pin =  SIGNAL_SEND_FREQ_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(SIGNAL_SEND_FREQ_PORT, &GPIO_InitStructure);
+  //发送输入捕获配置
+  TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
+  TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+  TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+  TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+  TIM_ICInitStructure.TIM_ICFilter = 0x0;
+  TIM_ICInit(TIM4, &TIM_ICInitStructure);
+  // Enable the CC1 Interrupt Request
+  TIM_ITConfig(TIM4, TIM_IT_CC1, ENABLE);
+  // TIM enable counter
+  TIM_Cmd(TIM4, ENABLE);
+
+
+  //接收频率检测引脚时钟
+  RCC_APB2PeriphClockCmd(SIGNAL_RECEIVE_FREQ_CLK, ENABLE);
+  //设置成模拟输入
+  GPIO_InitStructure.GPIO_Pin =  SIGNAL_RECEIVE_FREQ_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(SIGNAL_RECEIVE_FREQ_PORT, &GPIO_InitStructure);
+  //接收输入捕获配置
+  TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
+  TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+  TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+  TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+  TIM_ICInitStructure.TIM_ICFilter = 0x0;
+  TIM_ICInit(TIM3, &TIM_ICInitStructure);
+  // Enable the CC2 Interrupt Request
+  TIM_ITConfig(TIM3, TIM_IT_CC2, ENABLE);
+  // TIM enable counter
+  TIM_Cmd(TIM3, ENABLE);
+
+  
+  //DAC信号产生
   //DMA时钟使能
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
   //GPIOA时钟使能
@@ -97,6 +195,48 @@ void signal_init(void)
 
 }
 
+FunctionalState signal_send_power(FunctionalState state)
+{
+  if(state == ENABLE)
+	{
+	  SIGNAL_SEND_POWER_PORT->BSRR = SIGNAL_SEND_POWER_PIN;//设置为1，状态为开启
+	  return ENABLE;
+	}
+  else if(state == DISABLE)
+	{
+	  SIGNAL_SEND_POWER_PORT->BRR = SIGNAL_SEND_POWER_PIN;//设置为0，状态为关闭
+	  return DISABLE;	  
+	}
+  else
+	{
+	  //默认为关闭
+	  SIGNAL_SEND_POWER_PORT->BRR = SIGNAL_SEND_POWER_PIN;//设置为0，状态为关闭
+	  return DISABLE;
+	}
+}
+
+FunctionalState signal_receive_power(FunctionalState state)
+{
+  if(state == ENABLE)
+	{
+	  SIGNAL_RECEIVE_POWER_PORT->BSRR = SIGNAL_RECEIVE_POWER_PIN;//设置为1，状态为开启
+	  return ENABLE;
+	}
+  else if(state == DISABLE)
+	{
+	  SIGNAL_RECEIVE_POWER_PORT->BRR = SIGNAL_RECEIVE_POWER_PIN;//设置为0，状态为关闭
+	  return DISABLE;	  
+	}
+  else
+	{
+	  //默认为关闭
+	  SIGNAL_RECEIVE_POWER_PORT->BRR = SIGNAL_RECEIVE_POWER_PIN;//设置为0，状态为关闭
+	  return DISABLE;
+	}
+
+}
+
+
 /*
  * Function signal_send ()
  *
@@ -129,21 +269,21 @@ void signal_receive(void)
 void signal_off(void)
 {
   DMA_Cmd(DMA2_Channel3, DISABLE);
-  //DAC1使能
+  //DAC1关闭
   DAC_Cmd(DAC_Channel_1, DISABLE);
-  //DAC1DMA使能
+  //DAC1DMA关闭
   DAC_DMACmd(DAC_Channel_1, DISABLE);
-  //TIM2使能
+  //TIM2关闭
   TIM_Cmd(TIM2, DISABLE);
 }
 
-void signal_frequency_set(uint32_t freq)
+void signal_frequency_set(SignalFreq freq)
 {
-  if(freq == 0)
+  if(freq < SIGNAL_FREQ_4000 || freq > SIGNAL_FREQ_64000)
 	{
-	  freq = 32000;
+	  freq = SIGNAL_FREQ_32000;
 	}
   SystemCoreClockUpdate();
-  period = SystemCoreClock / (freq * POINT_PER_PERIOD);
+  period = SystemCoreClock / (signal_freq[freq] * POINT_PER_PERIOD);
 }
 

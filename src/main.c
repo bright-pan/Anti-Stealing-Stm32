@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 13:39:50 2011
+ * Modified at:   Tue May 17 14:04:46 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan

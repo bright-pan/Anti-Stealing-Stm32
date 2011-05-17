@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri May 13 17:17:36 2011
+ * Modified at:   Tue May 17 14:53:43 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -194,7 +194,7 @@ static void calender_config(void)
  */
 static void signal_config(void)
 {
-  signal_frequency_set(SIGNAL_FREQ);
+  signal_frequency_set(SIGNAL_FREQ_32000);
   signal_init();
   signal_send();
 }

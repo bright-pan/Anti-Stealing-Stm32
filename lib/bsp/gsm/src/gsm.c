@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 13:13:03 2011
+ * Modified at:   Tue May 17 14:12:34 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -84,6 +84,7 @@ void gsm_init(void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GSM_POWER_PORT, &GPIO_InitStructure);
+  GSM_POWER_PORT->BRR = GSM_POWER_PIN;//0
   //GSM TERM_ON
   RCC_APB2PeriphClockCmd(GSM_TERM_ON_CLK, ENABLE);
   GPIO_InitStructure.GPIO_Pin = GSM_TERM_ON_PIN;

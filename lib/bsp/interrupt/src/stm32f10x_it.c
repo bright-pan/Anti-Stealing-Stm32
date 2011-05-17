@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 10:06:53 2011
+ * Modified at:   Tue May 17 17:35:04 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -15,6 +15,12 @@
 
 #include "includes.h"
 // 定义向量表
+
+__IO uint32_t signal_send_freq_capture = 0;
+__IO uint32_t signal_receive_freq_capture = 0;
+
+
+
 extern unsigned long _etext;
 extern unsigned long _data;
 extern unsigned long _edata;
@@ -139,8 +145,77 @@ void TIM1_UP_IRQHandler(void){}
 void TIM1_TRG_COM_IRQHandler(void){}
 void TIM1_CC_IRQHandler(void){}
 void TIM2_IRQHandler(void){}
-void TIM3_IRQHandler(void){}
-void TIM4_IRQHandler(void){}
+
+void TIM3_IRQHandler(void)
+{ 
+  static __IO uint8_t capture_number = 0;
+  static __IO uint16_t read_value1 = 0;
+  static __IO uint16_t read_value2 = 0;
+
+  if(TIM_GetITStatus(TIM3, TIM_IT_CC2) == SET)
+  {
+    /* Clear TIM3 Capture compare interrupt pending bit */
+    TIM_ClearITPendingBit(TIM3, TIM_IT_CC2);
+    if(capture_number == 0)
+    {
+      /* Get the Input Capture value */
+      read_value1 = TIM_GetCapture2(TIM3);
+      capture_number = 1;
+    }
+    else if(capture_number == 1)
+    {
+      /* Get the Input Capture value */
+      read_value2 = TIM_GetCapture2(TIM3); 
+      
+      /* Capture computation */
+      if (read_value2 > read_value1)
+      {
+        signal_receive_freq_capture = (read_value2 - read_value1); 
+      }
+      else
+      {
+        signal_receive_freq_capture = ((0xFFFF - read_value1) + read_value2); 
+      }
+      capture_number = 0;
+    }
+  }
+}
+
+void TIM4_IRQHandler(void)
+{ 
+  static __IO uint8_t capture_number = 0;
+  static __IO uint16_t read_value1 = 0;
+  static __IO uint16_t read_value2 = 0;
+
+  if(TIM_GetITStatus(TIM4, TIM_IT_CC1) == SET)
+  {
+    /* Clear TIM3 Capture compare interrupt pending bit */
+    TIM_ClearITPendingBit(TIM4, TIM_IT_CC1);
+    if(capture_number == 0)
+    {
+      /* Get the Input Capture value */
+      read_value1 = TIM_GetCapture1(TIM4);
+      capture_number = 1;
+    }
+    else if(capture_number == 1)
+    {
+      /* Get the Input Capture value */
+      read_value2 = TIM_GetCapture1(TIM4); 
+      
+      /* Capture computation */
+      if (read_value2 > read_value1)
+      {
+        signal_send_freq_capture = (read_value2 - read_value1); 
+      }
+      else
+      {
+        signal_send_freq_capture = ((0xFFFF - read_value1) + read_value2); 
+      }
+      capture_number = 0;
+    }
+  }
+}
+
 void I2C1_EV_IRQHandler(void){}
 void I2C1_ER_IRQHandler(void){}
 void I2C2_EV_IRQHandler(void){}

@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed May  4 15:01:43 2011
+ * Modified at:   Tue May 17 14:51:28 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -50,7 +50,7 @@ void delay_us(uint32_t time)
 
 uint8_t DS18B20_reset(void)
 {
-  GPIO_InitTypeDef GPIO_InitStructure;
+  //  GPIO_InitTypeDef GPIO_InitStructure;
 
   /* Enable the GPIO_LED Clock */
   RCC_APB2PeriphClockCmd(DS18B20_BUS_CLK, ENABLE);
