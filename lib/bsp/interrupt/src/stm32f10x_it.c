@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May  5 14:56:56 2011
+ * Modified at:   Tue May 17 10:06:53 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -30,15 +30,17 @@ void Reset_Handler(void)
   //
   src = &_etext;
   dst = &_data;
-  while (dst < &_edata) {
-	*dst++ = *src++;
-  }
+  while (dst < &_edata)
+	{
+	  *dst++ = *src++;
+	}
   //
   // Zero fill the bss segment.
   //
-  for(dst = &_bss; dst < &_ebss; dst++) {
-	*dst = 0;
-  }
+  for(dst = &_bss; dst < &_ebss; dst++)
+	{
+	  *dst = 0;
+	}
   //
   // Call the application's entry point.
   //
@@ -90,22 +92,22 @@ void DebugMon_Handler(void) {
 
 }
 /*
-void PendSV_Handler(void) {
+  void PendSV_Handler(void) {
 
-}
+  }
 */
 void SysTick_Handler(void) {
   //  TimingDelay_Decrement();
-   OS_CPU_SR  cpu_sr;
+  OS_CPU_SR  cpu_sr;
 
    
-   OS_ENTER_CRITICAL();  /* Tell uC/OS-II that we are starting an ISR*/
-   OSIntNesting++;
-   OS_EXIT_CRITICAL();	  
+  OS_ENTER_CRITICAL();  /* Tell uC/OS-II that we are starting an ISR*/
+  OSIntNesting++;
+  OS_EXIT_CRITICAL();	  
    
-   OSTimeTick();     /* Call uC/OS-II's OSTimeTick() */
+  OSTimeTick();     /* Call uC/OS-II's OSTimeTick() */
    
-   OSIntExit();
+  OSIntExit();
 }
 
 void WWDG_IRQHandler(void){}
@@ -162,14 +164,28 @@ void USART3_IRQHandler(void){
 	{
 	  /* Read one byte from the receive data register */
 	  temp = USART_ReceiveData(GSM_USART3);
-	  PUTCH(temp, gsm_buf);
+	  if(FULL(gsm_buf))
+		{
+		  //缓冲区已满，丢弃数据
+		}
+	  else
+		{
+		  PUTCH(temp, gsm_buf);//缓冲区不是满的则存入缓冲区
+		}
 	  //记录溢出标识
 	}
   if(USART_GetITStatus(GSM_USART3, USART_IT_RXNE) != RESET)
 	{
 	  /* Read one byte from the receive data register */
 	  temp = USART_ReceiveData(GSM_USART3);
-	  PUTCH(temp, gsm_buf);
+	  if(FULL(gsm_buf))
+		{
+		  //缓冲区已满，丢弃数据
+		}
+	  else
+		{
+		  PUTCH(temp, gsm_buf);//缓冲区不是满的则存入缓冲区
+		}
 	}
   
   OSIntExit();

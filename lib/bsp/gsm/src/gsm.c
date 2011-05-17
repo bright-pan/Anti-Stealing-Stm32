@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 12 13:09:33 2011
+ * Modified at:   Tue May 17 13:13:03 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -198,7 +198,7 @@ void gsm_power(FunctionalState state)
 	}
 }
 
-uint8_t gsm_setup(FunctionalState state)
+GsmStatus gsm_setup(FunctionalState state)
 {
   if(state == ENABLE)
 	{
@@ -248,7 +248,7 @@ uint8_t gsm_setup(FunctionalState state)
 	}
 }
 
-uint8_t gsm_reset(void)
+GsmStatus gsm_reset(void)
 {
   GSM_RESET_PORT->BRR = GSM_RESET_PIN;//0
   GSM_RESET_PORT->BSRR = GSM_RESET_PIN;//1
@@ -295,7 +295,7 @@ void send_to_gsm(const char *str, uint16_t str_len)
 char *receive_from_gsm(char *str, uint16_t str_len)
 {
   char *str_bk = str;
-  uint8_t buf_length = 0;
+  uint16_t buf_length = 0;
 
   buf_length = CHARS(gsm_buf);
 
@@ -310,7 +310,14 @@ char *receive_from_gsm(char *str, uint16_t str_len)
 		
 	  while(str_len--)
 		{
-		  GETCH(gsm_buf, *str_bk++);
+		  if(EMPTY(gsm_buf))
+			{
+			  //缓冲区为空就不取数据
+			}
+		  else
+			{
+			  GETCH(gsm_buf, *str_bk++);
+			}
 		}
 	}
   else
@@ -318,7 +325,14 @@ char *receive_from_gsm(char *str, uint16_t str_len)
 	  str_len = buf_length;
 	  while(str_len--)
 		{
-		  GETCH(gsm_buf, *str_bk++);
+		  if(EMPTY(gsm_buf))
+			{
+			  //缓冲区为空就不取数据
+			}
+		  else
+			{
+			  GETCH(gsm_buf, *str_bk++);
+			}
 		}
 		
 	}

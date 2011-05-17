@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 12 16:28:08 2011
+ * Modified at:   Mon May 16 15:09:48 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -49,7 +49,7 @@
 
 
 
-#define  OS_TASK_TMR_PRIO                      10
+#define  OS_TASK_TMR_PRIO                      20
 
 
 /*
@@ -66,10 +66,10 @@
 #define  APP_TASK_START_STK_SIZE              256
 //#define  APP_TASK_LCD_STK_SIZE                256
 //#define  OS_PROBE_TASK_STK_SIZE               160                       /* See probe_com_cfg for RS-232 commication task stack size */
-#define  APP_TASK_GSM_STK_SIZE		128
+#define  APP_TASK_GSM_STK_SIZE		256
 #define APP_TASK_RS485_STK_SIZE		128
-#define APP_TASK_SMSSend_STK_SIZE		512
-#define APP_TASK_SMSReceive_STK_SIZE	512
+#define APP_TASK_SMSSend_STK_SIZE		256
+#define APP_TASK_SMSReceive_STK_SIZE	256
 
 
 
@@ -95,7 +95,7 @@
 #define	LOCAL_ADDRESS_TYPE				0xA1
 
 
-#define  	SMSC_DEFAULT 						0x00
+#define  	SMSC_DEFAULT 						0x08
 #define 	FIRST_OCTET_DEFAULT				0x11
 #define	TP_MR_DEFAULT						0x00
 #define	TP_TYPE_DEFAULT					INTERNATIONAL_ADDRESS_TYPE//国际地址;

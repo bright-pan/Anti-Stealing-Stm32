@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 12 10:12:09 2011
+ * Modified at:   Tue May 17 13:29:32 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -20,6 +20,7 @@
 #define GSM_USART3 USART3
 #define GSM_USART3_IRQn USART3_IRQn
 
+#define GSM_RESEND_NUMBERS 5
 #define	SEND_ALL 0
 #define	RECEIVE_ALL	0 
 
@@ -56,12 +57,14 @@ typedef enum {
   GSM_SETUP_DISABLE_FAILURE,
   GSM_RESET_SUCCESS,
   GSM_RESET_FAILURE,
-}Gsm_Status;
+  GSM_SMS_SEND_SUCCESS,
+  GSM_SMS_SEND_FAILURE,
+}GsmStatus;
 
 extern BUFFER gsm_buf;
 
-uint8_t gsm_reset(void);
-uint8_t gsm_setup(FunctionalState state);
+GsmStatus gsm_reset(void);
+GsmStatus gsm_setup(FunctionalState state);
 void gsm_power(FunctionalState state);
 void gsm_init(void);
 char *receive_from_gsm(char *str, uint16_t str_len);

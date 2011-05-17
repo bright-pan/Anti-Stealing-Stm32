@@ -7,9 +7,9 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 12 18:02:38 2011
+ * Modified at:   Tue May 17 13:39:50 2011
  *                
- * Description:   application main program.
+ * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
  ********************************************************************/
 
@@ -70,16 +70,16 @@ OS_EVENT *SEM_SMS_MSG_INDICATOR;
 
 // 帧处理内存区
 #define GSM_SEND_BUF_SIZE 256
-__attribute__((aligned(8))) uint8_t GSM_SEND_BUF[GSM_SEND_BUF_SIZE + 1] = {'\0',};;
+uint8_t GSM_SEND_BUF[GSM_SEND_BUF_SIZE + 1] = {'\0',};
 
 #define GSM_RECEIVE_BUF_SIZE 512
-__attribute__((aligned(8))) uint8_t GSM_RECEIVE_BUF[GSM_RECEIVE_BUF_SIZE + 1] = {'\0',};
+uint8_t GSM_RECEIVE_BUF[GSM_RECEIVE_BUF_SIZE + 1] = {'\0',};
 
 #define SMS_RECEIVE_PROCESS_BUF_SIZE 256
-uint8_t SMS_RECEIVE_PROCESS_BUF[SMS_RECEIVE_PROCESS_BUF_SIZE];
+uint8_t SMS_RECEIVE_PROCESS_BUF[SMS_RECEIVE_PROCESS_BUF_SIZE + 1] = {'\0',};
 #define SMS_SEND_PROCESS_BUF_SIZE 512
-uint8_t SMS_SEND_PROCESS_BUF[SMS_SEND_PROCESS_BUF_SIZE];
-uint8_t SMS_UCS_PROCESS_BUF[DEVICE_NAME_MAX_LENGTH];
+uint8_t SMS_SEND_PROCESS_BUF[SMS_SEND_PROCESS_BUF_SIZE + 1] = {'\0',};
+uint8_t SMS_UCS_PROCESS_BUF[DEVICE_NAME_MAX_LENGTH + 1] = {'\0',};
 
 uint8_t RS485_SEND_BUF[32];
 uint8_t RS485_RECEIVE_BUF[32];
@@ -96,8 +96,8 @@ const char *ATIPR = (const char *)"AT+IPR=9600\r";
 const char *ATCSQ = (const char *)"AT+CSQ\r";
 const char *ATCMGF = (const char *)"AT+CMGF=0\r";
 //int8_t *ATCNMI     = "AT+CNMI=3,1\r";
-const char *ATCMGL = (const char *)"AT+CMGL=4\r";
-const char *ATCNMI = (const char *)"AT+CNMI=1,1,0,0,1\r";
+const char *ATCMGL = (const char *)"AT+CMGL=0\r";
+const char *ATCNMI = (const char *)"AT+CNMI=1,2,0,0,0\r";
 const char *ATCSCA = (const char *)"AT+CSCA?\r";
 const char *ATCCLK = (const char *)"AT+CCLK?\r";
 const char *ATOK = (const char *)"OK\r\n";
@@ -140,7 +140,7 @@ static uint8_t byte2BCD(uint8_t bVal)
 }
 
 
-uint8_t data[1000] = {0,};
+//uint8_t data[1000] = {0,};
 
 int  main (void)
 {
@@ -150,6 +150,8 @@ int  main (void)
   // Set the Vector Table base location at 0x08000000
   NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);   
 
+
+  //  siprintf((char *)GSM_SEND_BUF, "%d", 10);
   //BSP_IntDisAll();                   // Disable all interrupts until we are ready to accept them
 
   OSInit();                          // Initialize "uC/OS-II, The Real-Time Kernel"
@@ -192,7 +194,7 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_GSM_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
-  /*  
+    
   OSTaskCreateExt(AppSMSSendTask,
 				  (void *)0,
 				  (OS_STK *)&AppSMSSendTaskStk[APP_TASK_SMSSend_STK_SIZE-1],
@@ -202,7 +204,7 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_SMSSend_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
-  */
+  
   OSTaskCreateExt(AppSMSReceiveTask,
 				  (void *)0,
 				  (OS_STK *)&AppSMSReceiveTaskStk[APP_TASK_SMSReceive_STK_SIZE -1],
@@ -269,6 +271,30 @@ static  void  AppStartTask (void *p_arg)
 	{  
 	  /* Task body, always written as an infinite loop. */
 	  //  OSTaskSuspend(OS_PRIO_SELF);
+
+
+	  GPIO_InitTypeDef GPIO_InitStructure;
+  
+	  /* Enable the GPIO_LED Clock */
+	  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+
+	  /* Configure the GPIO_LED pin */
+	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+  
+	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	  GPIO_Init(GPIOE, &GPIO_InitStructure);
+	  GPIOE->BSRR = GPIO_Pin_5;
+	  /* Enable the GPIO_LED Clock */
+	  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+
+	  /* Configure the GPIO_LED pin */
+	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+  
+	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	  GPIO_Init(GPIOE, &GPIO_InitStructure);
+	  GPIOE->BSRR = GPIO_Pin_6;
 
 	  OSTimeDlyHMSM(0,0,0,200);
 	  led_toggle(LED_1);
@@ -481,45 +507,51 @@ static void AppGSMTask(void *p_arg)
 		  if(match)
 			{
 			  siscanf((const char *)GSM_RECEIVE_BUF, "%*[^86]86%[^\"]", GSM_SEND_BUF);
-			  memcpy((void *)(device_init_paramaters.service_center_address), GSM_SEND_BUF, ALARM_TELEPHONE_NUMBER_SIZE);
+			  if(memcmp((void *)(device_init_paramaters.service_center_address), GSM_SEND_BUF, ALARM_TELEPHONE_NUMBER_SIZE))
+				{
+
+				}
+			  else
+				{
+				  memcpy((void *)(device_init_paramaters.service_center_address), GSM_SEND_BUF, ALARM_TELEPHONE_NUMBER_SIZE);
+				  OSMutexPend(MUTEX_SFLASH, 0, &err);
+				  /*
+					Iron_Write(IRON_SERVICE_CENTER_ADDRESS, \
+					device_init_paramaters.service_center_address, \
+					ALARM_TELEPHONE_NUMBER_SIZE);*/
+				  sFLASH_WriteBuffer(device_init_paramaters.service_center_address, \
+									 SFLASH_DEVICE_INIT_PARAMATERS_START +	\
+									 OFF_SET_OF(DEVICE_INIT_PARAMATERS, service_center_address) , \
+									 ALARM_TELEPHONE_NUMBER_SIZE);
+				  OSMutexPost(MUTEX_SFLASH);
+
+				}
 			  OSMutexPost(MUTEX_GSM);
-			  OSMutexPend(MUTEX_SFLASH, 0, &err);
-			  /*
-				Iron_Write(IRON_SERVICE_CENTER_ADDRESS, \
-				device_init_paramaters.service_center_address, \
-				ALARM_TELEPHONE_NUMBER_SIZE);*/
-			  sFLASH_WriteBuffer(device_init_paramaters.service_center_address, \
-								 SFLASH_DEVICE_INIT_PARAMATERS_START +	\
-								 OFF_SET_OF(DEVICE_INIT_PARAMATERS, service_center_address) , \
-								 ALARM_TELEPHONE_NUMBER_SIZE);
-			  OSMutexPost(MUTEX_SFLASH);
 			}
 		  else
 			{
 			  OSMutexPost(MUTEX_GSM);
 			  continue;
 			}
-		  /*  */
-			
+
 		  OSSemPost(SEM_SMS_OK);//启动SMSSend 任务;
 		  OSSemPend(SEM_SMS_FAULT, 0, &err);//等待SMS发送失败信号;
+		  flush_gsm_buffer();
 		  //OSTimeDlyHMSM(0, 5, 0, 0);//检验完成以后每五分钟检测一次;
 		}
 	}
 }
 
 TP_OA_TYPE TP_OA_temp;
+OS_SEM_DATA sem_data;
 static void AppSMSReceiveTask(void *p_arg)
 {
   (void)p_arg;
   uint8_t err;
   char *match = NULL;
   uint16_t *temp = NULL;
-
-
   // 由于SSCANF函数%d输出数据时必须是偶地址
   //  uint16_t unread_sms_index = 0;
-
   uint16_t length = 0;
   uint16_t index = 0;
   uint16_t id = 0;
@@ -533,32 +565,32 @@ static void AppSMSReceiveTask(void *p_arg)
 	
   while(1)
 	{
-	  //OSSemPend(SEM_SMS_MSG_INDICATOR, 0, &err);//有短消息信号;
-
-	  
+	  OSTimeDlyHMSM(0, 0, 10, 0);//每十秒钟检测一次;	  
+	  //OSSemQuery(SEM_SMS_OK, &sem_data);//有短消息信号;
+	  //sem_sms_ok = sem_data.OSCnt;
+	  //OSSemQuery(SEM_SMS_FAULT, &sem_data);//有短消息信号;
+	  //sem_sms_fault = sem_data.OSCnt;
+	  //	  if (sem_sms_ok == 1 && sem_sms_fault == 0)
+	  //{
 	  OSMutexPend(MUTEX_GSM, 0, &err);
-	  //	  send_to_gsm(ATCMGL, SEND_ALL);
-	  //OSTimeDlyHMSM(0, 0, 0, 500);
-	  //memset((void *)GSM_RECEIVE_BUF, '\0', GSM_RECEIVE_BUF_SIZE);
-	  //receive_from_gsm((char *)GSM_RECEIVE_BUF, GSM_RECEIVE_BUF_SIZE);
-	  //match = strstr((char *)GSM_RECEIVE_BUF, "\r\n+CMGL:");
-	  OSMutexPost(MUTEX_GSM);	  
+	  flush_gsm_buffer();
+	  send_to_gsm(ATCMGL, SEND_ALL);
+	  OSTimeDlyHMSM(0, 0, 2, 0);
+	  memset((void *)GSM_RECEIVE_BUF, '\0', GSM_RECEIVE_BUF_SIZE);
+	  receive_from_gsm((char *)GSM_RECEIVE_BUF, GSM_RECEIVE_BUF_SIZE);
+	  match = strstr((char *)GSM_RECEIVE_BUF, "\r\n+CMGL:");
 	  
-	  while(1)
-		{
-		  OSTimeDlyHMSM(0, 0, 10, 0);//每十秒钟检测一次;	  
-		}
 	  if(!match)
 		{
 		  OSMutexPost(MUTEX_GSM);	  
-		  //		  continue;
+		  continue;
 		}
 	  else
 		{
 		  while(1)
 			{
 			  memset((void *)SMS_RECEIVE_PROCESS_BUF, '\0', SMS_RECEIVE_PROCESS_BUF_SIZE);
-			  siscanf(match, "\r\n+CMGL:%*\r\n%s\r\n", SMS_RECEIVE_PROCESS_BUF);
+			  siscanf(match, "%*[^:]%*[^\r]\r\n%s[^\r]", SMS_RECEIVE_PROCESS_BUF);
 			  String_To_Hex(SMS_RECEIVE_PROCESS_BUF, SMS_RECEIVE_PROCESS_BUF, strlen((char *)SMS_RECEIVE_PROCESS_BUF));
 		
 			  sms_receive_pdu_frame = (SMS_RECEIVE_PDU_FRAME *)SMS_RECEIVE_PROCESS_BUF;//用PDU结构体解析出PDU格式中的短信数据;
@@ -583,11 +615,11 @@ static void AppSMSReceiveTask(void *p_arg)
 			
 				  sms_list_frame = (SMS_LIST_FRAME *)SMS_RECEIVE_PROCESS_BUF;//用LIST短信结构体来解析短信数据;
 
-				  err = memcmp((void *)sms_list_frame->ZXSOFT, \
+				  err = memcmp((void *)sms_list_frame->ZXSOFT,	\
 							   (void *)ZXSOFT, \
 							   sizeof(sms_list_frame->ZXSOFT));
 				  /* 帧头匹配处理 */
-				  if(err)
+				  if(!err)
 					{
 					  /* 功能间隔符# 匹配处理 */
 					  if((sms_list_frame->SIGN_1 == POUND_SIGN) && (sms_list_frame->SIGN_2 == POUND_SIGN))
@@ -595,7 +627,7 @@ static void AppSMSReceiveTask(void *p_arg)
 						  err = memcmp((void *)sms_list_frame->LIST, \
 									   (void *)SMS_SET, \
 									   sizeof(sms_list_frame->LIST));
-						  if(!err)
+						  if(err)
 							{
 							  if(sms_list_frame->SIGN_3 == POUND_SIGN)
 								{
@@ -1425,12 +1457,12 @@ static void AppSMSReceiveTask(void *p_arg)
 				  /* 非法帧尾 处理*/
 				  //continue;
 				}
-			  match += 8;//阻止重复匹配已处理的帧
+			  match += 20;//阻止重复匹配已处理的帧
 			  match = strstr(match, "\r\n+CMGL:");
 			  if(!match)
 				{
 				  OSMutexPost(MUTEX_GSM);
-				  continue;
+				  break;
 				}
 
 			}
@@ -1440,13 +1472,13 @@ static void AppSMSReceiveTask(void *p_arg)
 	  __NOP();
 	  OSTimeDlyHMSM(0, 0, 0, 50);//等待接收数据
 		
+	  //		}
 	}
+
 }
 
 
-
-
-uint8_t *sms_send(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, uint16_t sms_data_length)
+GsmStatus sms_send(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, uint16_t sms_data_length)
 {
   char *match = NULL;
   //uint16_t sms_length = sms_send_pdu_frame->TPDU.TP_UDL;
@@ -1485,23 +1517,30 @@ uint8_t *sms_send(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, uint16_t sms_data_leng
 	{
 	  //单条短信
 	  sms_send_pdu_frame->TPDU.TP_UDL = sms_data_length;
-	  sprintf((char *)GSM_SEND_BUF_SIZE, \
-			  "AT+CMGS=%d\x0D", \
-			  sms_send_pdu_frame->TPDU.TP_UDL + \
-			  (sizeof(sms_send_pdu_frame->TPDU) - sizeof(sms_send_pdu_frame->TPDU.TP_UD)));
-	  send_to_gsm((char *)GSM_SEND_BUF_SIZE, SEND_ALL);
-	  OSTimeDlyHMSM(0, 0, 0, 50);
+	  siprintf((char *)GSM_SEND_BUF, \
+			   "AT+CMGS=%d\x0D", \
+			   sms_send_pdu_frame->TPDU.TP_UDL + \
+			   (sizeof(sms_send_pdu_frame->TPDU) - sizeof(sms_send_pdu_frame->TPDU.TP_UD)));
+	  send_to_gsm((char *)GSM_SEND_BUF, GSM_SEND_BUF_SIZE);
+	  OSTimeDlyHMSM(0, 0, 0, 500);
+	  memset((void *)GSM_RECEIVE_BUF, '\0', GSM_RECEIVE_BUF_SIZE);
 	  receive_from_gsm((char *)GSM_RECEIVE_BUF, GSM_RECEIVE_BUF_SIZE);
-	  match = strchr((char *)GSM_RECEIVE_BUF, '>');
+	  match = memchr((char *)GSM_RECEIVE_BUF, '>', GSM_RECEIVE_BUF_SIZE);
 	  if(!match)
 		{
-		  return (uint8_t *)match;
+		  send_to_gsm("\x1B", 1);//取消发送
+		  return GSM_SMS_SEND_FAILURE;
 		}
 	  memset((void *)match, 2, 5);
 	  Send_PDU_To_GSM(sms_send_pdu_frame, &sms_head);
-	  OSTimeDlyHMSM(0, 0, 0, 50);
+	  OSTimeDlyHMSM(0, 0, 0, 500);
+	  memset((void *)GSM_RECEIVE_BUF, '\0', GSM_RECEIVE_BUF_SIZE);
 	  receive_from_gsm((char *)GSM_RECEIVE_BUF, GSM_RECEIVE_BUF_SIZE);
 	  match = strstr((char *)GSM_RECEIVE_BUF, "ERROR");
+	  if(!match)
+		{
+		  return GSM_SMS_SEND_SUCCESS;
+		}
 	}
   else
 	{
@@ -1521,36 +1560,46 @@ uint8_t *sms_send(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, uint16_t sms_data_leng
 			  sms_send_pdu_frame->TPDU.TP_UDL = 140;
 			}
 			
-		  sprintf((char *)GSM_SEND_BUF_SIZE, \
-				  "AT+CMGS=%d\x0D", \
-				  sms_send_pdu_frame->TPDU.TP_UDL + \
-				  (sizeof(sms_send_pdu_frame->TPDU) - sizeof(sms_send_pdu_frame->TPDU.TP_UD)));
-		  send_to_gsm((char *)GSM_SEND_BUF_SIZE, SEND_ALL);
-		  OSTimeDlyHMSM(0, 0, 0, 50);
+		  siprintf((char *)GSM_SEND_BUF, \
+				   "AT+CMGS=%d\x0D", \
+				   sms_send_pdu_frame->TPDU.TP_UDL + \
+				   (sizeof(sms_send_pdu_frame->TPDU) - sizeof(sms_send_pdu_frame->TPDU.TP_UD)));
+		  send_to_gsm((char *)GSM_SEND_BUF, GSM_SEND_BUF_SIZE);
+		  OSTimeDlyHMSM(0, 0, 0, 500);
+		  memset((void *)GSM_RECEIVE_BUF, '\0', GSM_RECEIVE_BUF_SIZE);
+
 		  receive_from_gsm((char *)GSM_RECEIVE_BUF, GSM_RECEIVE_BUF_SIZE);
-		  match = strchr((char *)GSM_RECEIVE_BUF, '>');
+		  match = memchr((char *)GSM_RECEIVE_BUF, '>', GSM_RECEIVE_BUF_SIZE);
+						
 		  if(!match)
 			{
-			  return (uint8_t *)match;
+			  send_to_gsm("\x1B", 1);//取消发送
+			  return GSM_SMS_SEND_FAILURE;
 			}
 		  memset((void *)match, 2, 5);
 		  Send_PDU_To_GSM(sms_send_pdu_frame, &sms_head);
-		  OSTimeDlyHMSM(0, 0, 0, 50);
+		  OSTimeDlyHMSM(0, 0, 0, 500);
+		  memset((void *)GSM_RECEIVE_BUF, '\0', GSM_RECEIVE_BUF_SIZE);
+
 		  receive_from_gsm((char *)GSM_RECEIVE_BUF, GSM_RECEIVE_BUF_SIZE);
 		  match = strstr((char *)GSM_RECEIVE_BUF, "ERROR");
+		  if(!match)
+			{
+			  return GSM_SMS_SEND_SUCCESS;
+			}
 		}
 	}
-
 	
-  return (uint8_t *)match;
+  return GSM_SMS_SEND_FAILURE;
 }
 
 
 void sms_alarm_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_ALARM_FRAME *sms_alarm_mail, DEVICE_INIT_PARAMATERS *device_parameters)
 {
-  uint8_t *match = NULL;
+  GsmStatus gsm_status;
   uint8_t alarm_telephone_cnt;
   uint8_t err;
+  uint8_t send_index;
   uint16_t sms_data_length;
 
   sms_send_pdu_frame->SMSC.SMSC_Length = SMSC_DEFAULT;
@@ -1595,7 +1644,7 @@ void sms_alarm_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_ALARM_F
 						 &(sms_data_length));
 
   sms_data_length <<= 1;//字节数
-
+  OSMutexPend(MUTEX_GSM, 0, &err);
   for(alarm_telephone_cnt = 0; \
 	  alarm_telephone_cnt < device_parameters->alarm_telephone_numbers; \
 	  alarm_telephone_cnt++)
@@ -1608,28 +1657,36 @@ void sms_alarm_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_ALARM_F
 					  TP_TYPE_DEFAULT, \
 					  ALARM_TELEPHONE_NUMBER_SIZE);
 		
-	  OSMutexPend(MUTEX_GSM, 0, &err);
-	  match = sms_send(sms_send_pdu_frame, sms_data_length);
-		
-	  if(match)
+
+	  for(send_index = 0; send_index <= GSM_RESEND_NUMBERS; send_index++)
 		{
-		  memset((void *)match, 0, 5);
-		  OSMutexPost(MUTEX_GSM);
-		  continue;
+		  gsm_status = sms_send(sms_send_pdu_frame, sms_data_length);
+	
+		  if(gsm_status == GSM_SMS_SEND_SUCCESS)
+			{
+			  break;//发送成功则退出重发机制	  
+			}
+		  else
+			{
+			  //发送失败
+			  OSTimeDlyHMSM(0, 0, 1, 0);
+			}
 		}
-	  OSMutexPost(MUTEX_GSM);
-	  OSTimeDlyHMSM(0, 0, 10, 0);
+	  OSTimeDlyHMSM(0, 0, 2, 0);
 	}
+  OSMutexPost(MUTEX_GSM);
 }
 
 void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_FRAME *sms_query_mail, DEVICE_INIT_PARAMATERS *device_parameters)
 {
-  uint8_t *match = NULL;
+  GsmStatus gsm_status;
   //	uint8_t alarm_telephone_cnt;
   uint8_t err;
   uint16_t *UCS = NULL;
   uint16_t *UCS_len = NULL;
-  uint8_t temp,index;
+  uint8_t temp;
+  uint8_t index;
+  uint8_t send_index;
   SLAVE_DEVICE_STATE_FRAME *slave_device_state = NULL;
   uint16_t sms_data_length;
   sms_send_pdu_frame->SMSC.SMSC_Length = SMSC_DEFAULT;
@@ -2013,34 +2070,39 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 
 
   OSMutexPend(MUTEX_GSM, 0, &err);
-  match = sms_send(sms_send_pdu_frame, sms_data_length);
-	
-  if(match)
+  for(send_index = 0; send_index <= GSM_RESEND_NUMBERS; send_index++)
 	{
-
-	  OSMutexPost(MUTEX_GSM);
-
+	  gsm_status = sms_send(sms_send_pdu_frame, sms_data_length);
+	
+	  if(gsm_status == GSM_SMS_SEND_SUCCESS)
+		{
+		  break;//发送成功则退出重发机制	  
+		}
+	  else
+		{
+		  //发送失败
+		  OSTimeDlyHMSM(0, 0, 1, 0);
+		}
 	}
+
   OSMutexPost(MUTEX_GSM);
-  OSTimeDly(1000);
 }
 
 
 static void AppSMSSendTask(void *p_arg)
 {
-
+  (void)p_arg;
   uint8_t err;
   SMS_ALARM_FRAME *sms_alarm_mail = NULL;
   SMS_MAIL_FRAME *sms_mail = NULL;
   SMS_QUERY_FRAME *sms_query_mail = NULL;
   SMS_SEND_PDU_FRAME *sms_send_pdu_frame = (SMS_SEND_PDU_FRAME *)SMS_SEND_PROCESS_BUF;
-
   DEVICE_INIT_PARAMATERS *device_parameters = &device_init_paramaters;
 
-  (void)p_arg;
   while(1)
 	{
 	  OSSemPend(SEM_SMS_OK, 0, &err);//等待短信状态OK信号
+	  //OSSemPost(SEM_SMS_OK);//维持短信OK状态，保持使能短信接收任务
 	  while(1)
 		{
 
@@ -2050,6 +2112,7 @@ static void AppSMSSendTask(void *p_arg)
 			
 		  if(err == OS_TIMEOUT)//如果空闲60秒没有邮件则检查SMS状态
 			{
+			  //OSSemPend(SEM_SMS_OK, 0, &err);//关闭短信OK状态，阻塞短信接受任务
 			  OSSemPost(SEM_SMS_FAULT);//启动SMS状态检测任务
 			  break;//跳出循环进入等待短信OK状态信号
 			}
