@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 14:49:50 2011
+ * Modified at:   Wed May 18 12:53:40 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -22,7 +22,13 @@
 //信号点数据
 //extern uint32_t sine12bit[32];
 
-#define SIGNAL_FREQ 32000//发射信号频率为32K
+#define SIGNAL_SEND_FREQ_TIM4_CH1_IRQn TIM4_IRQn
+#define SIGNAL_SEND_FREQ_TIM4_PREEMPTION_PRIORITY 6
+#define SIGNAL_RECEIVE_FREQ_TIM3_CH2_IRQn TIM3_IRQn
+#define SIGNAL_RECEIVE_FREQ_TIM3_PREEMPTION_PRIORITY 5
+
+#define ADC1_BUF_SIZE 2
+extern __IO uint16_t adc1_buf[ADC1_BUF_SIZE];
 
 typedef enum {
   SIGNAL_FREQ_4000 = 0,
@@ -32,6 +38,7 @@ typedef enum {
   SIGNAL_FREQ_20000,
   SIGNAL_FREQ_24000,
   SIGNAL_FREQ_28000,
+  SIGNAL_FREQ_30000,
   SIGNAL_FREQ_32000,
   SIGNAL_FREQ_36000,
   SIGNAL_FREQ_40000,
@@ -43,12 +50,20 @@ typedef enum {
   SIGNAL_FREQ_64000,
 }SignalFreq;
 
-void signal_init(void);
-void signal_send(void);
-void signal_receive(void);
-void signal_frequency_set(SignalFreq freq);
+void signal_amp_battery_init(void);
+FunctionalState signal_amp_battery(FunctionalState state);
+
+void signal_freq_test_init(void);
+FunctionalState signal_freq_test(FunctionalState state);
+
+void signal_power_init(void);
 FunctionalState signal_send_power(FunctionalState state);
 FunctionalState signal_receive_power(FunctionalState state);
+
+void signal_send_init(void);
+FunctionalState signal_send(FunctionalState state);
+
+void signal_frequency_set(SignalFreq freq);
 
 
 #endif

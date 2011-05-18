@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 14:53:43 2011
+ * Modified at:   Wed May 18 12:53:33 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -107,7 +107,19 @@ static void interrupt_config(void)
   // NVIC_SystemHandlerPriorityConfig(SystemHandler_PSV,3,3);
   //设置USART3中断优先级
   NVIC_InitStructure.NVIC_IRQChannel = GSM_USART3_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = GSM_USART3_PREEMPTION_PRIORITY;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+  //设置TIM4中断优先级
+  NVIC_InitStructure.NVIC_IRQChannel = SIGNAL_SEND_FREQ_TIM4_CH1_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = SIGNAL_SEND_FREQ_TIM4_PREEMPTION_PRIORITY;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+  //设置TIM3中断优先级
+  NVIC_InitStructure.NVIC_IRQChannel = SIGNAL_RECEIVE_FREQ_TIM3_CH2_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = SIGNAL_RECEIVE_FREQ_TIM3_PREEMPTION_PRIORITY;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
@@ -194,9 +206,16 @@ static void calender_config(void)
  */
 static void signal_config(void)
 {
-  signal_frequency_set(SIGNAL_FREQ_32000);
-  signal_init();
-  signal_send();
+  signal_power_init();//
+  signal_send_power(ENABLE);
+  signal_receive_power(ENABLE);
+  signal_frequency_set(SIGNAL_FREQ_30000);
+  signal_send_init();
+  signal_send(ENABLE);
+  signal_freq_test_init();
+  signal_freq_test(ENABLE);
+  signal_amp_battery_init();
+  signal_amp_battery(ENABLE);
 }
 
 /*

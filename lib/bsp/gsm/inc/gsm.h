@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 13:29:32 2011
+ * Modified at:   Wed May 18 09:48:17 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -19,6 +19,7 @@
 
 #define GSM_USART3 USART3
 #define GSM_USART3_IRQn USART3_IRQn
+#define GSM_USART3_PREEMPTION_PRIORITY 1
 
 #define GSM_RESEND_NUMBERS 5
 #define	SEND_ALL 0
