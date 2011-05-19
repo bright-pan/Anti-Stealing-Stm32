@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed May 18 12:53:40 2011
+ * Modified at:   Thu May 19 17:07:11 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -28,8 +28,22 @@
 #define SIGNAL_RECEIVE_FREQ_TIM3_PREEMPTION_PRIORITY 5
 
 #define ADC1_BUF_SIZE 2
+#define SIGNAL_BATTERY 0
+#define SIGNAL_AMP 1
 extern __IO uint16_t adc1_buf[ADC1_BUF_SIZE];
+/*
+typedef struct {
+  
+  uint16_t interval;//信号间隔时间，单位为分钟
+  uint16_t freq;//信号频率
+  uint16_t freq_spread;//信号频率差值
+  uint16_t amp_limit;//信号幅度限值
+  uint16_t process_counts;//信号处理次数
+  uint16_t process_interval;//信号每次处理之后的间隔，单位为毫秒
+  
+}SignalParameters;
 
+*/
 typedef enum {
   SIGNAL_FREQ_4000 = 0,
   SIGNAL_FREQ_8000,

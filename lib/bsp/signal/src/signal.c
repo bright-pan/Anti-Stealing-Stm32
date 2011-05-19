@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed May 18 12:58:37 2011
+ * Modified at:   Thu May 19 14:02:07 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -215,6 +215,7 @@ void signal_freq_test_init(void)
   GPIO_Init(SIGNAL_SEND_FREQ_PORT, &GPIO_InitStructure);
 
   //发送输入捕获配置
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
   TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
   TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
   TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
@@ -238,6 +239,7 @@ void signal_freq_test_init(void)
   //PIN PB5 TIM3－2 REMAP CONFIG
   GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);
   //接收输入捕获配置
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
   TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
   TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
   TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;

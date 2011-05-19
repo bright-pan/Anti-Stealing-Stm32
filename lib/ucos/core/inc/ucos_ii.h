@@ -40,7 +40,7 @@ extern "C" {
 *                                           INCLUDE HEADER FILES
 *********************************************************************************************************
 */
-
+#include "includes.h"
 #include <app_cfg.h>
 #include <os_cfg.h>
 #include <os_cpu.h>

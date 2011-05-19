@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon May 16 15:09:48 2011
+ * Modified at:   Thu May 19 17:23:30 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -16,7 +16,8 @@
 #ifndef  __APP_CFG_H__
 #define  __APP_CFG_H__
 
-#include "sms.h"
+//#include "signal.h"
+
 /*
 *********************************************************************************************************
 *                                            TASK STACK SIZES
@@ -42,6 +43,7 @@
 
 //#define  APP_TASK_LCD_PRIO                      6
 #define  APP_TASK_RS485_PRIO                     8                       /* RS485 发送任务 */
+#define  APP_TASK_SIGNAL_PRIO                     5                       /* RS485 发送任务 */
 #define  APP_TASK_GSM_PRIO                       9				/* GR64 发送任务 */
 #define  APP_TASK_SMSSend_PRIO			 10				/* SMS 发送任务 */
 #define  APP_TASK_SMSReceive_PRIO		 7				/* SMS 接收任务 */
@@ -67,9 +69,10 @@
 //#define  APP_TASK_LCD_STK_SIZE                256
 //#define  OS_PROBE_TASK_STK_SIZE               160                       /* See probe_com_cfg for RS-232 commication task stack size */
 #define  APP_TASK_GSM_STK_SIZE		256
-#define APP_TASK_RS485_STK_SIZE		128
 #define APP_TASK_SMSSend_STK_SIZE		256
 #define APP_TASK_SMSReceive_STK_SIZE	256
+#define APP_TASK_SIGNAL_STK_SIZE		256
+#define APP_TASK_RS485_STK_SIZE		256
 
 
 
@@ -108,23 +111,34 @@
 *                                          					DATA TYPES
 *********************************************************************************************************
 */
+
 typedef struct {
-  uint8_t	device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
-  uint8_t	primary_device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
-  uint8_t	slave_device_numbers;//从设备数量,且必须小于SLAVE_DEVICE_MAX_NUMBERS;
-  uint8_t slave_device_id[SLAVE_DEVICE_MAX_NUMBERS];//从设备ID数组,大小为SLAVE_DEVICE_MAX_NUMBERS;
-  uint8_t slave_device_name[SLAVE_DEVICE_MAX_NUMBERS][DEVICE_NAME_MAX_LENGTH];
-  SMS_ALARM_FRAME slave_device_history_alarm[SLAVE_DEVICE_MAX_NUMBERS];
+  
+  uint16_t interval;//信号间隔时间，单位为分钟
+  uint16_t freq;//信号频率
+  uint16_t freq_spread;//信号频率差值
+  uint16_t amp_limit;//信号幅度限值
+  uint16_t process_counts;//信号处理次数
+  uint16_t process_interval;//信号每次处理之后的间隔，单位为毫秒
+}SignalParameters;
+
+typedef struct {
+  uint8_t device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
+  uint8_t primary_device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
+  //uint8_t	slave_device_numbers;//从设备数量,且必须小于SLAVE_DEVICE_MAX_NUMBERS;
+  //uint8_t slave_device_id[SLAVE_DEVICE_MAX_NUMBERS];//从设备ID数组,大小为SLAVE_DEVICE_MAX_NUMBERS;
+  uint8_t slave_device_name[DEVICE_NAME_MAX_LENGTH];
+  //  SMS_ALARM_FRAME slave_device_history_alarm[SLAVE_DEVICE_MAX_NUMBERS];
   uint8_t alarm_telephone_numbers;
   uint8_t alarm_telephone[ALARM_TELEPHONE_MAX_NUMBERS][ALARM_TELEPHONE_NUMBER_SIZE];
   uint8_t service_center_address[ALARM_TELEPHONE_NUMBER_SIZE];
   uint8_t password[DEVICE_PASSWORD_MAX_LENGTH];
   uint8_t gps[GPS_MAX_LENGTH];//主设备名称;
   uint8_t sms_on_off;
-	
-}DEVICE_INIT_PARAMATERS;
-
-typedef struct {
+  SignalParameters signal_parameters;
+  }DEVICE_INIT_PARAMATERS;
+/*
+  typedef struct {
   uint8_t device_id;
   uint8_t function_code;
   uint8_t length;
@@ -135,6 +149,6 @@ typedef struct {
   uint16_t current_intensity;
   uint16_t current_frequency;
   uint16_t crc;
-}SLAVE_DEVICE_STATE_FRAME;
- 
+  }SLAVE_DEVICE_STATE_FRAME;
+*/
 #endif

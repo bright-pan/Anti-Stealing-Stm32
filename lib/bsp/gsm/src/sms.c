@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 11:49:59 2011
+ * Modified at:   Thu May 19 16:44:23 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -229,7 +229,7 @@ void Alarm_Mail_Data_To_UCS(uint16_t *UCS, SMS_ALARM_FRAME *sms_alarm_mail, uint
   *UCS++ = SHENG;
   *UCS_Len += 2;
   /* 线缆通断状态解析{接通,断开} */
-  if(sms_alarm_mail->cable_fault_type == CABLE_DISCONNECT_FAULT)
+  if(sms_alarm_mail->state == RESET)
 	{
 	  /* 断开 */
 	  *UCS++ = UCS2_DUAN;

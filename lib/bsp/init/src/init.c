@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed May 18 12:53:33 2011
+ * Modified at:   Thu May 19 16:42:22 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -15,7 +15,7 @@
 
 #include "includes.h"
 
-int16_t temperature = 0;
+//int16_t temperature = 0;
 
 static void systick_config(void);
 static void interrupt_config(void);
@@ -207,13 +207,10 @@ static void calender_config(void)
 static void signal_config(void)
 {
   signal_power_init();//
-  signal_send_power(ENABLE);
-  signal_receive_power(ENABLE);
-  signal_frequency_set(SIGNAL_FREQ_30000);
-  signal_send_init();
-  signal_send(ENABLE);
+  //  signal_send_power(ENABLE);
+  //  signal_receive_power(ENABLE);
   signal_freq_test_init();
-  signal_freq_test(ENABLE);
+  //signal_freq_test(ENABLE);
   signal_amp_battery_init();
   signal_amp_battery(ENABLE);
 }

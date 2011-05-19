@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 12 15:45:18 2011
+ * Modified at:   Thu May 19 15:30:31 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -212,16 +212,13 @@ typedef struct {
 	
 }MODBUS_DATA_QUERY_FRAME;
 typedef struct {
-	uint8_t device_index;
-	uint8_t	cable_fault_type;
 	uint16_t temperature;
-	uint8_t current_on_off;
+	uint8_t state;
 	struct tm time;
 }SMS_ALARM_FRAME;
 typedef struct {
 	TP_OA_TYPE		TP_OA;//9字节;
 	uint8_t function_code;
-	uint8_t cable_index;
 }SMS_QUERY_FRAME;
 
 
