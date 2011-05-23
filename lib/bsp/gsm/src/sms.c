@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 19 16:44:23 2011
+ * Modified at:   Fri May 20 09:35:34 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan

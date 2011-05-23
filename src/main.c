@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 19 17:30:08 2011
+ * Modified at:   Mon May 23 16:20:17 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -39,15 +39,25 @@ DEVICE_INIT_PARAMATERS device_init_paramaters;
 //SLAVE_DEVICE_STATE_FRAME slave_device_state_frame[SLAVE_DEVICE_MAX_NUMBERS];
 //TIME_FRAME set_time;
 const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
-  "zxsoft:anti-stealing-2011",
+  "zxsoft:as-2011-05-22",
   "高新区一号开闭所",
   "比亚迪出线电缆",
   1,
-  {"13474656377",},
+  {
+	"13474656377",
+  },
   "",
   "\x00\x31\x00\x32\x00\x33\x00\x34\x00\x35\x00\x36",
   "",
   1,
+  {
+	0,
+	SIGNAL_FREQ_30000,
+	200,
+	500,
+	10,
+	999,
+  },
 };
 // 设备使用分配信号量
 OS_EVENT *MUTEX_GSM;//设备使用互斥信号量;
@@ -156,7 +166,7 @@ int  main (void)
   NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);   
 
 
-  //  siprintf((char *)GSM_SEND_BUF, "%d", 10);
+  //  sprintf((char *)GSM_SEND_BUF, "%f", 1.12);
   //BSP_IntDisAll();                   // Disable all interrupts until we are ready to accept them
 
   OSInit();                          // Initialize "uC/OS-II, The Real-Time Kernel"
@@ -218,7 +228,7 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_SIGNAL_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
-  
+
 
   /*	    OSTaskCreateExt(AppRS485Task,
 			(void *)0,
@@ -288,31 +298,6 @@ static  void  AppStartTask (void *p_arg)
 	{  
 	  /* Task body, always written as an infinite loop. */
 	  //  OSTaskSuspend(OS_PRIO_SELF);
-
-
-	  GPIO_InitTypeDef GPIO_InitStructure;
-  
-	  /* Enable the GPIO_LED Clock */
-	  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
-
-	  /* Configure the GPIO_LED pin */
-	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-  
-	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	  GPIO_Init(GPIOE, &GPIO_InitStructure);
-	  GPIOE->BSRR = GPIO_Pin_5;
-	  /* Enable the GPIO_LED Clock */
-	  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
-
-	  /* Configure the GPIO_LED pin */
-	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
-  
-	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	  GPIO_Init(GPIOE, &GPIO_InitStructure);
-	  GPIOE->BSRR = GPIO_Pin_6;
-
 	  OSTimeDlyHMSM(0,0,0,200);
 	  led_toggle(LED_1);
 	  OSTimeDlyHMSM(0,0,0,200);
@@ -324,7 +309,7 @@ static  void  AppStartTask (void *p_arg)
 	  OSTimeDlyHMSM(0,0,0,200);
 	  led_toggle(LED_5);
 	  OSTimeDlyHMSM(0,0,0,200);
-	  calender_get(&calender);
+	  
 	  OSTimeDlyHMSM(0,0,0,200);
 	  /*	   
 			   uint16_t index = 0;
@@ -355,13 +340,13 @@ static  void  AppStartTask (void *p_arg)
 			   __NOP();
 			   __NOP();
 	  */
-	  uint16_t temp = 0;
+	  //读取温度
 	  if(TP_convert())
 		{
-		  __NOP();
-		  __NOP();
-		  temp=TP_read();
+		  temperature = (int16_t)(TP_read() * TP_CONVERT_VALUE * 10);
 		}
+	  //读取时间
+	  calender_get(&calender);
 	}
 }
 
@@ -1109,7 +1094,6 @@ static void AppSMSReceiveTask(void *p_arg)
 												  if(UCS_Char(sms_set_frame->DATA, COMMA_SIGN, length))//查找逗号分隔符;
 													{
 													  /* 分配内存 */
-													  
 													  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
 													  match = OSMemGet(MEM_BUF, &err);
 													  int TEMP[5];
@@ -1127,6 +1111,7 @@ static void AppSMSReceiveTask(void *p_arg)
 													  calender.tm_mday = byte2BCD((uint8_t)(TEMP[2] % 100));
 													  calender.tm_hour = byte2BCD((uint8_t)(TEMP[3] % 100));
 													  calender.tm_min = byte2BCD((uint8_t)(TEMP[4] % 100));
+													  calender_set(&calender);
 													}
 												  else
 													{
@@ -1638,8 +1623,34 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 									DEVICE_NAME_MAX_LENGTH);
 	  *UCS++ = POUND_SIGN;
 	  (*UCS_len)++;
+	  
+	  *UCS++ = 0X3200;// 2;
+	  *UCS++ = 0X3000;// 0;
+	  *UCS++ = ((uint16_t )(calender.tm_year & 0xf0) << 4) | 0x3000;//解析年的高四为年的十位;
+	  *UCS++ = ((uint16_t )(calender.tm_year & 0x0f) << 8) | 0x3000;//解析年的高四为年的个位;
+	  *UCS++ = YEAR;// 年;
+	  *UCS++ = ((uint16_t )(calender.tm_mon & 0xf0) << 4) | 0x3000;//解析年的高四为月的十位;
+	  *UCS++ = ((uint16_t )(calender.tm_mon & 0x0f) << 8) | 0x3000;//解析年的高四为月的个位;
+	  *UCS++ = MONTH;// 月;
+	  *UCS++ = ((uint16_t )(calender.tm_mday & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
+	  *UCS++ = ((uint16_t )(calender.tm_mday & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  *UCS++ = DAY;// 日;
+	  *UCS++ = ((uint16_t )(calender.tm_hour & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
+	  *UCS++ = ((uint16_t )(calender.tm_hour & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  *UCS++ = HOUR;// 时;
+	  *UCS++ = ((uint16_t )(calender.tm_min & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
+	  *UCS++ = ((uint16_t )(calender.tm_min & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  *UCS++ = MINUTE;// 分;
+	  *UCS++ = ((uint16_t )(calender.tm_sec & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
+	  *UCS++ = ((uint16_t )(calender.tm_sec & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  *UCS++ = SECOND;// 秒;
+	  
+	  *UCS_len += 20;
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;
+
 	  //线缆通段状态解析
-	  if(signal_state)
+	  if(signal_state == RESET)
 		{
 		  //断开
 		  *UCS++ = UCS2_DUAN;
@@ -1651,6 +1662,52 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 		  *UCS++ = UCS2_LIAN;
 		  *UCS++ = UCS2_TONG;
 		}
+	  *UCS++ = POUND_SIGN;
+	  *UCS_len += 3;
+	  //设备温度
+	  if(temperature < 10)
+		{
+		  *UCS++ = NUM_UCS_MAP[0];
+		  *UCS++ = LINE_SIGN;
+		  *UCS++ = NUM_UCS_MAP[temperature];
+		  *UCS++ = UCS2_DU;
+		  *UCS_len += 4;		
+					
+		}
+	  else if(temperature < 100)
+		{
+
+		  *UCS++ = NUM_UCS_MAP[temperature / 10];
+		  *UCS++ = LINE_SIGN;
+		  *UCS++ = NUM_UCS_MAP[temperature % 10];
+		  *UCS++ = UCS2_DU;
+		  *UCS_len += 4;
+		}
+	  else if(temperature < 1000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temperature / 100];
+		  temp = temperature % 100;
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  *UCS++ = LINE_SIGN;
+		  *UCS++ = NUM_UCS_MAP[temp % 10];
+		  *UCS++ = UCS2_DU;
+		  *UCS_len += 5;
+		}
+	  else
+		{
+		  *UCS++ = NUM_UCS_MAP[temperature / 100];
+		  temp = temperature % 100;
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  *UCS++ = LINE_SIGN;
+		  *UCS++ = NUM_UCS_MAP[temp % 10];
+		  *UCS++ = UCS2_DU;
+		  *UCS_len += 5;
+		}
+						
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;			
+	  
+
 	  break;
 	}
 	case 0x41 : {
@@ -1864,103 +1921,225 @@ static void AppSignalTask(void *p_arg)
 	{
 	  if (device_parameters->signal_parameters.interval != 0)
 		{
-		  OSTimeDlyHMSM(0, device_parameters->signal_parameters.interval, 0, 0);
+		  OSTimeDlyHMSM(0, device_parameters->signal_parameters.interval / 60, \
+						device_parameters->signal_parameters.interval / 60, 0);
 		  
-		}
-	  else
-		{
-		  OSTimeDlyHMSM(0, 5, 0, 0);
-		}
-	  //打开信号收发电源
-	  signal_receive_power(ENABLE);//接收电源打开
-	  OSTimeDlyHMSM(0, 0, 0, 50);
-	  signal_send_power(ENABLE);//发送电源打开
-	  signal_frequency_set(device_parameters->signal_parameters.freq);//信号
-	  signal_send_init();//信号发送初始化
-	  signal_send(ENABLE);//信号发送
-	  signal_freq_test(ENABLE);//信号频率检测
-	  OSTimeDlyHMSM(0, 0, 0, 50);//等待信号稳定
-
-	  //处理信号频率及幅值
-	  signal_send_freq = 0;
-	  signal_receive_freq = 0;
-	  signal_amp = 0;
-	  //由于参数需要作被除数所以确保这个数不为0
-	  if(device_parameters->signal_parameters.process_counts < 1)
-		{
-		  device_parameters->signal_parameters.process_counts = 1;
-		}
-
-	  
-	  for(index = 0; index < device_parameters->signal_parameters.process_counts; index++)
-		{
-		  signal_send_freq += signal_send_freq_capture;
-		  signal_receive_freq += signal_receive_freq_capture;
-		  signal_amp += adc1_buf[SIGNAL_AMP];
-		  OSTimeDlyHMSM(0, 0, 0, device_parameters->signal_parameters.process_interval);
-		}
-	  signal_send_freq /= device_parameters->signal_parameters.process_counts;
-	  signal_receive_freq /= device_parameters->signal_parameters.process_counts;
-	  signal_amp /= device_parameters->signal_parameters.process_counts;
-
-	  if(signal_send_freq >= signal_receive_freq)
-		{
-		  signal_freq_spread = signal_send_freq - signal_receive_freq;
-		  
-		}
-	  else
-		{
-		  signal_freq_spread = signal_receive_freq - signal_send_freq;
-		}
-	  
-	  //信号断开	  
-	  if(signal_freq_spread > device_parameters->signal_parameters.freq_spread \
-		 || signal_amp < device_parameters->signal_parameters.amp_limit)
-		{
-		  signal_state = RESET;//设置信号状态为断开
-		  //信号的历史状态为连通
-		  if(signal_state == SET)
+		  //打开信号收发电源
+		  signal_receive_power(ENABLE);//接收电源打开
+		  OSTimeDlyHMSM(0, 0, 0, 50);
+		  signal_send_power(ENABLE);//发送电源打开
+		  signal_frequency_set(device_parameters->signal_parameters.freq);//信号
+		  signal_send_init();//信号发送初始化
+		  signal_send(ENABLE);//信号发送
+		  signal_freq_test(ENABLE);//信号频率检测
+		  OSTimeDlyHMSM(0, 0, 3, 0);//等待信号稳定
+		  //处理信号频率及幅值
+		  signal_send_freq = 0;
+		  signal_receive_freq = 0;
+		  signal_amp = 0;
+		  //由于参数需要作被除数所以确保这个数不为0
+		  if(device_parameters->signal_parameters.process_counts < 1)
 			{
-			  //由通变成断则发送告警邮件
-			  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
-			  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
-			  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
-			  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
-			  sms_alarm_mail->temperature = temperature;
-			  sms_alarm_mail->state = signal_state;
-			  sms_alarm_mail->time = calender;
+			  device_parameters->signal_parameters.process_counts = 1;
+			}
 
-			  if(device_parameters->sms_on_off == 1)
+	  
+		  for(index = 0; index < device_parameters->signal_parameters.process_counts; index++)
+			{
+			  signal_send_freq += signal_send_freq_capture;
+			  signal_receive_freq += signal_receive_freq_capture;
+			  signal_amp += adc1_buf[SIGNAL_AMP];
+			  OSTimeDlyHMSM(0, 0, 0, device_parameters->signal_parameters.process_interval);
+			}
+		  signal_send_freq /= device_parameters->signal_parameters.process_counts;
+		  signal_receive_freq /= device_parameters->signal_parameters.process_counts;
+		  signal_amp /= device_parameters->signal_parameters.process_counts;
+
+		  device_parameters->signal_parameters.send_freq = signal_send_freq;
+		  device_parameters->signal_parameters.receive_freq = signal_receive_freq;
+		  device_parameters->signal_parameters.amp = signal_amp;
+	  
+		  if(signal_send_freq >= signal_receive_freq)
+			{
+			  signal_freq_spread = signal_send_freq - signal_receive_freq;
+		  
+			}
+		  else
+			{
+			  signal_freq_spread = signal_receive_freq - signal_send_freq;
+			}
+
+		  //信号断开	  
+		  if(signal_freq_spread > device_parameters->signal_parameters.freq_spread \
+			 || signal_amp < device_parameters->signal_parameters.amp_limit)
+			{
+			  //信号的历史状态为连通
+			  if(signal_state == SET)
 				{
-				  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+				  //由通变成断则发送告警邮件
+				  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+				  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+				  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
+				  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
+				  sms_alarm_mail->temperature = temperature;
+				  sms_alarm_mail->state = RESET;
+				  sms_alarm_mail->time = calender;
+
+				  if(device_parameters->sms_on_off == 1)
+					{
+					  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+					}
 				}
+			  else
+				{
+		
+				}
+			  signal_state = RESET;//设置信号状态为断开
+
+
 			}
+		  //信号连通
 		  else
 			{
-		
-			}
+			  //信号的历史状态为连通
+			  if(signal_state == SET)
+				{
 
+				}
+			  else
+				{
+				  //由断变成通则发送告警邮件	  
+				  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+				  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+				  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
+				  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
+				  sms_alarm_mail->temperature = temperature;
+				  sms_alarm_mail->state = SET;
+				  sms_alarm_mail->time = calender;
+
+				  if(device_parameters->sms_on_off == 1)
+					{
+					  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+					}
+			  
+				}
+			  signal_state = SET;//设置信号状态为连通
+			}
+		  signal_freq_test(DISABLE);//信号频率检测
+		  signal_send(DISABLE);//信号发送
+		  //关闭信号收发电源
+		  signal_send_power(DISABLE);
+		  signal_receive_power(DISABLE);
+		  
 		}
-	  //信号连通
 	  else
 		{
-		  //信号的历史状态为连通
-		  if(signal_state == SET)
+		  //打开信号收发电源
+		  signal_receive_power(ENABLE);//接收电源打开
+		  OSTimeDlyHMSM(0, 0, 0, 50);
+		  signal_send_power(ENABLE);//发送电源打开
+		  signal_frequency_set(device_parameters->signal_parameters.freq);//信号
+		  signal_send_init();//信号发送初始化
+		  signal_send(ENABLE);//信号发送
+		  signal_freq_test(ENABLE);//信号频率检测
+		  OSTimeDlyHMSM(0, 0, 3, 0);//等待信号稳定
+		  while(1)
 			{
+			  //处理信号频率及幅值
+			  signal_send_freq = 0;
+			  signal_receive_freq = 0;
+			  signal_amp = 0;
+			  //由于参数需要作被除数所以确保这个数不为0
+			  if(device_parameters->signal_parameters.process_counts < 1)
+				{
+				  device_parameters->signal_parameters.process_counts = 1;
+				}
+			  for(index = 0; index < device_parameters->signal_parameters.process_counts; index++)
+				{
+				  signal_send_freq += signal_send_freq_capture;
+				  signal_receive_freq += signal_receive_freq_capture;
+				  signal_amp += adc1_buf[SIGNAL_AMP];
+				  OSTimeDlyHMSM(0, 0, device_parameters->signal_parameters.process_interval / 1000, \
+								device_parameters->signal_parameters.process_interval % 1000);
+				}
+			  signal_send_freq /= device_parameters->signal_parameters.process_counts;
+			  signal_receive_freq /= device_parameters->signal_parameters.process_counts;
+			  signal_amp /= device_parameters->signal_parameters.process_counts;
 
-			}
-		  else
-			{
-			  //由断变成通则发送告警邮件			  
+			  device_parameters->signal_parameters.send_freq = signal_send_freq;
+			  device_parameters->signal_parameters.receive_freq = signal_receive_freq;
+			  device_parameters->signal_parameters.amp = signal_amp;
+	  
+			  if(signal_send_freq >= signal_receive_freq)
+				{
+				  signal_freq_spread = signal_send_freq - signal_receive_freq;
+				}
+			  else
+				{
+				  signal_freq_spread = signal_receive_freq - signal_send_freq;
+				}
+			  //信号断开	  
+			  if(signal_freq_spread > device_parameters->signal_parameters.freq_spread \
+				 || signal_amp < device_parameters->signal_parameters.amp_limit)
+				{
+				  //信号的历史状态为连通
+				  if(signal_state == SET)
+					{
+					  //由通变成断则发送告警邮件
+					  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+					  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+					  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
+					  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
+					  sms_alarm_mail->temperature = temperature;
+					  sms_alarm_mail->state = RESET;
+					  sms_alarm_mail->time = calender;
+
+					  if(device_parameters->sms_on_off == 1)
+						{
+						  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+						}
+					}
+				  else
+					{
+		
+					}
+				  signal_state = RESET;//设置信号状态为断开
+				}
+			  //信号连通
+			  else
+				{
+				  //信号的历史状态为连通
+				  if(signal_state == SET)
+					{
+
+					}
+				  else
+					{
+					  //由断变成通则发送告警邮件	  
+					  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+					  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+					  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
+					  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
+					  sms_alarm_mail->temperature = temperature;
+					  sms_alarm_mail->state = SET;
+					  sms_alarm_mail->time = calender;
+
+					  if(device_parameters->sms_on_off == 1)
+						{
+						  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+						}
 			  
-			}
-		  signal_state = SET;//设置信号状态为连通
-		}
+					}
+				  signal_state = SET;//设置信号状态为连通
 
-	  signal_freq_test(DISABLE);//信号频率检测
-	  signal_send(DISABLE);//信号发送	  
-	  //关闭信号收发电源
-	  signal_send_power(ENABLE);
-	  signal_receive_power(ENABLE);
+				}
+			  OSTimeDlyHMSM(0, 0, 0, 50);
+			}
+		  signal_freq_test(DISABLE);//信号频率检测
+		  signal_send(DISABLE);//信号发送
+		  //关闭信号收发电源
+		  signal_send_power(DISABLE);
+		  signal_receive_power(DISABLE);
+		}
 	}
 }

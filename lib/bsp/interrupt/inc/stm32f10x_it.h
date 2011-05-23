@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 17:34:27 2011
+ * Modified at:   Fri May 20 16:25:54 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -20,8 +20,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
 
-extern __IO uint32_t signal_send_freq_capture;
-extern __IO uint32_t signal_receive_freq_capture;
+extern __IO uint16_t signal_send_freq_capture;
+extern __IO uint16_t signal_receive_freq_capture;
 
 
 /* Exported types ------------------------------------------------------------*/

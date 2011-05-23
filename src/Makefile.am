@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Wed May 11 13:50:29 2011
+## Modified at:   Fri May 20 14:46:35 2011
 ##                
 ## Description:   for main.elf program, linking some libraries.
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -22,7 +22,7 @@ OD = arm-none-eabi-objdump
 CPFLAGS = -Obinary
 ODFLAGS	= -S
 
-CCLD = arm-none-eabi-ld
+CCLD = arm-none-eabi-gcc
 
 LIBPATH = /usr/local/stm32/arm-none-eabi/lib/thumb
 
@@ -48,7 +48,9 @@ main_elf_LDADD = $(top_builddir)/lib/bsp/init/src/libbsp-init.la \
 	$(top_builddir)/lib/std_periph/src/libstd_periph.la \
 	$(top_builddir)/lib/ucos/ports/src/libucos-ports.la \
 	$(top_builddir)/lib/ucos/core/src/libucos-core.la \
-	$(LIBPATH)/libc.a
+	$(LIBPATH)/libc.a \
+	$(LIBPATH)/libm.a
+
 main_elf_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) \
 	 $(main_elf_LDFLAGS) $(LDFLAGS) -o $@

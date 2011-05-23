@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 17 17:35:04 2011
+ * Modified at:   Fri May 20 16:24:04 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -16,8 +16,8 @@
 #include "includes.h"
 // 定义向量表
 
-__IO uint32_t signal_send_freq_capture = 0;
-__IO uint32_t signal_receive_freq_capture = 0;
+__IO uint16_t signal_send_freq_capture = 0;
+__IO uint16_t signal_receive_freq_capture = 0;
 
 
 

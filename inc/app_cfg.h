@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 19 17:23:30 2011
+ * Modified at:   Mon May 23 09:37:59 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -113,13 +113,15 @@
 */
 
 typedef struct {
-  
-  uint16_t interval;//信号间隔时间，单位为分钟
+  uint16_t interval;//信号间隔时间，单位为秒
   uint16_t freq;//信号频率
   uint16_t freq_spread;//信号频率差值
   uint16_t amp_limit;//信号幅度限值
   uint16_t process_counts;//信号处理次数
   uint16_t process_interval;//信号每次处理之后的间隔，单位为毫秒
+  uint16_t send_freq;//发送信号频率
+  uint16_t receive_freq;//接收信号频率
+  uint16_t amp;//信号幅值
 }SignalParameters;
 
 typedef struct {

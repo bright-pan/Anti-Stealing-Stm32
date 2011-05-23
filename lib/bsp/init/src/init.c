@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 19 16:42:22 2011
+ * Modified at:   Fri May 20 18:20:09 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -207,12 +207,16 @@ static void calender_config(void)
 static void signal_config(void)
 {
   signal_power_init();//
-  //  signal_send_power(ENABLE);
-  //  signal_receive_power(ENABLE);
+  //signal_send_power(ENABLE);
+  //signal_receive_power(ENABLE);
   signal_freq_test_init();
   //signal_freq_test(ENABLE);
   signal_amp_battery_init();
   signal_amp_battery(ENABLE);
+  //  signal_frequency_set(SIGNAL_FREQ_30000);//信号
+  //signal_send_init();//信号发送初始化
+  //signal_send(ENABLE);//信号发送
+
 }
 
 /*
@@ -244,5 +248,40 @@ static void gsm_config(void)
   gsm_init();
   gsm_power(ENABLE);
   gsm_setup(ENABLE);
+}
+
+void App_TaskIdleHook(void)
+{
+  __WFI();
+}
+
+void          App_TaskCreateHook      (OS_TCB          *ptcb)
+{
+
+}
+void          App_TaskDelHook         (OS_TCB          *ptcb)
+{
+
+}
+
+void          App_TaskStatHook        (void)
+{
+
+}
+
+
+void          App_TaskSwHook          (void)
+{
+
+}
+
+void          App_TCBInitHook         (OS_TCB          *ptcb)
+{
+
+}
+
+void          App_TimeTickHook        (void)
+{
+
 }
 

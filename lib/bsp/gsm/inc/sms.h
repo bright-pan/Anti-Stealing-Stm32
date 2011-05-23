@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 19 15:30:31 2011
+ * Modified at:   Fri May 20 09:26:19 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -212,7 +212,7 @@ typedef struct {
 	
 }MODBUS_DATA_QUERY_FRAME;
 typedef struct {
-	uint16_t temperature;
+	int16_t temperature;
 	uint8_t state;
 	struct tm time;
 }SMS_ALARM_FRAME;
