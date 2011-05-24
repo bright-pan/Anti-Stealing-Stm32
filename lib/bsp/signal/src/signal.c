@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 19 14:02:07 2011
+ * Modified at:   Tue May 24 10:51:25 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -51,6 +51,16 @@
 #define SIGNAL_BATTERY_PIN                 GPIO_Pin_5
 #define SIGNAL_BATTERY_PORT                GPIOA
 #define SIGNAL_BATTERY_CLK                 RCC_APB2Periph_GPIOA
+
+//蜂鸣器告警引脚
+#define BEEP_ALARM_PIN                 GPIO_Pin_0
+#define BEEP_ALARM_PORT                GPIOA
+#define BEEP_ALARM_CLK                 RCC_APB2Periph_GPIOA
+//外部告警引脚
+#define EXTERNAL_ALARM_PIN                 GPIO_Pin_9
+#define EXTERNAL_ALARM_PORT                GPIOA
+#define EXTERNAL_ALARM_CLK                 RCC_APB2Periph_GPIOA
+
 
 
 //信号频率数组
@@ -441,7 +451,6 @@ FunctionalState signal_send(FunctionalState state)
 	}
 }
 
-
 void signal_frequency_set(SignalFreq freq)
 {
   if(freq < SIGNAL_FREQ_4000 || freq > SIGNAL_FREQ_64000)
@@ -452,3 +461,72 @@ void signal_frequency_set(SignalFreq freq)
   period = SystemCoreClock / (signal_freq[freq] * POINT_PER_PERIOD);
 }
 
+void beep_alarm_init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+  //使能发送电源引脚时钟
+  RCC_APB2PeriphClockCmd(BEEP_ALARM_CLK, ENABLE);
+  //配置发送电源引脚为输出
+  GPIO_InitStructure.GPIO_Pin = BEEP_ALARM_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(BEEP_ALARM_PORT, &GPIO_InitStructure);
+  BEEP_ALARM_PORT->BSRR = BEEP_ALARM_PIN;//默认为1,关闭状态
+  
+}
+
+void external_alarm_init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+  //使能发送电源引脚时钟
+  RCC_APB2PeriphClockCmd(EXTERNAL_ALARM_CLK, ENABLE);
+  //配置发送电源引脚为输出
+  GPIO_InitStructure.GPIO_Pin = EXTERNAL_ALARM_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(EXTERNAL_ALARM_PORT, &GPIO_InitStructure);
+  EXTERNAL_ALARM_PORT->BSRR = EXTERNAL_ALARM_PIN;//默认为1,关闭状态
+  
+}
+
+FunctionalState beep_alarm_set(FunctionalState state)
+{
+  if(state == ENABLE)
+	{
+	  BEEP_ALARM_PORT->BRR = BEEP_ALARM_PIN;//0,打开
+	  return ENABLE;
+	}
+  else if(state == DISABLE)
+	{
+	  BEEP_ALARM_PORT->BSRR = BEEP_ALARM_PIN;//默认为1,关闭状态
+	  return DISABLE;	  
+	}
+  else
+	{
+	  //默认为关闭
+	  BEEP_ALARM_PORT->BSRR = BEEP_ALARM_PIN;//默认为1,关闭状态
+	  return DISABLE;	  
+	}
+  
+}
+
+FunctionalState external_alarm_set(FunctionalState state)
+{
+  if(state == ENABLE)
+	{
+	  EXTERNAL_ALARM_PORT->BRR = EXTERNAL_ALARM_PIN;//0,打开
+	  return ENABLE;
+	}
+  else if(state == DISABLE)
+	{
+	  EXTERNAL_ALARM_PORT->BSRR = EXTERNAL_ALARM_PIN;//默认为1,关闭状态
+	  return DISABLE;	  
+	}
+  else
+	{
+	  //默认为关闭
+	  EXTERNAL_ALARM_PORT->BSRR = EXTERNAL_ALARM_PIN;//默认为1,关闭状态
+	  return DISABLE;	  
+	}
+
+}

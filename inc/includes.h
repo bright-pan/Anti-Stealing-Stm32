@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 19 16:48:13 2011
+ * Modified at:   Tue May 24 10:01:54 2011
  *                
  * Description:   all include file
  * Copyright (C) 2010-2011,  Bright Pan
@@ -33,6 +33,8 @@
 #include "system_stm32f10x.h"
 #include "core_cm3.h"
 //用户自定义头文件
+#include "app_cfg.h"
+#include "buffer.h"
 #include "stm32f10x_it.h"
 #include "init.h"
 #include "led.h"
@@ -42,7 +44,7 @@
 #include "temperature.h"
 #include "gsm.h"
 #include "sms.h"
-#include "app_cfg.h"
+#include "rs485.h"
 
 #endif
 

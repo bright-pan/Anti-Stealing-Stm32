@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri May 20 16:24:04 2011
+ * Modified at:   Tue May 24 09:54:10 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -148,6 +148,13 @@ void TIM2_IRQHandler(void){}
 
 void TIM3_IRQHandler(void)
 { 
+  OS_CPU_SR  cpu_sr;
+
+   
+  OS_ENTER_CRITICAL();  /* Tell uC/OS-II that we are starting an ISR*/
+  OSIntNesting++;
+  OS_EXIT_CRITICAL();	  
+
   static __IO uint8_t capture_number = 0;
   static __IO uint16_t read_value1 = 0;
   static __IO uint16_t read_value2 = 0;
@@ -179,10 +186,18 @@ void TIM3_IRQHandler(void)
       capture_number = 0;
     }
   }
+
+  OSIntExit();
 }
 
 void TIM4_IRQHandler(void)
 { 
+  OS_CPU_SR  cpu_sr;
+
+  OS_ENTER_CRITICAL();  /* Tell uC/OS-II that we are starting an ISR*/
+  OSIntNesting++;
+  OS_EXIT_CRITICAL();	  
+
   static __IO uint8_t capture_number = 0;
   static __IO uint16_t read_value1 = 0;
   static __IO uint16_t read_value2 = 0;
@@ -214,6 +229,9 @@ void TIM4_IRQHandler(void)
       capture_number = 0;
     }
   }
+
+  OSIntExit();
+
 }
 
 void I2C1_EV_IRQHandler(void){}
@@ -223,13 +241,52 @@ void I2C2_ER_IRQHandler(void){}
 void SPI1_IRQHandler(void){}
 void SPI2_IRQHandler(void){}
 void USART1_IRQHandler(void){}
-void USART2_IRQHandler(void){}
 
-void USART3_IRQHandler(void){
+void USART2_IRQHandler(void)
+{
+  OS_CPU_SR  cpu_sr;
+  
+  OS_ENTER_CRITICAL();  /* Tell uC/OS-II that we are starting an ISR*/
+  OSIntNesting++;
+  OS_EXIT_CRITICAL();	  
+
+  uint8_t temp;
+  if(USART_GetITStatus(RS485_USART2, USART_IT_ORE) != RESET)
+	{
+	  /* Read one byte from the receive data register */
+	  temp = USART_ReceiveData(RS485_USART2);
+	  if(FULL(rs485_buf))
+		{
+		  //缓冲区已满，丢弃数据
+		}
+	  else
+		{
+		  PUTCH(temp, rs485_buf);//缓冲区不是满的则存入缓冲区
+		}
+	  //记录溢出标识
+	}
+  if(USART_GetITStatus(RS485_USART2, USART_IT_RXNE) != RESET)
+	{
+	  /* Read one byte from the receive data register */
+	  temp = USART_ReceiveData(RS485_USART2);
+	  if(FULL(rs485_buf))
+		{
+		  //缓冲区已满，丢弃数据
+		}
+	  else
+		{
+		  PUTCH(temp, rs485_buf);//缓冲区不是满的则存入缓冲区
+		}
+	}
+  
+  OSIntExit();
+}
+
+void USART3_IRQHandler(void)
+{
   //  TimingDelay_Decrement();
   OS_CPU_SR  cpu_sr;
   
-   
   OS_ENTER_CRITICAL();  /* Tell uC/OS-II that we are starting an ISR*/
   OSIntNesting++;
   OS_EXIT_CRITICAL();	  

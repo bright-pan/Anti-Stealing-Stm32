@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon May 23 16:20:17 2011
+ * Modified at:   Tue May 24 09:16:26 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -143,7 +143,7 @@ static  void  AppStartTask(void *p_arg);
 //static  void  AppLCDTask(void *p_arg);
 static  void  AppTaskCreate(void);
 static void AppGSMTask(void *p_arg);
-//static void AppRS485Task(void *p_arg);
+static void AppRS485Task(void *p_arg);
 static void AppSignalTask(void *p_arg);
 static void AppSMSSendTask(void *p_arg);
 //static void AppSMSReceiveTask(void *p_arg);
@@ -219,6 +219,7 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_SMSReceive_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
+
   OSTaskCreateExt(AppSignalTask,
 				  (void *)0,
 				  (OS_STK *)&AppSignalTaskStk[APP_TASK_SIGNAL_STK_SIZE-1],
@@ -229,17 +230,15 @@ static  void  AppTaskCreate(void)
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
 
-
-  /*	    OSTaskCreateExt(AppRS485Task,
-			(void *)0,
-			(OS_STK *)&AppRS485TaskStk[0],
-			APP_TASK_RS485_PRIO,
-			APP_TASK_RS485_PRIO,
-			(OS_STK *)&AppRS485TaskStk[APP_TASK_RS485_STK_SIZE-1],
-			APP_TASK_RS485_STK_SIZE,
-			(void *)0,
-			OS_TASK_OPT_STK_CLR);
-  */
+  OSTaskCreateExt(AppRS485Task,
+				  (void *)0,
+				  (OS_STK *)&AppRS485TaskStk[APP_TASK_RS485_STK_SIZE-1],
+				  APP_TASK_RS485_PRIO,
+				  APP_TASK_RS485_PRIO,
+				  (OS_STK *)&AppRS485TaskStk[0],
+				  APP_TASK_RS485_STK_SIZE,
+				  (void *)0,
+				  OS_TASK_OPT_STK_CLR);
 
 }
 
@@ -2133,7 +2132,7 @@ static void AppSignalTask(void *p_arg)
 				  signal_state = SET;//设置信号状态为连通
 
 				}
-			  OSTimeDlyHMSM(0, 0, 0, 50);
+			  OSTimeDlyHMSM(0, 0, 1, 0);
 			}
 		  signal_freq_test(DISABLE);//信号频率检测
 		  signal_send(DISABLE);//信号发送
@@ -2141,5 +2140,16 @@ static void AppSignalTask(void *p_arg)
 		  signal_send_power(DISABLE);
 		  signal_receive_power(DISABLE);
 		}
+	}
+}
+
+static void AppRS485Task(void *p_arg)
+{
+  (void)p_arg;
+  while(1)
+	{
+
+
+	  OSTimeDlyHMSM(0, 0, 1, 0);
 	}
 }

@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed May 18 09:12:31 2011
+ * Modified at:   Tue May 24 10:25:20 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -61,7 +61,7 @@
 #define GSM_USART3_RX_CLK                RCC_APB2Periph_GPIOD
 #define GSM_USART3_RX_PIN                GPIO_Pin_9
 #define GSM_USART3_RX_PORT               GPIOD
-
+/*
 #define GSM_USART3_CTS_CLK               RCC_APB2Periph_GPIOD
 #define GSM_USART3_CTS_PIN               GPIO_Pin_11
 #define GSM_USART3_CTS_PORT              GPIOD
@@ -69,7 +69,7 @@
 #define GSM_USART3_RTS_CLK               RCC_APB2Periph_GPIOD
 #define GSM_USART3_RTS_PIN               GPIO_Pin_12
 #define GSM_USART3_RTS_PORT              GPIOD
-
+*/
 
 
 BUFFER gsm_buf;
@@ -134,29 +134,32 @@ void gsm_init(void)
   //GSM USART3 REMAP CONFIG
   GPIO_PinRemapConfig(GPIO_FullRemap_USART3, ENABLE);
   //GSM UART3 RX AND CTS AS IN_FLOATING
+  
   RCC_APB2PeriphClockCmd(GSM_USART3_RX_CLK, ENABLE);
   GPIO_InitStructure.GPIO_Pin = GSM_USART3_RX_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GSM_USART3_RX_PORT, &GPIO_InitStructure);
-  
+  /*
   RCC_APB2PeriphClockCmd(GSM_USART3_CTS_CLK, ENABLE);
   GPIO_InitStructure.GPIO_Pin = GSM_USART3_CTS_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GSM_USART3_CTS_PORT, &GPIO_InitStructure);
+  */
   //GSM UART3 TX AND RTX AS AF_PP
   RCC_APB2PeriphClockCmd(GSM_USART3_TX_CLK, ENABLE);
   GPIO_InitStructure.GPIO_Pin = GSM_USART3_TX_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GSM_USART3_TX_PORT, &GPIO_InitStructure);
-
+  /*
   RCC_APB2PeriphClockCmd(GSM_USART3_RTS_CLK, ENABLE);
   GPIO_InitStructure.GPIO_Pin = GSM_USART3_RTS_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GSM_USART3_RTS_PORT, &GPIO_InitStructure);
+  */
   //GSM USART3 CLOCK
   RCC_APB1PeriphClockCmd(GSM_USART3_CLK, ENABLE);
 

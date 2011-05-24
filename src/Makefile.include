@@ -7,7 +7,7 @@
 ##                
 ##                
 ## Modified by:   Bright Pan <loststriker@gmail.com>
-## Modified at:   Thu May  5 14:24:16 2011
+## Modified at:   Tue May 24 09:22:14 2011
 ##                
 ## Description:   
 ## Copyright (C) 2010-2011,  Bright Pan
@@ -27,6 +27,7 @@ INCLUDE_PATH = -I./ \
 	-I$(top_srcdir)/lib/bsp/temperature/inc \
 	-I$(top_srcdir)/lib/bsp/calender/inc \
 	-I$(top_srcdir)/lib/bsp/gsm/inc \
+	-I$(top_srcdir)/lib/bsp/rs485/inc \
 	-I$(top_srcdir)/lib/ucos/ports/inc \
 	-I$(top_srcdir)/lib/ucos/core/inc \
 	-I$(top_srcdir)/lib/std_periph/inc

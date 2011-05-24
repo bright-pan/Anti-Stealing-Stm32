@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri May 20 18:20:09 2011
+ * Modified at:   Tue May 24 10:52:11 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -26,6 +26,7 @@ static void signal_config(void);
 static void sflash_config(void);
 static void temperature_config(void);
 static void gsm_config(void);
+static void rs485_config(void);
 
 /*
  * Function bsp_init ()
@@ -52,6 +53,7 @@ void bsp_init(void)
   sflash_config();
   temperature_config();
   gsm_config();
+  rs485_config();
   systick_config();
 }
 
@@ -105,6 +107,12 @@ static void interrupt_config(void)
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure); 
   // NVIC_SystemHandlerPriorityConfig(SystemHandler_PSV,3,3);
+  //设置USART2中断优先级
+  NVIC_InitStructure.NVIC_IRQChannel = RS485_USART2_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = RS485_USART2_PREEMPTION_PRIORITY;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
   //设置USART3中断优先级
   NVIC_InitStructure.NVIC_IRQChannel = GSM_USART3_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = GSM_USART3_PREEMPTION_PRIORITY;
@@ -213,6 +221,8 @@ static void signal_config(void)
   //signal_freq_test(ENABLE);
   signal_amp_battery_init();
   signal_amp_battery(ENABLE);
+  beep_alarm_init();
+  external_alarm_init();
   //  signal_frequency_set(SIGNAL_FREQ_30000);//信号
   //signal_send_init();//信号发送初始化
   //signal_send(ENABLE);//信号发送
@@ -249,6 +259,14 @@ static void gsm_config(void)
   gsm_power(ENABLE);
   gsm_setup(ENABLE);
 }
+
+static void rs485_config(void)
+{
+  rs485_baudrate_set(BAUDRATE_1200);
+  rs485_init();
+  rs485_dir_set(DISABLE);//接收
+}
+
 
 void App_TaskIdleHook(void)
 {

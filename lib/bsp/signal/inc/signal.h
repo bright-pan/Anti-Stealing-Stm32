@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May 19 17:07:11 2011
+ * Modified at:   Tue May 24 10:37:37 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -79,5 +79,11 @@ FunctionalState signal_send(FunctionalState state);
 
 void signal_frequency_set(SignalFreq freq);
 
+void external_alarm_init(void);
+void beep_alarm_init(void);
+
+FunctionalState beep_alarm_set(FunctionalState state);
+
+FunctionalState external_alarm_set(FunctionalState state);
 
 #endif
