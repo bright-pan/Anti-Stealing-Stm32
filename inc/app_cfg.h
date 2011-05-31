@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon May 23 09:37:59 2011
+ * Modified at:   Mon May 30 14:16:57 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -39,7 +39,7 @@
 #define  MUTEX_GSM_PIP					  		1
 #define  MUTEX_RS485_PIP				  		2		
 #define  MUTEX_SFLASH_PIP							3
-#define  MUTEX_DEVICE_INIT_PARAMETERS_PIP 		4
+#define  MUTEX_CALENDER_PIP 		4
 
 //#define  APP_TASK_LCD_PRIO                      6
 #define  APP_TASK_RS485_PRIO                     8                       /* RS485 发送任务 */
@@ -126,19 +126,23 @@ typedef struct {
 
 typedef struct {
   uint8_t device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
+  uint16_t device_id;
   uint8_t primary_device_name[DEVICE_NAME_MAX_LENGTH];//主设备名称;
   //uint8_t	slave_device_numbers;//从设备数量,且必须小于SLAVE_DEVICE_MAX_NUMBERS;
   //uint8_t slave_device_id[SLAVE_DEVICE_MAX_NUMBERS];//从设备ID数组,大小为SLAVE_DEVICE_MAX_NUMBERS;
   uint8_t slave_device_name[DEVICE_NAME_MAX_LENGTH];
   //  SMS_ALARM_FRAME slave_device_history_alarm[SLAVE_DEVICE_MAX_NUMBERS];
-  uint8_t alarm_telephone_numbers;
-  uint8_t alarm_telephone[ALARM_TELEPHONE_MAX_NUMBERS][ALARM_TELEPHONE_NUMBER_SIZE];
-  uint8_t service_center_address[ALARM_TELEPHONE_NUMBER_SIZE];
+  uint16_t alarm_telephone_numbers;
+  uint8_t alarm_telephone[ALARM_TELEPHONE_MAX_NUMBERS][ALARM_TELEPHONE_NUMBER_SIZE + 1];
+  uint8_t service_center_address[ALARM_TELEPHONE_NUMBER_SIZE + 1];
   uint8_t password[DEVICE_PASSWORD_MAX_LENGTH];
   uint8_t gps[GPS_MAX_LENGTH];//主设备名称;
-  uint8_t sms_on_off;
+  uint16_t sms_on_off;
+  uint16_t rs485_baudrate;
   SignalParameters signal_parameters;
   }DEVICE_INIT_PARAMATERS;
+
+
 /*
   typedef struct {
   uint8_t device_id;

@@ -7,14 +7,14 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 24 10:52:11 2011
+ * Modified at:   Mon May 30 14:05:50 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
  ********************************************************************/
 
 #include "includes.h"
-
+extern DEVICE_INIT_PARAMATERS device_init_paramaters;
 //int16_t temperature = 0;
 
 static void systick_config(void);
@@ -262,7 +262,7 @@ static void gsm_config(void)
 
 static void rs485_config(void)
 {
-  rs485_baudrate_set(BAUDRATE_1200);
+  rs485_baudrate_set(device_init_paramaters.rs485_baudrate);
   rs485_init();
   rs485_dir_set(DISABLE);//接收
 }

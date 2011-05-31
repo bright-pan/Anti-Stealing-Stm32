@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 24 09:16:26 2011
+ * Modified at:   Tue May 31 09:55:02 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -39,7 +39,8 @@ DEVICE_INIT_PARAMATERS device_init_paramaters;
 //SLAVE_DEVICE_STATE_FRAME slave_device_state_frame[SLAVE_DEVICE_MAX_NUMBERS];
 //TIME_FRAME set_time;
 const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
-  "zxsoft:as-2011-05-22",
+  "zxsoft:as-2011-05-23",
+  1,//id
   "高新区一号开闭所",
   "比亚迪出线电缆",
   1,
@@ -50,6 +51,7 @@ const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
   "\x00\x31\x00\x32\x00\x33\x00\x34\x00\x35\x00\x36",
   "",
   1,
+  0,
   {
 	0,
 	SIGNAL_FREQ_30000,
@@ -62,6 +64,7 @@ const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
 // 设备使用分配信号量
 OS_EVENT *MUTEX_GSM;//设备使用互斥信号量;
 OS_EVENT *MUTEX_RS485;//设备使用互斥信号量;
+OS_EVENT *MUTEX_CALENDER;//日历互斥信号量
 // 铁电存储器使用信号量
 OS_EVENT *MUTEX_SFLASH;
 
@@ -95,8 +98,9 @@ uint8_t SMS_RECEIVE_PROCESS_BUF[SMS_RECEIVE_PROCESS_BUF_SIZE + 1] = {'\0',};
 uint8_t SMS_SEND_PROCESS_BUF[SMS_SEND_PROCESS_BUF_SIZE + 1] = {'\0',};
 uint8_t SMS_UCS_PROCESS_BUF[DEVICE_NAME_MAX_LENGTH + 1] = {'\0',};
 
-uint8_t RS485_SEND_BUF[32];
-uint8_t RS485_RECEIVE_BUF[32];
+uint8_t RS485_SEND_BUF[256];
+uint8_t RS485_RECEIVE_BUF[256];
+uint8_t RS485_PROCESS_BUF[256];
 
 OS_EVENT *SEM_SMS_OK;
 OS_EVENT *SEM_SMS_FAULT;
@@ -260,6 +264,7 @@ static  void  AppStartTask (void *p_arg)
   MUTEX_GSM = OSMutexCreate(MUTEX_GSM_PIP, &err);
   MUTEX_RS485 = OSMutexCreate(MUTEX_RS485_PIP, &err);
   MUTEX_SFLASH = OSMutexCreate(MUTEX_SFLASH_PIP, &err);
+  MUTEX_CALENDER = OSMutexCreate(MUTEX_CALENDER_PIP, &err);
 
   // 创建MEM_PART_NUMBER 个内存分区且分区大小为MEM_PART_SIZE 供邮箱队列使用
   SEM_MEM_PART_ALLOC = OSSemCreate(MEM_PART_NUMBER);
@@ -272,7 +277,7 @@ static  void  AppStartTask (void *p_arg)
   SEM_SMS_OK = OSSemCreate(0);
   SEM_SMS_FAULT = OSSemCreate(0);
 
-  MUTEX_DEVICE_INIT_PARAMATERS = OSMutexCreate(MUTEX_DEVICE_INIT_PARAMETERS_PIP, &err);
+  //  MUTEX_DEVICE_INIT_PARAMATERS = OSMutexCreate(MUTEX_DEVICE_INIT_PARAMETERS_PIP, &err);
 
   SEM_SMS_MSG_INDICATOR = OSSemCreate(0);
 
@@ -555,6 +560,7 @@ static void AppSMSReceiveTask(void *p_arg)
   //  uint16_t unread_sms_index = 0;
   uint16_t length = 0;
   uint16_t index = 0;
+  int TEMP[5];
   //  uint16_t id = 0;
 
   SMS_RECEIVE_PDU_FRAME *sms_receive_pdu_frame = NULL; 
@@ -776,6 +782,118 @@ static void AppSMSReceiveTask(void *p_arg)
 									  break;
 		
 									}
+									case 0x51 : {
+									  /* 查询信号间隔时间*/
+									  /* 分配一个16 字节的内存分区 用于告警邮件的存储*/
+									  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+									  //sms_alarm_mail = (SMS_ALARM_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail->sms_mail_type = SMS_QUERY_FRAME_TYPE;
+									  sms_query_mail = &(sms_mail->sms_query_frame);
+									  sms_query_mail->TP_OA = TP_OA_temp;
+									  sms_query_mail->function_code = 0x51;
+
+									  /* 发送短信告警邮件 */
+									  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+									  break;
+		
+									}
+									case 0x52 : {
+									  /* 查询信号间隔时间*/
+									  /* 分配一个16 字节的内存分区 用于告警邮件的存储*/
+									  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+									  //sms_alarm_mail = (SMS_ALARM_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail->sms_mail_type = SMS_QUERY_FRAME_TYPE;
+									  sms_query_mail = &(sms_mail->sms_query_frame);
+									  sms_query_mail->TP_OA = TP_OA_temp;
+									  sms_query_mail->function_code = 0x52;
+
+									  /* 发送短信告警邮件 */
+									  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+									  break;
+		
+									}
+									case 0x53 : {
+									  /* 查询信号间隔时间*/
+									  /* 分配一个16 字节的内存分区 用于告警邮件的存储*/
+									  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+									  //sms_alarm_mail = (SMS_ALARM_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail->sms_mail_type = SMS_QUERY_FRAME_TYPE;
+									  sms_query_mail = &(sms_mail->sms_query_frame);
+									  sms_query_mail->TP_OA = TP_OA_temp;
+									  sms_query_mail->function_code = 0x53;
+
+									  /* 发送短信告警邮件 */
+									  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+									  break;
+		
+									}
+									case 0x54 : {
+									  /* 查询信号间隔时间*/
+									  /* 分配一个16 字节的内存分区 用于告警邮件的存储*/
+									  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+									  //sms_alarm_mail = (SMS_ALARM_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail->sms_mail_type = SMS_QUERY_FRAME_TYPE;
+									  sms_query_mail = &(sms_mail->sms_query_frame);
+									  sms_query_mail->TP_OA = TP_OA_temp;
+									  sms_query_mail->function_code = 0x54;
+
+									  /* 发送短信告警邮件 */
+									  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+									  break;
+		
+									}
+									case 0x55 : {
+									  /* 查询信号间隔时间*/
+									  /* 分配一个16 字节的内存分区 用于告警邮件的存储*/
+									  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+									  //sms_alarm_mail = (SMS_ALARM_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail->sms_mail_type = SMS_QUERY_FRAME_TYPE;
+									  sms_query_mail = &(sms_mail->sms_query_frame);
+									  sms_query_mail->TP_OA = TP_OA_temp;
+									  sms_query_mail->function_code = 0x55;
+
+									  /* 发送短信告警邮件 */
+									  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+									  break;
+		
+									}
+									case 0x56 : {
+									  /* 查询信号间隔时间*/
+									  /* 分配一个16 字节的内存分区 用于告警邮件的存储*/
+									  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+									  //sms_alarm_mail = (SMS_ALARM_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail->sms_mail_type = SMS_QUERY_FRAME_TYPE;
+									  sms_query_mail = &(sms_mail->sms_query_frame);
+									  sms_query_mail->TP_OA = TP_OA_temp;
+									  sms_query_mail->function_code = 0x56;
+
+									  /* 发送短信告警邮件 */
+									  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+									  break;
+		
+									}
+									case 0x57 : {
+									  /* 查询信号间隔时间*/
+									  /* 分配一个16 字节的内存分区 用于告警邮件的存储*/
+									  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+									  //sms_alarm_mail = (SMS_ALARM_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
+									  sms_mail->sms_mail_type = SMS_QUERY_FRAME_TYPE;
+									  sms_query_mail = &(sms_mail->sms_query_frame);
+									  sms_query_mail->TP_OA = TP_OA_temp;
+									  sms_query_mail->function_code = 0x57;
+
+									  /* 发送短信告警邮件 */
+									  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+									  break;
+		
+									}
 									  /* 无效功能码时不做处理 */
 									default :
 
@@ -980,7 +1098,7 @@ static void AppSMSReceiveTask(void *p_arg)
 												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->alarm_telephone_numbers), \
 																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
 																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone_numbers), \
-																	 1);
+																	 sizeof(device_parameters->alarm_telephone_numbers));
 												  OSMutexPost(MUTEX_SFLASH);
 												}
 											  else
@@ -1041,6 +1159,7 @@ static void AppSMSReceiveTask(void *p_arg)
 																	device_parameters->alarm_telephone[index - 1], \
 																	ALARM_TELEPHONE_NUMBER_SIZE);
 																  */
+																  OSMutexPend(MUTEX_SFLASH, 0, &err);
 																  sFLASH_WriteBuffer(device_parameters->alarm_telephone[index - 1], \
 																					 SFLASH_DEVICE_INIT_PARAMATERS_START + \
 																					 OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone) + (index - 1) * ALARM_TELEPHONE_NUMBER_SIZE, \
@@ -1095,7 +1214,7 @@ static void AppSMSReceiveTask(void *p_arg)
 													  /* 分配内存 */
 													  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
 													  match = OSMemGet(MEM_BUF, &err);
-													  int TEMP[5];
+													  
 													  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
 															  "%d,%d,%d,%d,%d[^#]",\
 															  &TEMP[0],&TEMP[1],&TEMP[2],&TEMP[3],&TEMP[4]);
@@ -1104,13 +1223,18 @@ static void AppSMSReceiveTask(void *p_arg)
 													  
 													  OSMemPut(MEM_BUF, (void *)match);
 													  OSSemPost(SEM_MEM_PART_ALLOC);
-														
+
+													  OSMutexPend(MUTEX_CALENDER, 0, &err);
+
 													  calender.tm_year = byte2BCD((uint8_t)(TEMP[0] % 100));
 													  calender.tm_mon = byte2BCD((uint8_t)(TEMP[1] % 100));
 													  calender.tm_mday = byte2BCD((uint8_t)(TEMP[2] % 100));
 													  calender.tm_hour = byte2BCD((uint8_t)(TEMP[3] % 100));
 													  calender.tm_min = byte2BCD((uint8_t)(TEMP[4] % 100));
 													  calender_set(&calender);
+
+													  OSMutexPost(MUTEX_CALENDER);
+																										  
 													}
 												  else
 													{
@@ -1165,7 +1289,7 @@ static void AppSMSReceiveTask(void *p_arg)
 												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->sms_on_off), \
 																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
 																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, sms_on_off), \
-																	 1);
+																	 sizeof(device_parameters->sms_on_off));
 												  OSMutexPost(MUTEX_SFLASH);
 												}
 											  else
@@ -1213,6 +1337,394 @@ static void AppSMSReceiveTask(void *p_arg)
 																 GPS_MAX_LENGTH);
 											  OSMutexPost(MUTEX_SFLASH);
 											}
+										  break;
+		
+										}
+										case 0x51 : {
+										  //设置信号间隔时间
+										  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN);
+										  if(length)
+											{
+											  if(length <= 4)
+												{
+												  /* 分配内存 */
+												  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+												  match = OSMemGet(MEM_BUF, &err);
+													
+												  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
+														  "%d[^#]", \
+														  (int *)&length);
+													
+												  /* 释放内存 */
+												  OSMemPut(MEM_BUF, (void *)match);
+												  OSSemPost(SEM_MEM_PART_ALLOC);
+												  if(length >= 3000)
+													{
+													  device_parameters->signal_parameters.interval = 0;
+													}
+												  else
+													{
+													  device_parameters->signal_parameters.interval = length;
+													}
+												  OSMutexPend(MUTEX_SFLASH, 0, &err);
+												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->signal_parameters.interval), \
+																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
+																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + \
+																	 OFF_SET_OF(SignalParameters, interval),	\
+																	 sizeof(device_parameters->signal_parameters.interval));
+												  OSMutexPost(MUTEX_SFLASH);
+												}
+											  else
+												{
+												  //长度大于4个字符数据;
+												}
+											}
+										  else
+											{
+											  //无数据项;
+											}
+													
+										  break;
+		
+										}
+										case 0x52 : {
+										  //设置信号频率
+										  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN);
+										  if(length)
+											{
+											  if(length <= 2)
+												{
+												  /* 分配内存 */
+												  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+												  match = OSMemGet(MEM_BUF, &err);
+													
+												  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
+														  "%d[^#]", \
+														  (int *)&length);
+													
+												  /* 释放内存 */
+												  OSMemPut(MEM_BUF, (void *)match);
+												  OSSemPost(SEM_MEM_PART_ALLOC);
+												  if(length >= 10)
+													{
+													  device_parameters->signal_parameters.freq = SIGNAL_FREQ_30000;
+													}
+												  else
+													{
+													  device_parameters->signal_parameters.freq = length;
+													}
+												  OSMutexPend(MUTEX_SFLASH, 0, &err);
+												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->signal_parameters.freq), \
+																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
+																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + \
+																	 OFF_SET_OF(SignalParameters, freq),	\
+																	 sizeof(device_parameters->signal_parameters.freq));
+												  OSMutexPost(MUTEX_SFLASH);
+												}
+											  else
+												{
+												  //长度大于4个字符数据;
+												}
+											}
+										  else
+											{
+											  //无数据项;
+											}
+													
+										  break;
+		
+										}
+										case 0x53 : { 
+										  // 设置频率差值与幅值限值
+										  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN);//设置从设备数量数据长度;
+										  if(length)
+											{ 
+											  if(length <= 10)
+												{
+												  if(UCS_Char(sms_set_frame->DATA, COMMA_SIGN, length))//查找逗号分隔符;
+													{
+													  /* 分配内存 */
+													  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+													  match = OSMemGet(MEM_BUF, &err);
+													  
+													  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
+															  "%d,%d[^#]",\
+															  &TEMP[0],&TEMP[1]);
+													  
+													  /* 释放内存 */
+													  
+													  OSMemPut(MEM_BUF, (void *)match);
+													  OSSemPost(SEM_MEM_PART_ALLOC);
+													  device_parameters->signal_parameters.freq_spread = TEMP[0];//信号频率差值
+													  device_parameters->signal_parameters.amp_limit = TEMP[1];//信号幅值限值
+													  OSMutexPend(MUTEX_SFLASH, 0, &err);
+													  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->signal_parameters.freq_spread), \
+																		 SFLASH_DEVICE_INIT_PARAMATERS_START + \
+																		 OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + \
+																		 OFF_SET_OF(SignalParameters, freq_spread),	\
+																		 sizeof(device_parameters->signal_parameters.freq_spread) + \
+																		 sizeof(device_parameters->signal_parameters.amp_limit));
+													  OSMutexPost(MUTEX_SFLASH);
+
+													}
+												  else
+													{
+													  //没有逗号分隔符;
+													}
+
+												}
+											  else
+												{
+												  //长度大于2个字符数据;
+												}
+											}
+										  else
+											{
+											  //无数据项;
+											}
+										  break;
+		
+										}
+										case 0x54 : {
+										  //设置信号处理次数
+										  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN);
+										  if(length)
+											{
+											  if(length <= 4)
+												{
+												  /* 分配内存 */
+												  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+												  match = OSMemGet(MEM_BUF, &err);
+													
+												  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
+														  "%d[^#]", \
+														  (int *)&length);
+													
+												  /* 释放内存 */
+												  OSMemPut(MEM_BUF, (void *)match);
+												  OSSemPost(SEM_MEM_PART_ALLOC);
+												  if(length >= 3000)
+													{
+													  device_parameters->signal_parameters.process_counts = 10;
+													}
+												  else
+													{
+													  device_parameters->signal_parameters.process_counts = length;
+													}
+												  OSMutexPend(MUTEX_SFLASH, 0, &err);
+												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->signal_parameters.process_counts), \
+																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
+																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + \
+																	 OFF_SET_OF(SignalParameters, process_counts),	\
+																	 sizeof(device_parameters->signal_parameters.process_counts));
+												  OSMutexPost(MUTEX_SFLASH);
+												}
+											  else
+												{
+												  //长度大于4个字符数据;
+												}
+											}
+										  else
+											{
+											  //无数据项;
+											}
+													
+										  break;
+		
+										}
+										case 0x55 : {
+										  //设置信号处理间隔
+										  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN);
+										  if(length)
+											{
+											  if(length <= 4)
+												{
+												  /* 分配内存 */
+												  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+												  match = OSMemGet(MEM_BUF, &err);
+													
+												  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
+														  "%d[^#]", \
+														  (int *)&length);
+													
+												  /* 释放内存 */
+												  OSMemPut(MEM_BUF, (void *)match);
+												  OSSemPost(SEM_MEM_PART_ALLOC);
+												  if(length >= 3000)
+													{
+													  device_parameters->signal_parameters.process_interval = 1;
+													}
+												  else
+													{
+													  device_parameters->signal_parameters.process_interval = length;
+													}
+												  OSMutexPend(MUTEX_SFLASH, 0, &err);
+												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->signal_parameters.process_interval), \
+																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
+																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + \
+																	 OFF_SET_OF(SignalParameters, process_interval),	\
+																	 sizeof(device_parameters->signal_parameters.process_interval));
+												  OSMutexPost(MUTEX_SFLASH);
+												}
+											  else
+												{
+												  //长度大于4个字符数据;
+												}
+											}
+										  else
+											{
+											  //无数据项;
+											}
+													
+										  break;
+		
+										}
+										case 0x56 : {
+										  //设置信号处理间隔
+										  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN);
+										  if(length)
+											{
+											  if(length <= 4)
+												{
+												  /* 分配内存 */
+												  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+												  match = OSMemGet(MEM_BUF, &err);
+													
+												  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
+														  "%d[^#]", \
+														  (int *)&length);
+													
+												  /* 释放内存 */
+												  OSMemPut(MEM_BUF, (void *)match);
+												  OSSemPost(SEM_MEM_PART_ALLOC);
+												  if(length >= 3000)
+													{
+													  device_parameters->signal_parameters.process_interval = 1;
+													}
+												  else
+													{
+													  device_parameters->signal_parameters.process_interval = length;
+													}
+												  OSMutexPend(MUTEX_SFLASH, 0, &err);
+												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->signal_parameters.process_interval), \
+																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
+																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + \
+																	 OFF_SET_OF(SignalParameters, process_interval),	\
+																	 sizeof(device_parameters->signal_parameters.process_interval));
+												  OSMutexPost(MUTEX_SFLASH);
+												}
+											  else
+												{
+												  //长度大于4个字符数据;
+												}
+											}
+										  else
+											{
+											  //无数据项;
+											}
+													
+										  break;
+		
+										}
+										case 0x57 : {
+										  //设置设备地址
+										  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN);//设置从设备数量数据长度;
+										  if(length)
+											{
+											  if(length <= 5)
+												{
+												  /* 分配内存 */
+												  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+												  match = OSMemGet(MEM_BUF, &err);
+													
+												  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
+														  "%x[^#]", \
+														  (int *)&length);
+													
+												  /* 释放内存 */
+												  OSMemPut(MEM_BUF, (void *)match);
+												  OSSemPost(SEM_MEM_PART_ALLOC);
+												  if(length >= 0xff)
+													{
+													  device_parameters->device_id = 0x01;
+													}
+												  else
+													{
+													  device_parameters->device_id = length;
+													}
+												  OSMutexPend(MUTEX_SFLASH, 0, &err);
+												  /*
+													Iron_Write(IRON_ALARM_TELEPHONE_NUMBERS, \
+													(uint8_t *)&(device_parameters->alarm_telephone_numbers), \
+													1);
+												  */
+												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->device_id), \
+																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
+																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, device_id), \
+																	 sizeof(device_parameters->device_id));
+												  OSMutexPost(MUTEX_SFLASH);
+												}
+											  else
+												{
+												  //长度大于5个字符数据;
+												}
+											}
+										  else
+											{
+											  //无数据项;
+											}
+													
+										  break;
+		
+										}
+										case 0x58 : {
+										  //设置设备地址
+										  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN);//设置从设备数量数据长度;
+										  if(length)
+											{
+											  if(length <= 2)
+												{
+												  /* 分配内存 */
+												  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
+												  match = OSMemGet(MEM_BUF, &err);
+													
+												  siscanf((char *)UCS_To_String(sms_set_frame->DATA, (uint8_t *)match, length), \
+														  "%d[^#]", \
+														  (int *)&length);
+													
+												  /* 释放内存 */
+												  OSMemPut(MEM_BUF, (void *)match);
+												  OSSemPost(SEM_MEM_PART_ALLOC);
+												  if(length >= 6)
+													{
+													  device_parameters->rs485_baudrate = 0;
+													}
+												  else
+													{
+													  device_parameters->rs485_baudrate = length;
+													}
+												  OSMutexPend(MUTEX_SFLASH, 0, &err);
+												  /*
+													Iron_Write(IRON_ALARM_TELEPHONE_NUMBERS, \
+													(uint8_t *)&(device_parameters->alarm_telephone_numbers), \
+													1);
+												  */
+												  sFLASH_WriteBuffer((uint8_t *)&(device_parameters->rs485_baudrate), \
+																	 SFLASH_DEVICE_INIT_PARAMATERS_START + \
+																	 OFF_SET_OF(DEVICE_INIT_PARAMATERS, rs485_baudrate), \
+																	 sizeof(device_parameters->rs485_baudrate));
+												  OSMutexPost(MUTEX_SFLASH);
+												}
+											  else
+												{
+												  //长度大于5个字符数据;
+												}
+											}
+										  else
+											{
+											  //无数据项;
+											}
+													
 										  break;
 		
 										}
@@ -1483,7 +1995,7 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
   uint8_t err;
   uint16_t *UCS = NULL;
   uint16_t *UCS_len = NULL;
-  uint8_t temp;
+  uint16_t temp;
   uint8_t index;
   uint8_t send_index;
   //  SLAVE_DEVICE_STATE_FRAME *slave_device_state = NULL;
@@ -1733,6 +2245,239 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 
 	  break;
 	}
+	case 0x51 : {
+			
+	  UCS = (uint16_t *)(sms_send_pdu_frame->TPDU.TP_UD) + sms_data_length;
+	  UCS_len = &(sms_data_length);
+	  temp = device_parameters->signal_parameters.interval;
+	  if(temp <= 3000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp / 1000];
+		  temp %= 1000;
+		  *UCS++ = NUM_UCS_MAP[temp / 100];
+		  temp %= 100;		  
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  temp %= 10;
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  *UCS_len += 4;
+		}
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;			
+	  break;
+	}
+	case 0x52 : {
+			
+	  UCS = (uint16_t *)(sms_send_pdu_frame->TPDU.TP_UD) + sms_data_length;
+	  UCS_len = &(sms_data_length);
+	  temp = device_parameters->signal_parameters.freq;
+	  if(temp < 10)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  (*UCS_len)++;
+		}
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;			
+	  break;
+	}
+	case 0x53 : {
+			
+	  UCS = (uint16_t *)(sms_send_pdu_frame->TPDU.TP_UD) + sms_data_length;
+	  UCS_len = &(sms_data_length);
+	  temp = device_parameters->signal_parameters.freq_spread;
+	  if(temp <= 3000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp / 1000];
+		  temp %= 1000;
+		  *UCS++ = NUM_UCS_MAP[temp / 100];
+		  temp %= 100;		  
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  temp %= 10;
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  *UCS_len += 4;
+		}
+
+	  *UCS++ = COMMA_SIGN;
+	  (*UCS_len)++;
+
+	  temp = device_parameters->signal_parameters.amp_limit;
+	  if(temp <= 3000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp / 1000];
+		  temp %= 1000;
+		  *UCS++ = NUM_UCS_MAP[temp / 100];
+		  temp %= 100;		  
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  temp %= 10;
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  *UCS_len += 4;
+		}
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;			
+	  break;
+	}
+	case 0x54 : {
+			
+	  UCS = (uint16_t *)(sms_send_pdu_frame->TPDU.TP_UD) + sms_data_length;
+	  UCS_len = &(sms_data_length);
+	  temp = device_parameters->signal_parameters.process_counts;
+	  if(temp <= 3000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp / 1000];
+		  temp %= 1000;
+		  *UCS++ = NUM_UCS_MAP[temp / 100];
+		  temp %= 100;		  
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  temp %= 10;
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  *UCS_len += 4;
+		}
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;			
+	  break;
+	}
+
+	case 0x55 : {
+			
+	  UCS = (uint16_t *)(sms_send_pdu_frame->TPDU.TP_UD) + sms_data_length;
+	  UCS_len = &(sms_data_length);
+	  temp = device_parameters->signal_parameters.process_interval;
+	  if(temp <= 3000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp / 1000];
+		  temp %= 1000;
+		  *UCS++ = NUM_UCS_MAP[temp / 100];
+		  temp %= 100;		  
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  temp %= 10;
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  *UCS_len += 4;
+		}
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;			
+	  break;
+	}
+	case 0x56 : {
+			
+	  UCS = (uint16_t *)(sms_send_pdu_frame->TPDU.TP_UD) + sms_data_length;
+	  UCS_len = &(sms_data_length);
+	  temp = device_parameters->device_id;
+	  if(temp <= 0xff)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp >> 4];
+		  *UCS++ = NUM_UCS_MAP[temp & 0x0f];
+		  *UCS_len += 2;
+		}
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;			
+	  break;
+	}
+	case 0x57 : {
+			
+	  UCS = (uint16_t *)(sms_send_pdu_frame->TPDU.TP_UD) + sms_data_length;
+	  UCS_len = &(sms_data_length);
+	  temp = device_parameters->signal_parameters.send_freq;
+	  if(temp <= 3000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp / 1000];
+		  temp %= 1000;
+		  *UCS++ = NUM_UCS_MAP[temp / 100];
+		  temp %= 100;		  
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  temp %= 10;
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  *UCS_len += 4;
+		}
+
+	  *UCS++ = COMMA_SIGN;
+	  (*UCS_len)++;
+	  
+	  temp = device_parameters->signal_parameters.receive_freq;
+	  if(temp <= 3000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp / 1000];
+		  temp %= 1000;
+		  *UCS++ = NUM_UCS_MAP[temp / 100];
+		  temp %= 100;		  
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  temp %= 10;
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  *UCS_len += 4;
+		}
+
+	  *UCS++ = COMMA_SIGN;
+	  (*UCS_len)++;
+
+	  temp = device_parameters->signal_parameters.amp;
+	  if(temp <= 3000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp / 1000];
+		  temp %= 1000;
+		  *UCS++ = NUM_UCS_MAP[temp / 100];
+		  temp %= 100;		  
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  temp %= 10;
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  *UCS_len += 4;
+		}
+
+	  *UCS++ = COMMA_SIGN;
+	  (*UCS_len)++;
+
+	  //设备温度
+	  if(temperature < 10)
+		{
+		  *UCS++ = NUM_UCS_MAP[0];
+		  *UCS++ = LINE_SIGN;
+		  *UCS++ = NUM_UCS_MAP[temperature];
+		  *UCS++ = UCS2_DU;
+		  *UCS_len += 4;		
+					
+		}
+	  else if(temperature < 100)
+		{
+
+		  *UCS++ = NUM_UCS_MAP[temperature / 10];
+		  *UCS++ = LINE_SIGN;
+		  *UCS++ = NUM_UCS_MAP[temperature % 10];
+		  *UCS++ = UCS2_DU;
+		  *UCS_len += 4;
+		}
+	  else if(temperature < 1000)
+		{
+		  *UCS++ = NUM_UCS_MAP[temperature / 100];
+		  temp = temperature % 100;
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  *UCS++ = LINE_SIGN;
+		  *UCS++ = NUM_UCS_MAP[temp % 10];
+		  *UCS++ = UCS2_DU;
+		  *UCS_len += 5;
+		}
+	  else
+		{
+		  *UCS++ = NUM_UCS_MAP[temperature / 100];
+		  temp = temperature % 100;
+		  *UCS++ = NUM_UCS_MAP[temp / 10];
+		  *UCS++ = LINE_SIGN;
+		  *UCS++ = NUM_UCS_MAP[temp % 10];
+		  *UCS++ = UCS2_DU;
+		  *UCS_len += 5;
+		}
+
+	  *UCS++ = COMMA_SIGN;
+	  (*UCS_len)++;
+
+	  temp = signal_state;
+	  if(temp <= 1)
+		{
+		  *UCS++ = NUM_UCS_MAP[temp];
+		  (*UCS_len)++;
+		}
+	  
+	  *UCS++ = POUND_SIGN;
+	  (*UCS_len)++;			
+	  break;
+	}
+
 	default : 
 	  break;
 	}
@@ -2143,13 +2888,459 @@ static void AppSignalTask(void *p_arg)
 	}
 }
 
+
+typedef struct {
+  
+  uint16_t address;
+  uint16_t length;
+  uint16_t offset;
+  void *data;
+  
+}RS485_ADDRESS_INFO;
+
+
+#define nr_of_array(x) (sizeof((x)) / sizeof((x)[0]))
+
+uint8_t function_id[] = {0x04, 0x10};
+int comp_function_id(const void *m1, const void *m2)
+{
+  uint8_t *mi1 = (uint8_t *)m1;
+  uint8_t *mi2 = (uint8_t *)m2;
+  if(*mi1 > *mi2)
+	{
+	  return 1;
+	}
+  else if(*mi1 == *mi2)
+	{
+	  return 0;
+	}
+  else
+	{
+	  return -1;
+	}
+}
+
+int comp_rs485_address_info(const void *m1, const void *m2)
+{
+  RS485_ADDRESS_INFO *mi1 = (RS485_ADDRESS_INFO *)m1;
+  RS485_ADDRESS_INFO *mi2 = (RS485_ADDRESS_INFO *)m2;
+  if(mi1->address > mi2->address)
+	{
+	  return 1;
+	}
+  else if(mi1->address == mi2->address)
+	{
+	  return 0;
+	}
+  else
+	{
+	  return -1;
+	}
+}
+
+
+
+RS485_ADDRESS_INFO rs485_address_info[] = {
+  {
+	0x1100, 32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, primary_device_name), &(device_init_paramaters.primary_device_name[0]),
+  },
+  {
+	0x1200,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, slave_device_name), &(device_init_paramaters.slave_device_name[0]),
+  },
+  {
+	0x2100,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone_numbers), &(device_init_paramaters.alarm_telephone_numbers),
+  },
+  {
+	0x2200,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[0]), &(device_init_paramaters.alarm_telephone[0]),
+  },
+  {
+	0x2300,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[1]), &(device_init_paramaters.alarm_telephone[1]),
+  },
+  {
+	0x2400,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[2]), &(device_init_paramaters.alarm_telephone[2]),
+  },
+  {
+	0x2500,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[3]), &(device_init_paramaters.alarm_telephone[3]),
+  },
+  {
+	0x2600,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[4]), &(device_init_paramaters.alarm_telephone[4]),
+  },
+  {
+	0x2700,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[5]), &(device_init_paramaters.alarm_telephone[5]),
+  },
+  {
+	0x2800,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[6]), &(device_init_paramaters.alarm_telephone[6]),
+  },
+  {
+	0x2900,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[7]), &(device_init_paramaters.alarm_telephone[7]),
+  },
+  {
+	0x3000,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[8]), &(device_init_paramaters.alarm_telephone[8]),
+  },
+  {
+	0x3100,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[9]), &(device_init_paramaters.alarm_telephone[9]),
+  },
+  {
+	0x3200,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, service_center_address), &(device_init_paramaters.service_center_address[0]),
+  },
+  {
+	0x4100,	6,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, password), &(device_init_paramaters.password[0]),
+  },
+  {
+	0x4200,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, device_id), &(device_init_paramaters.device_id),
+  },
+  {
+	0x4300,	8,	0, &(calender),
+  },
+  {
+	0x5100,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gps), &(device_init_paramaters.gps[0]),
+  },
+  {
+	0x6100,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, sms_on_off), &(device_init_paramaters.sms_on_off),
+  },
+  {
+	0x7100,
+	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, interval),
+	&(device_init_paramaters.signal_parameters.interval),
+  },
+  {
+	0x7200,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, freq),
+	&(device_init_paramaters.signal_parameters.freq),
+  },
+  {
+	0x7300,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, freq_spread),
+	&(device_init_paramaters.signal_parameters.freq_spread),
+  },
+  {
+	0x7400,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, amp_limit),
+	&(device_init_paramaters.signal_parameters.amp_limit),
+  },
+  {
+	0x7500,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, process_counts),
+	&(device_init_paramaters.signal_parameters.process_counts),
+  },
+  {
+	0x7600,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, process_interval),
+	&(device_init_paramaters.signal_parameters.process_interval),
+  },
+  {
+	0x7700,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, send_freq),
+	&(device_init_paramaters.signal_parameters.send_freq),
+  },
+};
+
+
+RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, uint8_t *len, DEVICE_INIT_PARAMATERS *device_parameters)
+{
+  RS485_ADDRESS_INFO key, *res;
+  void *temp;
+  *len = 0;
+  //接收device_id字节
+  if(receive_from_rs485((char *)&(request_frame->device_id), 1) == 1)
+	{
+	  (*len)++;
+	  //处理device_id
+	  if(request_frame->device_id == device_parameters->device_id)
+		{
+		  //接收function_id
+		  if(receive_from_rs485((char *)&(request_frame->function_id), 1) == 1)
+			{
+			  (*len)++;//帧长度处理
+			  //处理function_id
+			  temp = (void *)bsearch((void *)&(request_frame->function_id),
+									 (void *)&function_id[0],
+									 nr_of_array(function_id),
+									 sizeof(function_id[0]),
+									 comp_function_id);
+			  if(temp != NULL)
+				{
+				  //接收地址码
+				  if(receive_from_rs485((char *)&(request_frame->address), 2) == 2)
+					{
+					  *len += 2;//帧长度处理
+					  //处理地址码
+					  __REV16(request_frame->address);
+					  key.address = request_frame->address;
+					  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
+														  (void *)&rs485_address_info[0],
+														  nr_of_array(rs485_address_info),
+														  sizeof(rs485_address_info[0]),
+														  comp_rs485_address_info);
+					  if(res != NULL)
+						{
+						  //接收数据长度
+						  if(receive_from_rs485((char *)&(request_frame->length_16), 2) == 2)
+							{
+							  *len += 2;//帧长度处理
+							  //处理数据长度
+							  __REV16(request_frame->length_16);
+							  if(request_frame->length_16 <= 100)
+								{
+								  switch(request_frame->function_id)
+									{
+									case 0x04 : {
+									  //接收CRC码
+									  if(receive_from_rs485((char *)&(request_frame->rs485_read_request_frame.crc), 2) == 2)
+										{
+										  *len += 2;
+										  //校验帧CRC
+										  if(crc_16((uint8_t *)request_frame, *len) == 0x0)
+											{
+											  return request_frame;
+											}
+										  else
+											{
+											  return NULL;
+											}
+										}
+									  else
+										{
+										  return NULL;
+										}
+									  break;
+									}
+									case 0x10 : {
+									  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.length_8), 1) == 1))
+										{
+										  (*len)++;
+										  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.length_8),
+																request_frame->rs485_set_request_frame.length_8) \
+											  == request_frame->rs485_set_request_frame.length_8))
+											{
+											  *len += request_frame->rs485_set_request_frame.length_8;
+											  if(receive_from_rs485((char *)&(request_frame->rs485_read_request_frame.crc), 2) == 2)
+												{
+												  *len += 2;
+												  //校验帧CRC
+												  if(crc_16((uint8_t *)request_frame, *len) == 0x0)
+													{
+													  return request_frame;
+													}
+												  else
+													{
+													  return NULL;
+													}
+												}
+											  else
+												{
+												  return NULL;
+												}
+
+											}
+										  else
+											{
+											  return NULL;
+											}
+										}
+									  else
+										{
+										  return NULL;
+										}
+									  break;
+									}
+									default:{
+									  
+									  break;
+									}
+									}
+								  return NULL;
+								}
+							  else
+								{
+								  return NULL;
+								}
+							}
+						  else
+							{
+							  return NULL;
+							}
+						  
+						}
+					  else
+						{
+						  return NULL;
+						}
+					}
+				  else
+					{
+					  return NULL;
+					}
+				}
+			  else
+				{
+				  return NULL;
+				}
+			}
+		  else
+			{
+			  return NULL;
+			}
+		}
+	  else
+		{
+		  return NULL;
+		}
+	  
+	}
+  else
+	{
+	  return NULL;
+	}
+}
+
 static void AppRS485Task(void *p_arg)
 {
   (void)p_arg;
+  uint8_t err;
+  uint8_t length = 0;
+  uint8_t index = 0;
+
+  RS485_ADDRESS_INFO key, *res;
+  DEVICE_INIT_PARAMATERS *device_parameters = &device_init_paramaters;
+  RS485_REQUEST_FRAME *rs_request_frame = NULL;
+  RS485_RESPONSE_FRAME *rs_response_frame = (RS485_RESPONSE_FRAME *)RS485_SEND_BUF;
+  uint16_t *temp = NULL;
+  
+  
+  
   while(1)
 	{
+	  rs_request_frame = receive_rs485_frame((RS485_REQUEST_FRAME *)RS485_RECEIVE_BUF,
+											 &length,
+											 device_parameters);
+	  if(rs_request_frame != NULL)
+		{
+		  rs_response_frame->device_id = rs_request_frame->device_id;
+		  rs_response_frame->function_id = rs_request_frame->function_id;
+		  switch(rs_request_frame->function_id)
+			{
+			case 0x04 : {
+			  //rs_response_frame->rs485_read_response_frame.length_8 = rs_request_frame->rs485_read_request_frame.length_8;
+			  key.address = __REV(rs_request_frame->address);
+			  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
+												  (void *)&rs485_address_info[0],
+												  nr_of_array(rs485_address_info),
+												  sizeof(rs485_address_info[0]),
+												  comp_rs485_address_info);
+			  if(res != NULL)
+				{
+				  memset(RS485_PROCESS_BUF, 0, res->length + 1);
+				  memcpy(RS485_PROCESS_BUF, res->data, res->length);
+				  if(res->length % 2 == 0)
+					{
+					  length = res->length >> 1;
+					}
+				  else
+					{
+					  length = (res->length + 1) >> 1;
+					  (res->length)++;
+					}
+				  temp = (uint16_t *)RS485_RECEIVE_BUF;
+				  for(index = 0; index < length; index++)
+					{
+					  index++;
+					  //					  __REV(*(temp + index));
+					}
 
+				  memcpy(rs_response_frame->rs485_read_response_frame.data, RS485_PROCESS_BUF, res->length);
+				  index = crc_16((uint8_t *)rs_response_frame, res->length + 3);
+				  rs_response_frame->rs485_read_response_frame.data[res->length] = (uint8_t)index;
+				  rs_response_frame->rs485_read_response_frame.data[res->length + 1] = (uint8_t)(index >> 8);
+				  OSMutexPend(MUTEX_RS485, 0, &err);
 
-	  OSTimeDlyHMSM(0, 0, 1, 0);
+				  rs485_dir_set(ENABLE);
+				  send_to_rs485((char *)rs_response_frame, res->length + 5);
+				  rs485_dir_set(DISABLE);
+				  
+				  OSMutexPost(MUTEX_RS485);
+				}
+			  else
+				{
+
+				}
+			  break;
+			}
+			case 0x10 : {
+			  rs_response_frame->rs485_set_response_frame.length_16 = rs_request_frame->length_16;
+			  rs_response_frame->rs485_set_response_frame.address = rs_request_frame->address;
+			  key.address = __REV(rs_request_frame->address);
+			  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
+												  (void *)&rs485_address_info[0],
+												  nr_of_array(rs485_address_info),
+												  sizeof(rs485_address_info[0]),
+												  comp_rs485_address_info);
+			  if(res != NULL)
+				{
+				  memset(RS485_PROCESS_BUF, 0, res->length);
+				  memcpy(RS485_PROCESS_BUF, rs_request_frame->rs485_set_request_frame.data, res->length);
+				  length = res->length >> 2;
+				  temp = (uint16_t *)RS485_RECEIVE_BUF;
+				  memcpy(res->data, RS485_RECEIVE_BUF, res->length);
+
+				  for(index = 0; index < length; index++)
+					{
+					  __REV(*temp++);
+					}
+				  if(rs_request_frame->address == 0x4300)
+					{
+					  
+					  OSMutexPend(MUTEX_CALENDER, 0, &err);
+					  temp = (uint16_t *)RS485_RECEIVE_BUF;
+					  calender.tm_sec = *temp++;
+					  calender.tm_min = *temp++;
+					  calender.tm_hour = *temp++;
+					  calender.tm_mday = *temp++;
+					  calender.tm_mon = *temp++;
+					  calender.tm_year = *temp++;
+					  calender.tm_wday = 0;
+					  calender.tm_yday = 0;
+					  calender.tm_isdst = 0;
+					  calender_set(&calender);
+					  OSMutexPost(MUTEX_CALENDER);
+
+					}
+				  else
+					{
+					  OSMutexPend(MUTEX_SFLASH, 0, &err);
+					  /*
+						Iron_Write(IRON_SERVICE_CENTER_ADDRESS, \
+						device_init_paramaters.service_center_address, \
+						ALARM_TELEPHONE_NUMBER_SIZE);*/
+					  sFLASH_WriteBuffer(res->data, \
+										 SFLASH_DEVICE_INIT_PARAMATERS_START +	\
+										 res->offset, \
+										 res->length);
+					  OSMutexPost(MUTEX_SFLASH);
+
+					}
+				  OSMutexPend(MUTEX_RS485, 0, &err);
+
+				  rs485_dir_set(ENABLE);
+				  send_to_rs485((char *)rs_response_frame, res->length + 5);
+				  rs485_dir_set(DISABLE);
+				  
+				  OSMutexPost(MUTEX_RS485);
+
+				}
+			  else
+				{
+
+				}
+			  break;
+			}
+			}
+			  
+		}
+	  else
+		{
+			  OSTimeDlyHMSM(0, 0, 0, 200);
+		}
 	}
 }
