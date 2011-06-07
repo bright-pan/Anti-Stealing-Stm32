@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon May 30 13:56:27 2011
+ * Modified at:   Tue Jun  7 14:07:31 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -46,6 +46,7 @@ typedef struct {
   
   uint8_t length_8;
   uint8_t data[200];
+  uint16_t crc;
 
 }RS485_SET_REQUEST_FRAME;
 
@@ -90,6 +91,7 @@ void flush_rs485_buffer(void);
 void send_to_rs485(const char *str, uint16_t str_len);
 void rs485_baudrate_set(BaudRate rate);
 
+void crc_16_init(void);
 uint16_t crc_16(uint8_t *puchMsg, uint16_t usDataLen);
 
 

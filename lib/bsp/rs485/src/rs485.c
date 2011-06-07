@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed May 25 15:13:32 2011
+ * Modified at:   Tue Jun  7 14:22:46 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -285,6 +285,9 @@ const static uint8_t auchCRCLo[] = {
   
 };
 
+static uint8_t uchCRCHi = 0xFF; // CRC 的高字节初始化
+static uint8_t uchCRCLo = 0xFF; // CRC 的低字节初始化
+
 /*
  * Function crc_16 (puchMsg, usDataLen)
  *
@@ -295,15 +298,18 @@ const static uint8_t auchCRCLo[] = {
  */
 uint16_t crc_16(uint8_t *puchMsg, uint16_t usDataLen)
 {
-  uint8_t uchCRCHi = 0xFF; // CRC 的高字节初始化
-  uint8_t uchCRCLo = 0xFF; // CRC 的低字节初始化
   uint16_t uIndex; // CRC 查询表索引
   while (usDataLen--) // 完成整个报文缓冲区
 	{
-	  uIndex = uchCRCLo ^ *puchMsg++; // 计算CRC
-	  uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex];
-	  uchCRCHi = auchCRCLo[uIndex];
+	  uIndex = uchCRCHi ^ *puchMsg++; // 计算CRC
+	  uchCRCHi = uchCRCLo ^ auchCRCHi[uIndex];
+	  uchCRCLo = auchCRCLo[uIndex];
 	}
   return (uchCRCHi << 8 | uchCRCLo);
 }
 
+void crc_16_init(void)
+{
+  uchCRCHi = 0xFF; // CRC 的高字节初始化
+  uchCRCLo = 0xFF; // CRC 的低字节初始化
+}

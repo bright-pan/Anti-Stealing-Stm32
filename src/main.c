@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 31 09:55:02 2011
+ * Modified at:   Tue Jun  7 18:09:47 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -39,7 +39,7 @@ DEVICE_INIT_PARAMATERS device_init_paramaters;
 //SLAVE_DEVICE_STATE_FRAME slave_device_state_frame[SLAVE_DEVICE_MAX_NUMBERS];
 //TIME_FRAME set_time;
 const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
-  "zxsoft:as-2011-05-23",
+  "zxsoft:as-2011-06-07",
   1,//id
   "高新区一号开闭所",
   "比亚迪出线电缆",
@@ -2990,7 +2990,7 @@ RS485_ADDRESS_INFO rs485_address_info[] = {
 	0x4200,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, device_id), &(device_init_paramaters.device_id),
   },
   {
-	0x4300,	8,	0, &(calender),
+	0x4300,	10,	0, &(calender),
   },
   {
 	0x5100,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gps), &(device_init_paramaters.gps[0]),
@@ -3037,22 +3037,24 @@ RS485_ADDRESS_INFO rs485_address_info[] = {
 };
 
 
-RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, uint8_t *len, DEVICE_INIT_PARAMATERS *device_parameters)
+RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, DEVICE_INIT_PARAMATERS *device_parameters)
 {
   RS485_ADDRESS_INFO key, *res;
-  void *temp;
-  *len = 0;
+  void *temp = NULL;
+  uint16_t crc = 0;
+  crc_16_init();
   //接收device_id字节
   if(receive_from_rs485((char *)&(request_frame->device_id), 1) == 1)
 	{
-	  (*len)++;
 	  //处理device_id
 	  if(request_frame->device_id == device_parameters->device_id)
 		{
+		  crc = crc_16((uint8_t *)&(request_frame->device_id), 1);
+		  //OSTimeDlyHMSM(0, 0, 0, 1);
 		  //接收function_id
 		  if(receive_from_rs485((char *)&(request_frame->function_id), 1) == 1)
 			{
-			  (*len)++;//帧长度处理
+			  crc = crc_16((uint8_t *)&(request_frame->function_id), 1);
 			  //处理function_id
 			  temp = (void *)bsearch((void *)&(request_frame->function_id),
 									 (void *)&function_id[0],
@@ -3064,9 +3066,10 @@ RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, uin
 				  //接收地址码
 				  if(receive_from_rs485((char *)&(request_frame->address), 2) == 2)
 					{
-					  *len += 2;//帧长度处理
+					  crc = crc_16((uint8_t *)&(request_frame->address), 2);
 					  //处理地址码
-					  __REV16(request_frame->address);
+					  request_frame->address = __REV16(request_frame->address);
+					  //					  request_frame->address = (request_frame->address >> 8) | (request_frame->address << 8);
 					  key.address = request_frame->address;
 					  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
 														  (void *)&rs485_address_info[0],
@@ -3078,9 +3081,9 @@ RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, uin
 						  //接收数据长度
 						  if(receive_from_rs485((char *)&(request_frame->length_16), 2) == 2)
 							{
-							  *len += 2;//帧长度处理
+							  crc = crc_16((uint8_t *)&(request_frame->length_16), 2);
 							  //处理数据长度
-							  __REV16(request_frame->length_16);
+							  request_frame->length_16 = __REV16(request_frame->length_16);
 							  if(request_frame->length_16 <= 100)
 								{
 								  switch(request_frame->function_id)
@@ -3089,9 +3092,9 @@ RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, uin
 									  //接收CRC码
 									  if(receive_from_rs485((char *)&(request_frame->rs485_read_request_frame.crc), 2) == 2)
 										{
-										  *len += 2;
+										  crc = crc_16((uint8_t *)&(request_frame->rs485_read_request_frame.crc), 2);
 										  //校验帧CRC
-										  if(crc_16((uint8_t *)request_frame, *len) == 0x0)
+										  if(crc == 0x0)
 											{
 											  return request_frame;
 											}
@@ -3109,17 +3112,16 @@ RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, uin
 									case 0x10 : {
 									  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.length_8), 1) == 1))
 										{
-										  (*len)++;
-										  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.length_8),
+										  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.length_8), 1);
+										  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.data),
 																request_frame->rs485_set_request_frame.length_8) \
 											  == request_frame->rs485_set_request_frame.length_8))
 											{
-											  *len += request_frame->rs485_set_request_frame.length_8;
-											  if(receive_from_rs485((char *)&(request_frame->rs485_read_request_frame.crc), 2) == 2)
+											  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.data), request_frame->rs485_set_request_frame.length_8);//校验帧CRC
+											  if(receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.crc), 2) == 2)
 												{
-												  *len += 2;
-												  //校验帧CRC
-												  if(crc_16((uint8_t *)request_frame, *len) == 0x0)
+												  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.crc), 2);//校验帧CRC
+												  if(crc == 0x0)
 													{
 													  return request_frame;
 													}
@@ -3201,7 +3203,8 @@ static void AppRS485Task(void *p_arg)
   uint8_t err;
   uint8_t length = 0;
   uint8_t index = 0;
-
+  //  uint16_t crc;
+  
   RS485_ADDRESS_INFO key, *res;
   DEVICE_INIT_PARAMATERS *device_parameters = &device_init_paramaters;
   RS485_REQUEST_FRAME *rs_request_frame = NULL;
@@ -3212,135 +3215,153 @@ static void AppRS485Task(void *p_arg)
   
   while(1)
 	{
-	  rs_request_frame = receive_rs485_frame((RS485_REQUEST_FRAME *)RS485_RECEIVE_BUF,
-											 &length,
-											 device_parameters);
-	  if(rs_request_frame != NULL)
+	  if(CHARS(rs485_buf) >= 1)
 		{
-		  rs_response_frame->device_id = rs_request_frame->device_id;
-		  rs_response_frame->function_id = rs_request_frame->function_id;
-		  switch(rs_request_frame->function_id)
+		  OSTimeDlyHMSM(0, 0, 0, 100);
+		  rs_request_frame = receive_rs485_frame((RS485_REQUEST_FRAME *)RS485_RECEIVE_BUF,
+												 device_parameters);
+		  if(rs_request_frame != NULL)
 			{
-			case 0x04 : {
-			  //rs_response_frame->rs485_read_response_frame.length_8 = rs_request_frame->rs485_read_request_frame.length_8;
-			  key.address = __REV(rs_request_frame->address);
-			  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
-												  (void *)&rs485_address_info[0],
-												  nr_of_array(rs485_address_info),
-												  sizeof(rs485_address_info[0]),
-												  comp_rs485_address_info);
-			  if(res != NULL)
+			  crc_16_init();
+			  rs_response_frame->device_id = rs_request_frame->device_id;
+			  crc_16((uint8_t *)&(rs_response_frame->device_id), 1);
+			  rs_response_frame->function_id = rs_request_frame->function_id;
+			  crc_16((uint8_t *)&(rs_response_frame->function_id), 1);
+			  switch(rs_request_frame->function_id)
 				{
-				  memset(RS485_PROCESS_BUF, 0, res->length + 1);
-				  memcpy(RS485_PROCESS_BUF, res->data, res->length);
-				  if(res->length % 2 == 0)
+				case 0x04 : {
+				  rs_response_frame->rs485_read_response_frame.length_8 = rs_request_frame->length_16 << 1;
+				  crc_16((uint8_t *)&(rs_response_frame->rs485_read_response_frame.length_8), 1);
+				  key.address = rs_request_frame->address;
+				  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
+													  (void *)&rs485_address_info[0],
+													  nr_of_array(rs485_address_info),
+													  sizeof(rs485_address_info[0]),
+													  comp_rs485_address_info);
+				  if(res != NULL)
 					{
+					  memset(RS485_PROCESS_BUF, 0, res->length + 1);
+					  memcpy(RS485_PROCESS_BUF, res->data, res->length);
 					  length = res->length >> 1;
+					  temp = (uint16_t *)RS485_PROCESS_BUF;
+					  for(index = 0; index < length; index++)
+						{
+						  *temp = __REV16(*temp);
+						  temp++;
+
+						}
+
+					  memcpy(rs_response_frame->rs485_read_response_frame.data, RS485_PROCESS_BUF, res->length);
+					  rs_response_frame->crc = crc_16((uint8_t *)&(rs_response_frame->rs485_read_response_frame.data), res->length);
+					  rs_response_frame->crc = __REV16(rs_response_frame->crc);
+					  OSMutexPend(MUTEX_RS485, 0, &err);
+
+					  rs485_dir_set(ENABLE);
+					  send_to_rs485((char *)&(rs_response_frame->device_id), 1);
+					  send_to_rs485((char *)&(rs_response_frame->function_id), 1);
+					  send_to_rs485((char *)&(rs_response_frame->rs485_read_response_frame.length_8), 1);
+					  send_to_rs485((char *)&(rs_response_frame->rs485_read_response_frame.data), rs_response_frame->rs485_read_response_frame.length_8);
+					  send_to_rs485((char *)&(rs_response_frame->crc), 2);
+					  OSTimeDlyHMSM(0, 0, 0, 50);
+					  rs485_dir_set(DISABLE);
+				  
+					  OSMutexPost(MUTEX_RS485);
 					}
 				  else
 					{
-					  length = (res->length + 1) >> 1;
-					  (res->length)++;
-					}
-				  temp = (uint16_t *)RS485_RECEIVE_BUF;
-				  for(index = 0; index < length; index++)
-					{
-					  index++;
-					  //					  __REV(*(temp + index));
-					}
 
-				  memcpy(rs_response_frame->rs485_read_response_frame.data, RS485_PROCESS_BUF, res->length);
-				  index = crc_16((uint8_t *)rs_response_frame, res->length + 3);
-				  rs_response_frame->rs485_read_response_frame.data[res->length] = (uint8_t)index;
-				  rs_response_frame->rs485_read_response_frame.data[res->length + 1] = (uint8_t)(index >> 8);
-				  OSMutexPend(MUTEX_RS485, 0, &err);
-
-				  rs485_dir_set(ENABLE);
-				  send_to_rs485((char *)rs_response_frame, res->length + 5);
-				  rs485_dir_set(DISABLE);
-				  
-				  OSMutexPost(MUTEX_RS485);
+					}
+				  break;
 				}
-			  else
-				{
-
-				}
-			  break;
-			}
-			case 0x10 : {
-			  rs_response_frame->rs485_set_response_frame.length_16 = rs_request_frame->length_16;
-			  rs_response_frame->rs485_set_response_frame.address = rs_request_frame->address;
-			  key.address = __REV(rs_request_frame->address);
-			  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
-												  (void *)&rs485_address_info[0],
-												  nr_of_array(rs485_address_info),
-												  sizeof(rs485_address_info[0]),
-												  comp_rs485_address_info);
-			  if(res != NULL)
-				{
-				  memset(RS485_PROCESS_BUF, 0, res->length);
-				  memcpy(RS485_PROCESS_BUF, rs_request_frame->rs485_set_request_frame.data, res->length);
-				  length = res->length >> 2;
-				  temp = (uint16_t *)RS485_RECEIVE_BUF;
-				  memcpy(res->data, RS485_RECEIVE_BUF, res->length);
-
-				  for(index = 0; index < length; index++)
+				case 0x10 : {
+				  rs_response_frame->rs485_set_response_frame.address = __REV16(rs_request_frame->address);
+				  rs_response_frame->rs485_set_response_frame.length_16 = __REV16(rs_request_frame->length_16);
+				  rs_response_frame->crc = crc_16((uint8_t *)&(rs_response_frame->rs485_set_response_frame.length_16), res->length);
+				  rs_response_frame->crc = __REV16(rs_response_frame->crc);
+				  key.address = rs_request_frame->address;
+				  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
+													  (void *)&rs485_address_info[0],
+													  nr_of_array(rs485_address_info),
+													  sizeof(rs485_address_info[0]),
+													  comp_rs485_address_info);
+				  if(res != NULL)
 					{
-					  __REV(*temp++);
-					}
-				  if(rs_request_frame->address == 0x4300)
-					{
+					  memset(RS485_PROCESS_BUF, 0, res->length);
+					  memcpy(RS485_PROCESS_BUF, rs_request_frame->rs485_set_request_frame.data, res->length);
+					  length = res->length >> 1;
+					  temp = (uint16_t *)RS485_PROCESS_BUF;
+
+					  for(index = 0; index < length; index++)
+						{
+						  *temp = __REV16(*temp);
+						  temp++;
+						}
+					  memcpy(res->data, RS485_RECEIVE_BUF, res->length);
+					  if(rs_request_frame->address == 0x4300)
+						{
 					  
-					  OSMutexPend(MUTEX_CALENDER, 0, &err);
-					  temp = (uint16_t *)RS485_RECEIVE_BUF;
-					  calender.tm_sec = *temp++;
-					  calender.tm_min = *temp++;
-					  calender.tm_hour = *temp++;
-					  calender.tm_mday = *temp++;
-					  calender.tm_mon = *temp++;
-					  calender.tm_year = *temp++;
-					  calender.tm_wday = 0;
-					  calender.tm_yday = 0;
-					  calender.tm_isdst = 0;
-					  calender_set(&calender);
-					  OSMutexPost(MUTEX_CALENDER);
+						  OSMutexPend(MUTEX_CALENDER, 0, &err);
+						  temp = (uint16_t *)RS485_RECEIVE_BUF;
+						  calender.tm_sec = *temp++;
+						  calender.tm_min = *temp++;
+						  calender.tm_hour = *temp++;
+						  calender.tm_mday = *temp++;
+						  calender.tm_mon = *temp++;
+						  calender.tm_year = *temp++;
+						  calender.tm_wday = 0;
+						  calender.tm_yday = 0;
+						  calender.tm_isdst = 0;
+						  calender_set(&calender);
+						  OSMutexPost(MUTEX_CALENDER);
+
+						}
+					  else
+						{
+						  OSMutexPend(MUTEX_SFLASH, 0, &err);
+						  /*
+							Iron_Write(IRON_SERVICE_CENTER_ADDRESS, \
+							device_init_paramaters.service_center_address, \
+							ALARM_TELEPHONE_NUMBER_SIZE);*/
+						  sFLASH_WriteBuffer(res->data, \
+											 SFLASH_DEVICE_INIT_PARAMATERS_START +	\
+											 res->offset, \
+											 res->length);
+						  OSMutexPost(MUTEX_SFLASH);
+
+						}
+					  OSMutexPend(MUTEX_RS485, 0, &err);
+
+					  rs485_dir_set(ENABLE);
+					  send_to_rs485((char *)&(rs_response_frame->device_id), 1);
+					  send_to_rs485((char *)&(rs_response_frame->function_id), 1);
+					  send_to_rs485((char *)&(rs_response_frame->rs485_set_response_frame.address), 2);
+					  send_to_rs485((char *)&(rs_response_frame->rs485_set_response_frame.length_16), 2);
+					  send_to_rs485((char *)&(rs_response_frame->crc), 2);
+					  OSTimeDlyHMSM(0, 0, 0, 50);
+					  rs485_dir_set(DISABLE);
+				  
+					  OSMutexPost(MUTEX_RS485);
 
 					}
 				  else
 					{
-					  OSMutexPend(MUTEX_SFLASH, 0, &err);
-					  /*
-						Iron_Write(IRON_SERVICE_CENTER_ADDRESS, \
-						device_init_paramaters.service_center_address, \
-						ALARM_TELEPHONE_NUMBER_SIZE);*/
-					  sFLASH_WriteBuffer(res->data, \
-										 SFLASH_DEVICE_INIT_PARAMATERS_START +	\
-										 res->offset, \
-										 res->length);
-					  OSMutexPost(MUTEX_SFLASH);
 
 					}
-				  OSMutexPend(MUTEX_RS485, 0, &err);
-
-				  rs485_dir_set(ENABLE);
-				  send_to_rs485((char *)rs_response_frame, res->length + 5);
-				  rs485_dir_set(DISABLE);
-				  
-				  OSMutexPost(MUTEX_RS485);
-
+				  break;
 				}
-			  else
-				{
-
 				}
-			  break;
-			}
-			}
 			  
+			}
+		  else
+			{
+			  OSTimeDlyHMSM(0, 0, 0, 200);
+			}
+		  
 		}
 	  else
 		{
-			  OSTimeDlyHMSM(0, 0, 0, 200);
+		  OSTimeDlyHMSM(0, 0, 0, 200);
 		}
 	}
 }
+

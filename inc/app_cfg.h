@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon May 30 14:16:57 2011
+ * Modified at:   Tue Jun  7 18:15:41 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -89,7 +89,7 @@
 #define 	SLAVE_DEVICE_MAX_NUMBERS		10//从设备数量;
 #define 	DEVICE_NAME_MAX_LENGTH			32//设备名称长度;
 #define 	ALARM_TELEPHONE_MAX_NUMBERS	10 //告警手机最大数量;
-#define 	ALARM_TELEPHONE_NUMBER_SIZE 	11//手机号码长度(SEMI_OCTET格式);
+#define 	ALARM_TELEPHONE_NUMBER_SIZE 	12//手机号码长度(SEMI_OCTET格式);
 #define   DEVICE_PASSWORD_MAX_LENGTH		12
 #define   GPS_MAX_LENGTH					32
 
@@ -157,4 +157,7 @@ typedef struct {
   uint16_t crc;
   }SLAVE_DEVICE_STATE_FRAME;
 */
+
+#define INT16_REVERSER(a) ((a) >> 8 | (a) << 8)
+
 #endif

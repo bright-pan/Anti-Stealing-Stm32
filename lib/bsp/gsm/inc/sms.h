@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri May 20 09:26:19 2011
+ * Modified at:   Tue Jun  7 10:10:43 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -68,7 +68,6 @@
 #define MODBUS_DATA_QUERY 		0x03
 #define MODBUS_TIME_SET			0x10
 
-#define INT_REVERSER(a) ((a) >> 8 | (a) << 8)
 
 
 typedef struct {
