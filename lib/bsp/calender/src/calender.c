@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon May 30 14:24:33 2011
+ * Modified at:   Wed Jun  8 10:11:58 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -15,8 +15,10 @@
 
 #include "includes.h"
 
+extern DEVICE_INIT_PARAMATERS device_init_paramaters;
+
 //定义系统日历时间变量
-struct tm calender;
+//struct tm calender;
 
 static void RTC_Configuration(void);
 
@@ -38,16 +40,16 @@ void calender_init(void)
 	// RTC Configuration
 	RTC_Configuration();
 	//设置初始化时间为2011年1月1日1时1分1秒
-	calender.tm_sec = 1;
-	calender.tm_min = 1;
-	calender.tm_hour = 1;
-	calender.tm_mday = 1;
-	calender.tm_mon = 1;
-	calender.tm_year = 2011;
-	calender.tm_wday = 0;
-	calender.tm_yday = 0;
-	calender.tm_isdst = 0;
-	calender_set(&calender);
+	device_init_paramaters.calender.tm_sec = 1;
+	device_init_paramaters.calender.tm_min = 1;
+	device_init_paramaters.calender.tm_hour = 1;
+	device_init_paramaters.calender.tm_mday = 1;
+	device_init_paramaters.calender.tm_mon = 1;
+	device_init_paramaters.calender.tm_year = 2011;
+	device_init_paramaters.calender.tm_wday = 0;
+	device_init_paramaters.calender.tm_yday = 0;
+	device_init_paramaters.calender.tm_isdst = 0;
+	calender_set(&(device_init_paramaters.calender));
 	// Enable PWR and BKP clocks
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
 	// Allow access to BKP Domain

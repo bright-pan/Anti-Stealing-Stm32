@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 24 10:51:25 2011
+ * Modified at:   Wed Jun  8 18:51:44 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -471,8 +471,8 @@ void beep_alarm_init(void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(BEEP_ALARM_PORT, &GPIO_InitStructure);
-  BEEP_ALARM_PORT->BSRR = BEEP_ALARM_PIN;//默认为1,关闭状态
-  
+  //BEEP_ALARM_PORT->BSRR = BEEP_ALARM_PIN;//默认为1,关闭状态
+  BEEP_ALARM_PORT->BRR = BEEP_ALARM_PIN;//默认为1,关闭状态
 }
 
 void external_alarm_init(void)

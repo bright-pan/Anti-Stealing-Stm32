@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri May 13 17:20:55 2011
+ * Modified at:   Thu Jun  9 11:05:32 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -76,7 +76,7 @@ void led_init(LED_TypeDef led_name)
  */
 void led_on(LED_TypeDef led_name)
 {
-  GPIO_PORT[led_name]->BSRR = GPIO_PIN[led_name];
+  GPIO_PORT[led_name]->BRR = GPIO_PIN[led_name];
 }
 
 /*
@@ -87,7 +87,7 @@ void led_on(LED_TypeDef led_name)
  */
 void led_off(LED_TypeDef led_name)
 {
-  GPIO_PORT[led_name]->BRR = GPIO_PIN[led_name];   
+  GPIO_PORT[led_name]->BSRR = GPIO_PIN[led_name];   
 }
 
 

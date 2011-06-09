@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed Apr 27 09:32:01 2011
+ * Modified at:   Thu Jun  9 10:50:59 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -17,11 +17,11 @@
 #define __LED_H__
 
 typedef enum {
-  LED_1 = 0,
-  LED_2 = 1,
-  LED_3 = 2,
-  LED_4 = 3,
-  LED_5 = 4,
+  LED_RUN = 0,
+  LED_RS485 = 1,
+  LED_GSM = 2,
+  LED_SIGNAL_STATE = 3,
+  LED_PERSIST = 4,
 }LED_TypeDef;
 
 void led_init(LED_TypeDef led_name);

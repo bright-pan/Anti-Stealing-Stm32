@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri May 20 13:23:26 2011
+ * Modified at:   Wed Jun  8 09:58:40 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -16,7 +16,7 @@
 #ifndef __TEMPERATURE_H__
 #define __TEMPERATURE_H__
 
-extern int16_t temperature;
+//extern int16_t temperature;
 
 #define TP_CONVERT_VALUE 0.0625
 

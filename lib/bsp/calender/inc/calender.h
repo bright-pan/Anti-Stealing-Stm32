@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Apr 21 13:23:24 2011
+ * Modified at:   Wed Jun  8 10:08:00 2011
  *                
  * Description:   calander for system time.
  * Copyright (C) 2010-2011,  Bright Pan
@@ -18,7 +18,7 @@
 
 #include <time.h>
 
-extern struct tm calender;
+//extern struct tm calender;
 
 void calender_init(void);
 void calender_set(struct tm *tm_time);

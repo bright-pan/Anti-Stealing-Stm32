@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri May 20 13:26:37 2011
+ * Modified at:   Wed Jun  8 09:58:07 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -38,7 +38,7 @@
 #define DS18B20_BUS_READ() (DS18B20_BUS_PORT->IDR & DS18B20_BUS_PIN)
 
 //static GPIO_InitTypeDef GPIO_InitStructure;
-int16_t temperature;
+//int16_t temperature;
 
 
 void delay_us(uint32_t time)

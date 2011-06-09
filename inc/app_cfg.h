@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue Jun  7 18:15:41 2011
+ * Modified at:   Thu Jun  9 09:37:52 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -122,6 +122,7 @@ typedef struct {
   uint16_t send_freq;//发送信号频率
   uint16_t receive_freq;//接收信号频率
   uint16_t amp;//信号幅值
+  uint16_t state;//通断状态
 }SignalParameters;
 
 typedef struct {
@@ -139,7 +140,10 @@ typedef struct {
   uint8_t gps[GPS_MAX_LENGTH];//主设备名称;
   uint16_t sms_on_off;
   uint16_t rs485_baudrate;
+  uint16_t gsm_signal_strength;
   SignalParameters signal_parameters;
+  uint16_t temperature;//温度
+  struct tm calender;
   }DEVICE_INIT_PARAMATERS;
 
 

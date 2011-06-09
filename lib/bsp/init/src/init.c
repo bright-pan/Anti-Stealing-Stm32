@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon May 30 14:05:50 2011
+ * Modified at:   Thu Jun  9 11:02:12 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -188,11 +188,16 @@ static void gpio_config(void)
  */
 static void led_config(void)
 {
-  led_init(LED_1);
-  led_init(LED_2);
-  led_init(LED_3);
-  led_init(LED_4);
-  led_init(LED_5);
+  led_init(LED_RUN);
+  led_off(LED_RUN);
+  led_init(LED_RS485);
+  led_off(LED_RS485);
+  led_init(LED_GSM);
+  led_off(LED_GSM);
+  led_init(LED_SIGNAL_STATE);
+  led_on(LED_SIGNAL_STATE);
+  led_init(LED_PERSIST);
+  led_off(LED_PERSIST);
 }
 
 /*
@@ -214,14 +219,14 @@ static void calender_config(void)
  */
 static void signal_config(void)
 {
-  signal_power_init();//
+  signal_power_init();
   //signal_send_power(ENABLE);
   //signal_receive_power(ENABLE);
   signal_freq_test_init();
   //signal_freq_test(ENABLE);
   signal_amp_battery_init();
   signal_amp_battery(ENABLE);
-  beep_alarm_init();
+  /*beep_alarm_init();*/
   external_alarm_init();
   //  signal_frequency_set(SIGNAL_FREQ_30000);//信号
   //signal_send_init();//信号发送初始化
@@ -245,7 +250,7 @@ static void temperature_config(void)
 {
   if(TP_convert())
 	{
-	  temperature = (int16_t)TP_read();
+	  device_init_paramaters.temperature = (int16_t)(TP_read() * TP_CONVERT_VALUE * 10);
 	}
   else
 	{

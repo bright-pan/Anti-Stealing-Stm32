@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue Jun  7 18:09:47 2011
+ * Modified at:   Thu Jun  9 11:04:20 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -30,7 +30,7 @@ __attribute__((aligned(8))) static OS_STK  AppSignalTaskStk[APP_TASK_SIGNAL_STK_
 
 
 //信号初始状态为连通
-static uint8_t signal_state = SET;
+//static uint8_t signal_state = SET;
 
 
 // 设备运行参数
@@ -38,28 +38,35 @@ OS_EVENT *MUTEX_DEVICE_INIT_PARAMATERS;
 DEVICE_INIT_PARAMATERS device_init_paramaters;
 //SLAVE_DEVICE_STATE_FRAME slave_device_state_frame[SLAVE_DEVICE_MAX_NUMBERS];
 //TIME_FRAME set_time;
+
 const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
-  "zxsoft:as-2011-06-07",
+  "zxsoft:as-2011-06-09",//device name
   1,//id
-  "高新区一号开闭所",
-  "比亚迪出线电缆",
-  1,
+  "高新区一号开闭所",//pramiry device name
+  "比亚迪出线电缆",//slave device name
+  1,//alarm telephone numbers
   {
-	"13474656377",
+	"13474656377",//alarm telephone
   },
-  "",
-  "\x00\x31\x00\x32\x00\x33\x00\x34\x00\x35\x00\x36",
-  "",
-  1,
+  "",//sms center number
+  "\x00\x31\x00\x32\x00\x33\x00\x34\x00\x35\x00\x36",//系统设置密码
+  "",//GPS info
+  1,//sms switch
+  BAUDRATE_1200,//rs485 baudrate
   0,
   {
-	0,
-	SIGNAL_FREQ_30000,
-	200,
-	500,
-	10,
-	999,
+	0,//signal interval time
+	SIGNAL_FREQ_30000,//signal freq
+	200,//signal freq spread
+	500,//signal amp limit
+	10,//signal process times
+	999,//signal process interval
+	0,//signal send freq
+	0,//signal receive freq
+	0,//signal amp
+	SET,//signal state
   },
+  0,//temperature
 };
 // 设备使用分配信号量
 OS_EVENT *MUTEX_GSM;//设备使用互斥信号量;
@@ -223,7 +230,6 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_SMSReceive_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
-
   OSTaskCreateExt(AppSignalTask,
 				  (void *)0,
 				  (OS_STK *)&AppSignalTaskStk[APP_TASK_SIGNAL_STK_SIZE-1],
@@ -233,7 +239,6 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_SIGNAL_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
-
   OSTaskCreateExt(AppRS485Task,
 				  (void *)0,
 				  (OS_STK *)&AppRS485TaskStk[APP_TASK_RS485_STK_SIZE-1],
@@ -243,7 +248,8 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_RS485_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
-
+  
+    
 }
 
 static  void  AppStartTask (void *p_arg)
@@ -302,19 +308,8 @@ static  void  AppStartTask (void *p_arg)
 	{  
 	  /* Task body, always written as an infinite loop. */
 	  //  OSTaskSuspend(OS_PRIO_SELF);
-	  OSTimeDlyHMSM(0,0,0,200);
-	  led_toggle(LED_1);
-	  OSTimeDlyHMSM(0,0,0,200);
-	  led_toggle(LED_2);
-	  OSTimeDlyHMSM(0,0,0,200);
-	  led_toggle(LED_3);
-	  OSTimeDlyHMSM(0,0,0,200);
-	  led_toggle(LED_4);
-	  OSTimeDlyHMSM(0,0,0,200);
-	  led_toggle(LED_5);
-	  OSTimeDlyHMSM(0,0,0,200);
-	  
-	  OSTimeDlyHMSM(0,0,0,200);
+	  OSTimeDlyHMSM(0,0,0,500);
+	  led_toggle(LED_RUN);
 	  /*	   
 			   uint16_t index = 0;
 			   uint16_t length = sizeof(data)/sizeof(uint8_t);
@@ -347,10 +342,12 @@ static  void  AppStartTask (void *p_arg)
 	  //读取温度
 	  if(TP_convert())
 		{
-		  temperature = (int16_t)(TP_read() * TP_CONVERT_VALUE * 10);
+		  device_init_paramaters.temperature = (int16_t)(TP_read() * TP_CONVERT_VALUE * 10);
 		}
 	  //读取时间
-	  calender_get(&calender);
+	  calender_get(&(device_init_paramaters.calender));
+	  OSTimeDlyHMSM(0,0,0,400);
+
 	}
 }
 
@@ -391,6 +388,7 @@ static void AppGSMTask(void *p_arg)
 		  OSMutexPost(MUTEX_GSM);
 		  if(!match)
 			{
+			  led_off(LED_GSM);
 			  cnt++;
 			  if(cnt > 10)
 				{
@@ -401,8 +399,10 @@ static void AppGSMTask(void *p_arg)
 				  OSTimeDlyHMSM(0, 0, 2, 0);//等待接收数据
 				}	
 			  continue;
-			}		
-
+			}
+		  
+		  led_on(LED_GSM);
+		  
 		  /*****************************************************
 						验证通讯网络注册状况
 		  ******************************************************/
@@ -438,6 +438,25 @@ static void AppGSMTask(void *p_arg)
 			}
 		  OSMutexPost(MUTEX_GSM);
 
+		  /******************************************************************
+			 信号强度检测;
+		  *******************************************************************/
+		  OSMutexPend(MUTEX_GSM, 0, &err);
+		  //Flush_GSM_Buffer();
+		  send_to_gsm(ATCSQ, SEND_ALL);
+		  OSTimeDlyHMSM(0, 0, 0, 50);//等待接收数据
+		  memset((void *)GSM_RECEIVE_BUF, '\0', GSM_RECEIVE_BUF_SIZE);
+		  receive_from_gsm((char *)GSM_RECEIVE_BUF, GSM_RECEIVE_BUF_SIZE);
+		  match = strstr((const char *)GSM_RECEIVE_BUF, ATOK);
+
+		  if(!match)
+			{
+			  OSMutexPost(MUTEX_GSM);
+			  continue;
+			}
+		  siscanf((const char *)GSM_RECEIVE_BUF, "%*[^ ]%d[^,]", (int *)&(device_init_paramaters.gsm_signal_strength));
+		  OSMutexPost(MUTEX_GSM);
+		  
 		  /******************************************************************
 				设置短信数据格式为PDU;
 		  *******************************************************************/
@@ -513,13 +532,13 @@ static void AppGSMTask(void *p_arg)
 		  if(match)
 			{
 			  siscanf((const char *)GSM_RECEIVE_BUF, "%*[^86]86%[^\"]", GSM_SEND_BUF);
-			  if(memcmp((void *)(device_init_paramaters.service_center_address), GSM_SEND_BUF, ALARM_TELEPHONE_NUMBER_SIZE))
+			  if(!memcmp((void *)(device_init_paramaters.service_center_address), GSM_SEND_BUF, ALARM_TELEPHONE_NUMBER_SIZE - 1))
 				{
 
 				}
 			  else
 				{
-				  memcpy((void *)(device_init_paramaters.service_center_address), GSM_SEND_BUF, ALARM_TELEPHONE_NUMBER_SIZE);
+				  memcpy((void *)(device_init_paramaters.service_center_address), GSM_SEND_BUF, ALARM_TELEPHONE_NUMBER_SIZE - 1);
 				  OSMutexPend(MUTEX_SFLASH, 0, &err);
 				  /*
 					Iron_Write(IRON_SERVICE_CENTER_ADDRESS, \
@@ -1142,7 +1161,7 @@ static void AppSMSReceiveTask(void *p_arg)
 														  length = UCS_Len(sms_set_frame->DATA, POUND_SIGN) - length;//名称域长度;
 														  if(--length)
 															{
-															  if(length == ALARM_TELEPHONE_NUMBER_SIZE)
+															  if(length == ALARM_TELEPHONE_NUMBER_SIZE - 1)
 																{
 																  /* 分配内存 */
 																  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
@@ -1163,7 +1182,7 @@ static void AppSMSReceiveTask(void *p_arg)
 																  sFLASH_WriteBuffer(device_parameters->alarm_telephone[index - 1], \
 																					 SFLASH_DEVICE_INIT_PARAMATERS_START + \
 																					 OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone) + (index - 1) * ALARM_TELEPHONE_NUMBER_SIZE, \
-																					 ALARM_TELEPHONE_NUMBER_SIZE);
+																	ALARM_TELEPHONE_NUMBER_SIZE - 1);
 																  OSMutexPost(MUTEX_SFLASH);
 																}
 															  else
@@ -1226,12 +1245,12 @@ static void AppSMSReceiveTask(void *p_arg)
 
 													  OSMutexPend(MUTEX_CALENDER, 0, &err);
 
-													  calender.tm_year = byte2BCD((uint8_t)(TEMP[0] % 100));
-													  calender.tm_mon = byte2BCD((uint8_t)(TEMP[1] % 100));
-													  calender.tm_mday = byte2BCD((uint8_t)(TEMP[2] % 100));
-													  calender.tm_hour = byte2BCD((uint8_t)(TEMP[3] % 100));
-													  calender.tm_min = byte2BCD((uint8_t)(TEMP[4] % 100));
-													  calender_set(&calender);
+													  device_parameters->calender.tm_year = byte2BCD((uint8_t)(TEMP[0] % 100));
+													  device_parameters->calender.tm_mon = byte2BCD((uint8_t)(TEMP[1] % 100));
+													  device_parameters->calender.tm_mday = byte2BCD((uint8_t)(TEMP[2] % 100));
+													  device_parameters->calender.tm_hour = byte2BCD((uint8_t)(TEMP[3] % 100));
+													  device_parameters->calender.tm_min = byte2BCD((uint8_t)(TEMP[4] % 100));
+													  calender_set(&(device_parameters->calender));
 
 													  OSMutexPost(MUTEX_CALENDER);
 																										  
@@ -1920,7 +1939,7 @@ void sms_alarm_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_ALARM_F
 	  TP_Str_To_Octet(sms_send_pdu_frame->SMSC.SMSC_Address_Value, \
 					  device_parameters->service_center_address, \
 					  TP_TYPE_DEFAULT, \
-					  ALARM_TELEPHONE_NUMBER_SIZE);
+					  ALARM_TELEPHONE_NUMBER_SIZE - 1);
 	}
 
   sms_send_pdu_frame->TPDU.First_Octet = FIRST_OCTET_DEFAULT;
@@ -1966,7 +1985,7 @@ void sms_alarm_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_ALARM_F
 	  TP_Str_To_Octet(sms_send_pdu_frame->TPDU.TP_DA.TP_DA_Address_Value, \
 					  device_parameters->alarm_telephone[alarm_telephone_cnt], \
 					  TP_TYPE_DEFAULT, \
-					  ALARM_TELEPHONE_NUMBER_SIZE);
+					  ALARM_TELEPHONE_NUMBER_SIZE - 1);
 		
 
 	  for(send_index = 0; send_index <= GSM_RESEND_NUMBERS; send_index++)
@@ -2007,7 +2026,7 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 	  TP_Str_To_Octet(sms_send_pdu_frame->SMSC.SMSC_Address_Value, \
 					  device_parameters->service_center_address, \
 					  TP_TYPE_DEFAULT, \
-					  ALARM_TELEPHONE_NUMBER_SIZE);
+					  ALARM_TELEPHONE_NUMBER_SIZE - 1);
 	}
 
   sms_send_pdu_frame->TPDU.First_Octet = FIRST_OCTET_DEFAULT;
@@ -2112,11 +2131,11 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 			  *UCS++ = COMMA_SIGN;
 			  (*UCS_len)++;
 					
-			  for(temp = 0; temp < ALARM_TELEPHONE_NUMBER_SIZE; temp++)
+			  for(temp = 0; temp < ALARM_TELEPHONE_NUMBER_SIZE - 1; temp++)
 				{
 				  *UCS++ = NUM_UCS_MAP[device_parameters->alarm_telephone[index][temp] - 0x30];
 				}
-			  *UCS_len += ALARM_TELEPHONE_NUMBER_SIZE;
+			  *UCS_len += ALARM_TELEPHONE_NUMBER_SIZE - 1;
 
 			  *UCS++ = POUND_SIGN;
 			  (*UCS_len)++;
@@ -2137,23 +2156,23 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 	  
 	  *UCS++ = 0X3200;// 2;
 	  *UCS++ = 0X3000;// 0;
-	  *UCS++ = ((uint16_t )(calender.tm_year & 0xf0) << 4) | 0x3000;//解析年的高四为年的十位;
-	  *UCS++ = ((uint16_t )(calender.tm_year & 0x0f) << 8) | 0x3000;//解析年的高四为年的个位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_year & 0xf0) << 4) | 0x3000;//解析年的高四为年的十位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_year & 0x0f) << 8) | 0x3000;//解析年的高四为年的个位;
 	  *UCS++ = YEAR;// 年;
-	  *UCS++ = ((uint16_t )(calender.tm_mon & 0xf0) << 4) | 0x3000;//解析年的高四为月的十位;
-	  *UCS++ = ((uint16_t )(calender.tm_mon & 0x0f) << 8) | 0x3000;//解析年的高四为月的个位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_mon & 0xf0) << 4) | 0x3000;//解析年的高四为月的十位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_mon & 0x0f) << 8) | 0x3000;//解析年的高四为月的个位;
 	  *UCS++ = MONTH;// 月;
-	  *UCS++ = ((uint16_t )(calender.tm_mday & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-	  *UCS++ = ((uint16_t )(calender.tm_mday & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_mday & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_mday & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
 	  *UCS++ = DAY;// 日;
-	  *UCS++ = ((uint16_t )(calender.tm_hour & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-	  *UCS++ = ((uint16_t )(calender.tm_hour & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_hour & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_hour & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
 	  *UCS++ = HOUR;// 时;
-	  *UCS++ = ((uint16_t )(calender.tm_min & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-	  *UCS++ = ((uint16_t )(calender.tm_min & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_min & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_min & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
 	  *UCS++ = MINUTE;// 分;
-	  *UCS++ = ((uint16_t )(calender.tm_sec & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-	  *UCS++ = ((uint16_t )(calender.tm_sec & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_sec & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
+	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_sec & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
 	  *UCS++ = SECOND;// 秒;
 	  
 	  *UCS_len += 20;
@@ -2161,7 +2180,7 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 	  (*UCS_len)++;
 
 	  //线缆通段状态解析
-	  if(signal_state == RESET)
+	  if(device_parameters->signal_parameters.state == RESET)
 		{
 		  //断开
 		  *UCS++ = UCS2_DUAN;
@@ -2176,28 +2195,28 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 	  *UCS++ = POUND_SIGN;
 	  *UCS_len += 3;
 	  //设备温度
-	  if(temperature < 10)
+	  if(device_parameters->temperature < 10)
 		{
 		  *UCS++ = NUM_UCS_MAP[0];
 		  *UCS++ = LINE_SIGN;
-		  *UCS++ = NUM_UCS_MAP[temperature];
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature];
 		  *UCS++ = UCS2_DU;
 		  *UCS_len += 4;		
 					
 		}
-	  else if(temperature < 100)
+	  else if(device_parameters->temperature < 100)
 		{
 
-		  *UCS++ = NUM_UCS_MAP[temperature / 10];
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature / 10];
 		  *UCS++ = LINE_SIGN;
-		  *UCS++ = NUM_UCS_MAP[temperature % 10];
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature % 10];
 		  *UCS++ = UCS2_DU;
 		  *UCS_len += 4;
 		}
-	  else if(temperature < 1000)
+	  else if(device_parameters->temperature < 1000)
 		{
-		  *UCS++ = NUM_UCS_MAP[temperature / 100];
-		  temp = temperature % 100;
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature / 100];
+		  temp = device_parameters->temperature % 100;
 		  *UCS++ = NUM_UCS_MAP[temp / 10];
 		  *UCS++ = LINE_SIGN;
 		  *UCS++ = NUM_UCS_MAP[temp % 10];
@@ -2206,8 +2225,8 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 		}
 	  else
 		{
-		  *UCS++ = NUM_UCS_MAP[temperature / 100];
-		  temp = temperature % 100;
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature / 100];
+		  temp = device_parameters->temperature % 100;
 		  *UCS++ = NUM_UCS_MAP[temp / 10];
 		  *UCS++ = LINE_SIGN;
 		  *UCS++ = NUM_UCS_MAP[temp % 10];
@@ -2424,28 +2443,28 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 	  (*UCS_len)++;
 
 	  //设备温度
-	  if(temperature < 10)
+	  if(device_parameters->temperature < 10)
 		{
 		  *UCS++ = NUM_UCS_MAP[0];
 		  *UCS++ = LINE_SIGN;
-		  *UCS++ = NUM_UCS_MAP[temperature];
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature];
 		  *UCS++ = UCS2_DU;
 		  *UCS_len += 4;		
 					
 		}
-	  else if(temperature < 100)
+	  else if(device_parameters->temperature < 100)
 		{
 
-		  *UCS++ = NUM_UCS_MAP[temperature / 10];
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature / 10];
 		  *UCS++ = LINE_SIGN;
-		  *UCS++ = NUM_UCS_MAP[temperature % 10];
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature % 10];
 		  *UCS++ = UCS2_DU;
 		  *UCS_len += 4;
 		}
-	  else if(temperature < 1000)
+	  else if(device_parameters->temperature < 1000)
 		{
-		  *UCS++ = NUM_UCS_MAP[temperature / 100];
-		  temp = temperature % 100;
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature / 100];
+		  temp = device_parameters->temperature % 100;
 		  *UCS++ = NUM_UCS_MAP[temp / 10];
 		  *UCS++ = LINE_SIGN;
 		  *UCS++ = NUM_UCS_MAP[temp % 10];
@@ -2454,8 +2473,8 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 		}
 	  else
 		{
-		  *UCS++ = NUM_UCS_MAP[temperature / 100];
-		  temp = temperature % 100;
+		  *UCS++ = NUM_UCS_MAP[device_parameters->temperature / 100];
+		  temp = device_parameters->temperature % 100;
 		  *UCS++ = NUM_UCS_MAP[temp / 10];
 		  *UCS++ = LINE_SIGN;
 		  *UCS++ = NUM_UCS_MAP[temp % 10];
@@ -2466,7 +2485,7 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 	  *UCS++ = COMMA_SIGN;
 	  (*UCS_len)++;
 
-	  temp = signal_state;
+	  temp = device_parameters->signal_parameters.state;
 	  if(temp <= 1)
 		{
 		  *UCS++ = NUM_UCS_MAP[temp];
@@ -2717,36 +2736,44 @@ static void AppSignalTask(void *p_arg)
 		  if(signal_freq_spread > device_parameters->signal_parameters.freq_spread \
 			 || signal_amp < device_parameters->signal_parameters.amp_limit)
 			{
+			  led_off(LED_SIGNAL_STATE);
 			  //信号的历史状态为连通
-			  if(signal_state == SET)
+			  if(device_parameters->signal_parameters.state == SET)
 				{
 				  //由通变成断则发送告警邮件
 				  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
 				  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
 				  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
 				  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
-				  sms_alarm_mail->temperature = temperature;
+				  sms_alarm_mail->temperature = device_parameters->temperature;
 				  sms_alarm_mail->state = RESET;
-				  sms_alarm_mail->time = calender;
+				  sms_alarm_mail->time = device_parameters->calender;
 
 				  if(device_parameters->sms_on_off == 1)
 					{
 					  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+					}
+				  else
+					{
+					  //短信邮件处理完成释放短信邮件所占用的空间
+					  OSMemPut(MEM_BUF, (void *)sms_mail);
+					  OSSemPost(SEM_MEM_PART_ALLOC);
 					}
 				}
 			  else
 				{
 		
 				}
-			  signal_state = RESET;//设置信号状态为断开
+			  device_parameters->signal_parameters.state = RESET;//设置信号状态为断开
 
 
 			}
 		  //信号连通
 		  else
 			{
+			  led_on(LED_SIGNAL_STATE);
 			  //信号的历史状态为连通
-			  if(signal_state == SET)
+			  if(device_parameters->signal_parameters.state == SET)
 				{
 
 				}
@@ -2757,17 +2784,23 @@ static void AppSignalTask(void *p_arg)
 				  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
 				  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
 				  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
-				  sms_alarm_mail->temperature = temperature;
+				  sms_alarm_mail->temperature = device_parameters->temperature;
 				  sms_alarm_mail->state = SET;
-				  sms_alarm_mail->time = calender;
+				  sms_alarm_mail->time = device_parameters->calender;
 
 				  if(device_parameters->sms_on_off == 1)
 					{
 					  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
 					}
+				  else
+					{
+					  //短信邮件处理完成释放短信邮件所占用的空间
+					  OSMemPut(MEM_BUF, (void *)sms_mail);
+					  OSSemPost(SEM_MEM_PART_ALLOC);					  
+					}
 			  
 				}
-			  signal_state = SET;//设置信号状态为连通
+			  device_parameters->signal_parameters.state = SET;//设置信号状态为连通
 			}
 		  signal_freq_test(DISABLE);//信号频率检测
 		  signal_send(DISABLE);//信号发送
@@ -2826,55 +2859,70 @@ static void AppSignalTask(void *p_arg)
 			  if(signal_freq_spread > device_parameters->signal_parameters.freq_spread \
 				 || signal_amp < device_parameters->signal_parameters.amp_limit)
 				{
+				  led_off(LED_SIGNAL_STATE);
 				  //信号的历史状态为连通
-				  if(signal_state == SET)
+				  if(device_parameters->signal_parameters.state == SET)
 					{
 					  //由通变成断则发送告警邮件
 					  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
 					  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
 					  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
 					  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
-					  sms_alarm_mail->temperature = temperature;
+					  sms_alarm_mail->temperature = device_parameters->temperature;
 					  sms_alarm_mail->state = RESET;
-					  sms_alarm_mail->time = calender;
+					  sms_alarm_mail->time = device_parameters->calender;
 
 					  if(device_parameters->sms_on_off == 1)
 						{
 						  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
+						}
+					  else
+						{
+						  //短信邮件处理完成释放短信邮件所占用的空间
+						  OSMemPut(MEM_BUF, (void *)sms_mail);
+						  OSSemPost(SEM_MEM_PART_ALLOC);
+
 						}
 					}
 				  else
 					{
 		
 					}
-				  signal_state = RESET;//设置信号状态为断开
+				  device_parameters->signal_parameters.state = RESET;//设置信号状态为断开
 				}
 			  //信号连通
 			  else
 				{
+				  led_on(LED_SIGNAL_STATE);
 				  //信号的历史状态为连通
-				  if(signal_state == SET)
+				  if(device_parameters->signal_parameters.state == SET)
 					{
 
 					}
 				  else
 					{
-					  //由断变成通则发送告警邮件	  
+					  //由断变成通则发送告警邮件
 					  OSSemPend(SEM_MEM_PART_ALLOC, 0, &err);
 					  sms_mail = (SMS_MAIL_FRAME *)OSMemGet(MEM_BUF, &err);
 					  sms_mail->sms_mail_type = SMS_ALARM_FRAME_TYPE;
 					  sms_alarm_mail = &(sms_mail->sms_alarm_frame);							
-					  sms_alarm_mail->temperature = temperature;
+					  sms_alarm_mail->temperature = device_parameters->temperature;
 					  sms_alarm_mail->state = SET;
-					  sms_alarm_mail->time = calender;
+					  sms_alarm_mail->time = device_parameters->calender;
 
 					  if(device_parameters->sms_on_off == 1)
 						{
 						  OSQPostFront(Q_SMS_ALARM, (void *)sms_mail);
 						}
+					  else
+						{
+						  //短信邮件处理完成释放短信邮件所占用的空间
+						  OSMemPut(MEM_BUF, (void *)sms_mail);
+						  OSSemPost(SEM_MEM_PART_ALLOC);
+						}
 			  
 					}
-				  signal_state = SET;//设置信号状态为连通
+				  device_parameters->signal_parameters.state = SET;//设置信号状态为连通
 
 				}
 			  OSTimeDlyHMSM(0, 0, 1, 0);
@@ -2984,13 +3032,13 @@ RS485_ADDRESS_INFO rs485_address_info[] = {
 	0x3200,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, service_center_address), &(device_init_paramaters.service_center_address[0]),
   },
   {
-	0x4100,	6,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, password), &(device_init_paramaters.password[0]),
+	0x4100,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, password), &(device_init_paramaters.password[0]),
   },
   {
 	0x4200,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, device_id), &(device_init_paramaters.device_id),
   },
   {
-	0x4300,	10,	0, &(calender),
+	0x4300,	10,	0, &(device_init_paramaters.calender),
   },
   {
 	0x5100,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gps), &(device_init_paramaters.gps[0]),
@@ -3010,7 +3058,7 @@ RS485_ADDRESS_INFO rs485_address_info[] = {
 	&(device_init_paramaters.signal_parameters.freq),
   },
   {
-	0x7300,	2,
+	0x7300,	4,
 	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, freq_spread),
 	&(device_init_paramaters.signal_parameters.freq_spread),
   },
@@ -3030,9 +3078,15 @@ RS485_ADDRESS_INFO rs485_address_info[] = {
 	&(device_init_paramaters.signal_parameters.process_interval),
   },
   {
-	0x7700,	2,
+	0x7700,	10,
 	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, send_freq),
 	&(device_init_paramaters.signal_parameters.send_freq),
+  },
+  {
+	0x7900,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, rs485_baudrate), &(device_init_paramaters.rs485_baudrate),
+  },
+  {
+	0x8000,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gsm_signal_strength), &(device_init_paramaters.gsm_signal_strength),
   },
 };
 
@@ -3210,6 +3264,7 @@ static void AppRS485Task(void *p_arg)
   RS485_REQUEST_FRAME *rs_request_frame = NULL;
   RS485_RESPONSE_FRAME *rs_response_frame = (RS485_RESPONSE_FRAME *)RS485_SEND_BUF;
   uint16_t *temp = NULL;
+  int *time = NULL;
   
   
   
@@ -3217,11 +3272,12 @@ static void AppRS485Task(void *p_arg)
 	{
 	  if(CHARS(rs485_buf) >= 1)
 		{
-		  OSTimeDlyHMSM(0, 0, 0, 100);
+		  OSTimeDlyHMSM(0, 0, 0, 200);
 		  rs_request_frame = receive_rs485_frame((RS485_REQUEST_FRAME *)RS485_RECEIVE_BUF,
 												 device_parameters);
 		  if(rs_request_frame != NULL)
 			{
+			  led_on(LED_RS485);
 			  crc_16_init();
 			  rs_response_frame->device_id = rs_request_frame->device_id;
 			  crc_16((uint8_t *)&(rs_response_frame->device_id), 1);
@@ -3275,8 +3331,9 @@ static void AppRS485Task(void *p_arg)
 				}
 				case 0x10 : {
 				  rs_response_frame->rs485_set_response_frame.address = __REV16(rs_request_frame->address);
+				  crc_16((uint8_t *)&(rs_response_frame->rs485_set_response_frame.address), 2);
 				  rs_response_frame->rs485_set_response_frame.length_16 = __REV16(rs_request_frame->length_16);
-				  rs_response_frame->crc = crc_16((uint8_t *)&(rs_response_frame->rs485_set_response_frame.length_16), res->length);
+				  rs_response_frame->crc = crc_16((uint8_t *)&(rs_response_frame->rs485_set_response_frame.length_16), 2);
 				  rs_response_frame->crc = __REV16(rs_response_frame->crc);
 				  key.address = rs_request_frame->address;
 				  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
@@ -3296,27 +3353,28 @@ static void AppRS485Task(void *p_arg)
 						  *temp = __REV16(*temp);
 						  temp++;
 						}
-					  memcpy(res->data, RS485_RECEIVE_BUF, res->length);
 					  if(rs_request_frame->address == 0x4300)
 						{
 					  
 						  OSMutexPend(MUTEX_CALENDER, 0, &err);
-						  temp = (uint16_t *)RS485_RECEIVE_BUF;
-						  calender.tm_sec = *temp++;
-						  calender.tm_min = *temp++;
-						  calender.tm_hour = *temp++;
-						  calender.tm_mday = *temp++;
-						  calender.tm_mon = *temp++;
-						  calender.tm_year = *temp++;
-						  calender.tm_wday = 0;
-						  calender.tm_yday = 0;
-						  calender.tm_isdst = 0;
-						  calender_set(&calender);
+						  time = (int *)RS485_RECEIVE_BUF;
+						  device_parameters->calender.tm_sec = *time++;
+						  device_parameters->calender.tm_min = *time++;
+						  device_parameters->calender.tm_hour = *time++;
+						  device_parameters->calender.tm_mday = *time++;
+						  device_parameters->calender.tm_mon = *time++;
+						  device_parameters->calender.tm_year = *time++;
+						  device_parameters->calender.tm_wday = 0;
+						  device_parameters->calender.tm_yday = 0;
+						  device_parameters->calender.tm_isdst = 0;
+						  calender_set(&(device_parameters->calender));
 						  OSMutexPost(MUTEX_CALENDER);
 
 						}
 					  else
 						{
+						  memcpy(res->data, RS485_PROCESS_BUF, res->length);
+
 						  OSMutexPend(MUTEX_SFLASH, 0, &err);
 						  /*
 							Iron_Write(IRON_SERVICE_CENTER_ADDRESS, \
@@ -3350,7 +3408,8 @@ static void AppRS485Task(void *p_arg)
 				  break;
 				}
 				}
-			  
+			  led_off(LED_RS485);
+
 			}
 		  else
 			{
