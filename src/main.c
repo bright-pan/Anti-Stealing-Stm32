@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Jun  9 11:39:40 2011
+ * Modified at:   Thu Jun  9 13:56:46 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -3272,7 +3272,7 @@ static void AppRS485Task(void *p_arg)
 	{
 	  if(CHARS(rs485_buf) >= 1)
 		{
-		  OSTimeDlyHMSM(0, 0, 0, 200);
+		  OSTimeDlyHMSM(0, 0, 0, 300);
 		  rs_request_frame = receive_rs485_frame((RS485_REQUEST_FRAME *)RS485_RECEIVE_BUF,
 												 device_parameters);
 		  if(rs_request_frame != NULL)
@@ -3357,7 +3357,7 @@ static void AppRS485Task(void *p_arg)
 						{
 					  
 						  OSMutexPend(MUTEX_CALENDER, 0, &err);
-						  time = (int *)RS485_RECEIVE_BUF;
+						  time = (int *)RS485_PROCESS_BUF;
 						  device_parameters->calender.tm_sec = *time++;
 						  device_parameters->calender.tm_min = *time++;
 						  device_parameters->calender.tm_hour = *time++;
