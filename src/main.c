@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Jun  9 11:04:20 2011
+ * Modified at:   Thu Jun  9 11:39:40 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -3038,7 +3038,7 @@ RS485_ADDRESS_INFO rs485_address_info[] = {
 	0x4200,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, device_id), &(device_init_paramaters.device_id),
   },
   {
-	0x4300,	10,	0, &(device_init_paramaters.calender),
+	0x4300,	36,	0, &(device_init_paramaters.calender),
   },
   {
 	0x5100,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gps), &(device_init_paramaters.gps[0]),
