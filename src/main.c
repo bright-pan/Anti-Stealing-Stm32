@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Jun  9 13:56:46 2011
+ * Modified at:   Mon Jun 13 11:05:16 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -40,7 +40,7 @@ DEVICE_INIT_PARAMATERS device_init_paramaters;
 //TIME_FRAME set_time;
 
 const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
-  "zxsoft:as-2011-06-09",//device name
+  "zxsoft:as-2011-06-13",//device name
   1,//id
   "高新区一号开闭所",//pramiry device name
   "比亚迪出线电缆",//slave device name
@@ -51,7 +51,7 @@ const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
   "",//sms center number
   "\x00\x31\x00\x32\x00\x33\x00\x34\x00\x35\x00\x36",//系统设置密码
   "",//GPS info
-  1,//sms switch
+  0,//sms switch
   BAUDRATE_1200,//rs485 baudrate
   0,
   {
@@ -2153,26 +2153,33 @@ void sms_query_mail_analysis(SMS_SEND_PDU_FRAME *sms_send_pdu_frame, SMS_QUERY_F
 									DEVICE_NAME_MAX_LENGTH);
 	  *UCS++ = POUND_SIGN;
 	  (*UCS_len)++;
-	  
-	  *UCS++ = 0X3200;// 2;
-	  *UCS++ = 0X3000;// 0;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_year & 0xf0) << 4) | 0x3000;//解析年的高四为年的十位;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_year & 0x0f) << 8) | 0x3000;//解析年的高四为年的个位;
+	  temp = device_parameters->calender.tm_year;
+	  *UCS++ = NUM_UCS_MAP[temp / 1000];
+	  temp %= 1000;
+	  *UCS++ = NUM_UCS_MAP[temp / 100];
+	  temp %= 100;
+	  *UCS++ = NUM_UCS_MAP[temp / 10];
+	  *UCS++ = NUM_UCS_MAP[temp % 10];
 	  *UCS++ = YEAR;// 年;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_mon & 0xf0) << 4) | 0x3000;//解析年的高四为月的十位;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_mon & 0x0f) << 8) | 0x3000;//解析年的高四为月的个位;
+	  temp = device_parameters->calender.tm_mon;
+	  *UCS++ = NUM_UCS_MAP[temp / 10];
+	  *UCS++ = NUM_UCS_MAP[temp % 10];
 	  *UCS++ = MONTH;// 月;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_mday & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_mday & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  temp = device_parameters->calender.tm_mday;
+	  *UCS++ = NUM_UCS_MAP[temp / 10];
+	  *UCS++ = NUM_UCS_MAP[temp % 10];
 	  *UCS++ = DAY;// 日;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_hour & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_hour & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  temp = device_parameters->calender.tm_hour;
+	  *UCS++ = NUM_UCS_MAP[temp / 10];
+	  *UCS++ = NUM_UCS_MAP[temp % 10];
 	  *UCS++ = HOUR;// 时;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_min & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_min & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  temp = device_parameters->calender.tm_min;
+	  *UCS++ = NUM_UCS_MAP[temp / 10];
+	  *UCS++ = NUM_UCS_MAP[temp % 10];
 	  *UCS++ = MINUTE;// 分;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_sec & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-	  *UCS++ = ((uint16_t )(device_parameters->calender.tm_sec & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+	  temp = device_parameters->calender.tm_sec;
+	  *UCS++ = NUM_UCS_MAP[temp / 10];
+	  *UCS++ = NUM_UCS_MAP[temp % 10];
 	  *UCS++ = SECOND;// 秒;
 	  
 	  *UCS_len += 20;

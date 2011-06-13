@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Fri May 20 09:35:34 2011
+ * Modified at:   Mon Jun 13 11:10:04 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -199,30 +199,39 @@ uint16_t *SMS_Send_User_Data_Copy(uint16_t *UCS, uint8_t *data_src, uint16_t *UC
 
 void Alarm_Mail_Data_To_UCS(uint16_t *UCS, SMS_ALARM_FRAME *sms_alarm_mail, uint16_t *UCS_Len)
 {
-
+  int temp;
   /* 邮件时间解析格式为20XX-XX-XX,XX:XX:XX*/
   *UCS++ = YU;//于
   *UCS_Len += 1;
-	
-  *UCS++ = 0X3200;// 2;
-  *UCS++ = 0X3000;// 0;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_year & 0xf0) << 4) | 0x3000;//解析年的高四为年的十位;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_year & 0x0f) << 8) | 0x3000;//解析年的高四为年的个位;
+  temp = sms_alarm_mail->time.tm_year;
+  *UCS++ = NUM_UCS_MAP[temp / 1000];
+  temp %= 1000;
+  *UCS++ = NUM_UCS_MAP[temp / 100];
+  temp %= 100;
+  *UCS++ = NUM_UCS_MAP[temp / 10];
+  *UCS++ = NUM_UCS_MAP[temp % 10];
   *UCS++ = YEAR;// 年;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_mon & 0xf0) << 4) | 0x3000;//解析年的高四为月的十位;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_mon & 0x0f) << 8) | 0x3000;//解析年的高四为月的个位;
+  temp = sms_alarm_mail->time.tm_mon;
+  *UCS++ = NUM_UCS_MAP[temp / 10];
+  *UCS++ = NUM_UCS_MAP[temp % 10];
   *UCS++ = MONTH;// 月;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_mday & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_mday & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+  temp = sms_alarm_mail->time.tm_mday;
+  *UCS++ = NUM_UCS_MAP[temp / 10];
+  *UCS++ = NUM_UCS_MAP[temp % 10];
   *UCS++ = DAY;// 日;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_hour & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_hour & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+  temp = sms_alarm_mail->time.tm_hour;
+  *UCS++ = NUM_UCS_MAP[temp / 10];
+  *UCS++ = NUM_UCS_MAP[temp % 10];
   *UCS++ = HOUR;// 时;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_min & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_min & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+  temp = sms_alarm_mail->time.tm_min;
+  *UCS++ = NUM_UCS_MAP[temp / 10];
+  *UCS++ = NUM_UCS_MAP[temp % 10];
   *UCS++ = MINUTE;// 分;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_sec & 0xf0) << 4) | 0x3000;//解析年的高四为日的十位;
-  *UCS++ = ((uint16_t )(sms_alarm_mail->time.tm_sec & 0x0f) << 8) | 0x3000;//解析年的高四为日的个位;
+  temp = sms_alarm_mail->time.tm_sec;
+  *UCS++ = NUM_UCS_MAP[temp / 10];
+  *UCS++ = NUM_UCS_MAP[temp % 10];
+  *UCS++ = SECOND;// 秒;
+  
   *UCS++ = SECOND;// 秒;
   *UCS_Len += 20;
   *UCS++ = FAN;
