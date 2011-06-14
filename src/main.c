@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon Jun 13 11:05:16 2011
+ * Modified at:   Tue Jun 14 16:48:22 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -201,6 +201,7 @@ int  main (void)
 }
 static  void  AppTaskCreate(void)
 {
+  
   OSTaskCreateExt(AppGSMTask,
 				  (void *)0,
 				  (OS_STK *)&AppGSMTaskStk[APP_TASK_GSM_STK_SIZE-1],
@@ -210,7 +211,6 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_GSM_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
-    
   OSTaskCreateExt(AppSMSSendTask,
 				  (void *)0,
 				  (OS_STK *)&AppSMSSendTaskStk[APP_TASK_SMSSend_STK_SIZE-1],
@@ -220,7 +220,6 @@ static  void  AppTaskCreate(void)
 				  APP_TASK_SMSSend_STK_SIZE,
 				  (void *)0,
 				  OS_TASK_OPT_STK_CLR);
-  
   OSTaskCreateExt(AppSMSReceiveTask,
 				  (void *)0,
 				  (OS_STK *)&AppSMSReceiveTaskStk[APP_TASK_SMSReceive_STK_SIZE -1],
@@ -295,6 +294,7 @@ static  void  AppStartTask (void *p_arg)
 					SFLASH_DEVICE_INIT_PARAMATERS_START, \
 					sizeof(DEVICE_INIT_PARAMATERS));
 
+
   if(memcmp(device_init_paramaters.device_name, device_init_paramaters_const.device_name, DEVICE_NAME_MAX_LENGTH))
 	{
 	  device_init_paramaters = device_init_paramaters_const;
@@ -364,6 +364,7 @@ static void AppGSMTask(void *p_arg)
   (void)p_arg;
   uint8_t counts = 0;
   uint8_t cnt = 0;
+  int temp = 0;
   OSTimeDlyHMSM(0, 0, 10, 0);//冷却模块否则GSM_VIO状态不对;
   while(1)
 	{
@@ -454,7 +455,8 @@ static void AppGSMTask(void *p_arg)
 			  OSMutexPost(MUTEX_GSM);
 			  continue;
 			}
-		  siscanf((const char *)GSM_RECEIVE_BUF, "%*[^ ]%d[^,]", (int *)&(device_init_paramaters.gsm_signal_strength));
+		  siscanf((const char *)GSM_RECEIVE_BUF, "%*[^ ]%d[^,]", (int *)&temp);
+		  device_init_paramaters.gsm_signal_strength = (uint16_t)temp;
 		  OSMutexPost(MUTEX_GSM);
 		  
 		  /******************************************************************

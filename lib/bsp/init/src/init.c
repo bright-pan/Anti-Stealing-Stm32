@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Jun  9 11:02:12 2011
+ * Modified at:   Tue Jun 14 16:07:43 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -196,8 +196,8 @@ static void led_config(void)
   led_off(LED_GSM);
   led_init(LED_SIGNAL_STATE);
   led_on(LED_SIGNAL_STATE);
-  led_init(LED_PERSIST);
-  led_off(LED_PERSIST);
+  led_init(LED_SFLASH);
+  led_off(LED_SFLASH);
 }
 
 /*
@@ -240,10 +240,28 @@ static void signal_config(void)
  *    sflash 功能初始化
  *
  */
+static const char *sflash_test = "sflash test";
+
 static void sflash_config(void)
 {
+  uint32_t length = strlen(sflash_test);
   sFLASH_Init();
   sFLASH_PageSizeSet();
+  
+  sFLASH_WriteBuffer((uint8_t *)sflash_test,
+					 SFLASH_DEVICE_INIT_PARAMATERS_END,
+					 length);
+  sFLASH_ReadBuffer((uint8_t *)&(device_init_paramaters.device_name),
+					SFLASH_DEVICE_INIT_PARAMATERS_END,
+					length);
+  if(memcmp(device_init_paramaters.device_name, sflash_test, length))
+	{
+	  led_off(LED_SFLASH);//sflash test failure
+	}
+  else
+	{
+	  led_on(LED_SFLASH);//sflash test success
+	}
 }
 
 static void temperature_config(void)

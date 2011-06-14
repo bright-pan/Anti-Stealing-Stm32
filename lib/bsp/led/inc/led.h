@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Jun  9 10:50:59 2011
+ * Modified at:   Tue Jun 14 15:51:38 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -21,7 +21,7 @@ typedef enum {
   LED_RS485 = 1,
   LED_GSM = 2,
   LED_SIGNAL_STATE = 3,
-  LED_PERSIST = 4,
+  LED_SFLASH = 4,
 }LED_TypeDef;
 
 void led_init(LED_TypeDef led_name);
