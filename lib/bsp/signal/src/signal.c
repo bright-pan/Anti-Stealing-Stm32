@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed Jun  8 18:51:44 2011
+ * Modified at:   Tue Jun 14 10:44:10 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -155,7 +155,7 @@ void signal_amp_battery_init(void)
   ADC_Init(ADC1, &ADC_InitStructure);
 
   /* ADC1 regular channel14 configuration */ 
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5);
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 2, ADC_SampleTime_55Cycles5);
   ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_55Cycles5);
 
   
