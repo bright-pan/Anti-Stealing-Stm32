@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue Jun 14 16:07:43 2011
+ * Modified at:   Thu Jun 16 15:02:20 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -247,13 +247,13 @@ static void sflash_config(void)
   uint32_t length = strlen(sflash_test);
   sFLASH_Init();
   sFLASH_PageSizeSet();
-  
   sFLASH_WriteBuffer((uint8_t *)sflash_test,
 					 SFLASH_DEVICE_INIT_PARAMATERS_END,
 					 length);
   sFLASH_ReadBuffer((uint8_t *)&(device_init_paramaters.device_name),
-					SFLASH_DEVICE_INIT_PARAMATERS_END,
-					length);
+					 SFLASH_DEVICE_INIT_PARAMATERS_END,
+					 length);
+
   if(memcmp(device_init_paramaters.device_name, sflash_test, length))
 	{
 	  led_off(LED_SFLASH);//sflash test failure
@@ -262,6 +262,7 @@ static void sflash_config(void)
 	{
 	  led_on(LED_SFLASH);//sflash test success
 	}
+
 }
 
 static void temperature_config(void)

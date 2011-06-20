@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Wed Jun  8 09:39:11 2011
+ * Modified at:   Thu Jun 16 10:19:03 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -22,7 +22,20 @@
 #define RS485_USART2_PREEMPTION_PRIORITY 2
 
 
+typedef struct {
+  
+  uint16_t address;
+  uint16_t length;
+  uint16_t offset;
+  void *data;
+  
+}RS485_ADDRESS_INFO;
+
 extern BUFFER rs485_buf;
+extern uint8_t function_id[2];
+extern RS485_ADDRESS_INFO rs485_address_info[28];
+
+
 
 typedef enum {
   
@@ -84,6 +97,11 @@ typedef struct {
   uint16_t crc;
 }RS485_RESPONSE_FRAME;
 
+
+
+#define nr_of_array(x) (sizeof((x)) / sizeof((x)[0]))
+
+
 void rs485_init(void);
 FunctionalState rs485_dir_set(FunctionalState state);
 uint16_t receive_from_rs485(char *str, uint16_t str_len);
@@ -93,6 +111,10 @@ void rs485_baudrate_set(BaudRate rate);
 
 void crc_16_init(void);
 uint16_t crc_16(uint8_t *puchMsg, uint16_t usDataLen);
+
+RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, DEVICE_INIT_PARAMATERS *device_parameters);
+int comp_rs485_address_info(const void *m1, const void *m2);
+int comp_function_id(const void *m1, const void *m2);
 
 
 #endif

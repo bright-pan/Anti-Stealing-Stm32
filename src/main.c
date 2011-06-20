@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue Jun 14 16:48:22 2011
+ * Modified at:   Mon Jun 20 10:48:56 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -40,7 +40,7 @@ DEVICE_INIT_PARAMATERS device_init_paramaters;
 //TIME_FRAME set_time;
 
 const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
-  "zxsoft:as-2011-06-13",//device name
+  "zxsoft:as-2011-06-15",//device name
   1,//id
   "高新区一号开闭所",//pramiry device name
   "比亚迪出线电缆",//slave device name
@@ -55,7 +55,7 @@ const DEVICE_INIT_PARAMATERS device_init_paramaters_const = {
   BAUDRATE_1200,//rs485 baudrate
   0,
   {
-	0,//signal interval time
+	30,//signal interval time
 	SIGNAL_FREQ_30000,//signal freq
 	200,//signal freq spread
 	500,//signal amp limit
@@ -166,10 +166,29 @@ static uint8_t byte2BCD(uint8_t bVal)
 }
 
 
-//uint8_t data[1000] = {0,};
+uint8_t data[1000] = {0,};
 
 int  main (void)
 {
+  /*
+  bsp_init();
+  uint16_t index = 0;
+  uint16_t length = sizeof(data)/sizeof(uint8_t);
+  while(1)
+	{
+	  for (index = 0; index <=length; index++)
+		{
+		  *(data + index) = 0XAA;
+		}
+	  sFLASH_WriteBuffer(data, 0, length);
+	  for (index = 0; index <=length; index++)
+		{
+		  *(data + index) = 0;
+		}
+	  sFLASH_ReadBuffer(data, 0, length);
+	}
+*/
+  
   INT8U  err;
   *NVIC_CCR= *NVIC_CCR | 0x200; // 设置STKALIGN位
 
@@ -251,6 +270,8 @@ static  void  AppTaskCreate(void)
     
 }
 
+
+
 static  void  AppStartTask (void *p_arg)
 {
   (void)p_arg;
@@ -298,10 +319,11 @@ static  void  AppStartTask (void *p_arg)
   if(memcmp(device_init_paramaters.device_name, device_init_paramaters_const.device_name, DEVICE_NAME_MAX_LENGTH))
 	{
 	  device_init_paramaters = device_init_paramaters_const;
-	  sFLASH_WriteBuffer((uint8_t *)&device_init_paramaters, \
+	  sFLASH_WriteBuffer((uint8_t *)&device_init_paramaters,  \
 						 SFLASH_DEVICE_INIT_PARAMATERS_START, \
 						 sizeof(DEVICE_INIT_PARAMATERS));
 	}
+  
   OSMutexPost(MUTEX_SFLASH);
 
   while(DEF_TRUE)
@@ -310,21 +332,87 @@ static  void  AppStartTask (void *p_arg)
 	  //  OSTaskSuspend(OS_PRIO_SELF);
 	  OSTimeDlyHMSM(0,0,0,500);
 	  led_toggle(LED_RUN);
-	  /*	   
-			   uint16_t index = 0;
-			   uint16_t length = sizeof(data)/sizeof(uint8_t);
-	   
-			   for (index = 0; index <=length; index++)
-			   {
-			   *(data + index) = 0XAA;
-			   }
-			   sFLASH_WriteBuffer(data, 0, length);
-			   for (index = 0; index <=length; index++)
-			   {
-			   *(data + index) = 0;
-			   }
-			   sFLASH_ReadBuffer(data, 0, length);
+	  /*			   
+	  
+	  RS485_ADDRESS_INFO *res = &rs485_address_info[19];
+			   
+	  device_init_paramaters.signal_parameters.interval = 126;
+	  	  sFLASH_WriteBuffer(res->data,						\
+						 SFLASH_DEVICE_INIT_PARAMATERS_START +	\
+						 res->offset, \
+						 res->length);
+	  
+	  sFLASH_ReadBuffer(res->data, \
+						 SFLASH_DEVICE_INIT_PARAMATERS_START +	\
+						 res->offset, \
+						 res->length);
+			   device_init_paramaters.signal_parameters.interval = 20;
+			   sFLASH_WriteBuffer(res->data,
+								  20,
+								  res->length);
+			   
+			   sFLASH_ReadBuffer(res->data,
+								 20,
+								 res->length);
+			   
+			   device_init_paramaters.signal_parameters.interval = 100;
+			   sFLASH_WriteBuffer(res->data,
+								  100,
+								  res->length);
+			   
+			   sFLASH_ReadBuffer(res->data,
+								 100,
+								 res->length);
+			   
+			   device_init_paramaters.signal_parameters.interval = 200;
+			   sFLASH_WriteBuffer(res->data,
+								  200,
+								  res->length);
+			   
+			   sFLASH_ReadBuffer(res->data,
+								 200,
+								 res->length);
+			   
+			   device_init_paramaters.signal_parameters.interval = 300;
+			   sFLASH_WriteBuffer(res->data,
+								  300,
+								  res->length);
+			   
+			   sFLASH_ReadBuffer(res->data,
+								 300,
+								 res->length);
+			   
+			   device_init_paramaters.signal_parameters.interval = 400;
+			   sFLASH_WriteBuffer(res->data,
+								  400,
+								  res->length);
+			   
+			   sFLASH_ReadBuffer(res->data,
+								 400,
+								 res->length);
+			   
+			   device_init_paramaters.signal_parameters.interval = 500;
+			   sFLASH_WriteBuffer(res->data,
+								  500,
+								  res->length);
+			   
+			   sFLASH_ReadBuffer(res->data,
+								 500,
+								 res->length);
+			   
+			   device_init_paramaters.signal_parameters.interval = 600;
+			   sFLASH_WriteBuffer(res->data,
+								  600,
+								  res->length);
+			   
+			   sFLASH_ReadBuffer(res->data,
+								 600,
+								 res->length);
+
+			   
 			   __NOP();
+			   */
+			   /*
 			   for (index = 0; index <=length; index++)
 			   {
 			   *(data + index) = 0;
@@ -338,7 +426,7 @@ static  void  AppStartTask (void *p_arg)
 			   sFLASH_ReadBuffer(data, 550,  550);
 			   __NOP();
 			   __NOP();
-	  */
+			   */
 	  //读取温度
 	  if(TP_convert())
 		{
@@ -346,7 +434,12 @@ static  void  AppStartTask (void *p_arg)
 		}
 	  //读取时间
 	  calender_get(&(device_init_paramaters.calender));
-	  OSTimeDlyHMSM(0,0,0,400);
+	  OSTimeDlyHMSM(0,0,0,800);
+	  /*	  
+	    sFLASH_ReadBuffer((uint8_t *)&device_init_paramaters, \
+					SFLASH_DEVICE_INIT_PARAMATERS_START, \
+					sizeof(DEVICE_INIT_PARAMATERS));
+	  */
 
 	}
 }
@@ -2694,7 +2787,7 @@ static void AppSignalTask(void *p_arg)
 	  if (device_parameters->signal_parameters.interval != 0)
 		{
 		  OSTimeDlyHMSM(0, device_parameters->signal_parameters.interval / 60, \
-						device_parameters->signal_parameters.interval / 60, 0);
+						device_parameters->signal_parameters.interval % 60, 0);
 		  
 		  //打开信号收发电源
 		  signal_receive_power(ENABLE);//接收电源打开
@@ -2721,7 +2814,8 @@ static void AppSignalTask(void *p_arg)
 			  signal_send_freq += signal_send_freq_capture;
 			  signal_receive_freq += signal_receive_freq_capture;
 			  signal_amp += adc1_buf[SIGNAL_AMP];
-			  OSTimeDlyHMSM(0, 0, 0, device_parameters->signal_parameters.process_interval);
+			  OSTimeDlyHMSM(0, 0, device_parameters->signal_parameters.process_interval / 1000, \
+							device_parameters->signal_parameters.process_interval % 1000);
 			}
 		  signal_send_freq /= device_parameters->signal_parameters.process_counts;
 		  signal_receive_freq /= device_parameters->signal_parameters.process_counts;
@@ -2946,319 +3040,6 @@ static void AppSignalTask(void *p_arg)
 }
 
 
-typedef struct {
-  
-  uint16_t address;
-  uint16_t length;
-  uint16_t offset;
-  void *data;
-  
-}RS485_ADDRESS_INFO;
-
-
-#define nr_of_array(x) (sizeof((x)) / sizeof((x)[0]))
-
-uint8_t function_id[] = {0x04, 0x10};
-int comp_function_id(const void *m1, const void *m2)
-{
-  uint8_t *mi1 = (uint8_t *)m1;
-  uint8_t *mi2 = (uint8_t *)m2;
-  if(*mi1 > *mi2)
-	{
-	  return 1;
-	}
-  else if(*mi1 == *mi2)
-	{
-	  return 0;
-	}
-  else
-	{
-	  return -1;
-	}
-}
-
-int comp_rs485_address_info(const void *m1, const void *m2)
-{
-  RS485_ADDRESS_INFO *mi1 = (RS485_ADDRESS_INFO *)m1;
-  RS485_ADDRESS_INFO *mi2 = (RS485_ADDRESS_INFO *)m2;
-  if(mi1->address > mi2->address)
-	{
-	  return 1;
-	}
-  else if(mi1->address == mi2->address)
-	{
-	  return 0;
-	}
-  else
-	{
-	  return -1;
-	}
-}
-
-
-
-RS485_ADDRESS_INFO rs485_address_info[] = {
-  {
-	0x1100, 32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, primary_device_name), &(device_init_paramaters.primary_device_name[0]),
-  },
-  {
-	0x1200,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, slave_device_name), &(device_init_paramaters.slave_device_name[0]),
-  },
-  {
-	0x2100,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone_numbers), &(device_init_paramaters.alarm_telephone_numbers),
-  },
-  {
-	0x2200,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[0]), &(device_init_paramaters.alarm_telephone[0]),
-  },
-  {
-	0x2300,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[1]), &(device_init_paramaters.alarm_telephone[1]),
-  },
-  {
-	0x2400,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[2]), &(device_init_paramaters.alarm_telephone[2]),
-  },
-  {
-	0x2500,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[3]), &(device_init_paramaters.alarm_telephone[3]),
-  },
-  {
-	0x2600,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[4]), &(device_init_paramaters.alarm_telephone[4]),
-  },
-  {
-	0x2700,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[5]), &(device_init_paramaters.alarm_telephone[5]),
-  },
-  {
-	0x2800,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[6]), &(device_init_paramaters.alarm_telephone[6]),
-  },
-  {
-	0x2900,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[7]), &(device_init_paramaters.alarm_telephone[7]),
-  },
-  {
-	0x3000,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[8]), &(device_init_paramaters.alarm_telephone[8]),
-  },
-  {
-	0x3100,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[9]), &(device_init_paramaters.alarm_telephone[9]),
-  },
-  {
-	0x3200,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, service_center_address), &(device_init_paramaters.service_center_address[0]),
-  },
-  {
-	0x4100,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, password), &(device_init_paramaters.password[0]),
-  },
-  {
-	0x4200,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, device_id), &(device_init_paramaters.device_id),
-  },
-  {
-	0x4300,	36,	0, &(device_init_paramaters.calender),
-  },
-  {
-	0x5100,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gps), &(device_init_paramaters.gps[0]),
-  },
-  {
-	0x6100,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, sms_on_off), &(device_init_paramaters.sms_on_off),
-  },
-  {
-	0x7100,
-	2,
-	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, interval),
-	&(device_init_paramaters.signal_parameters.interval),
-  },
-  {
-	0x7200,	2,
-	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, freq),
-	&(device_init_paramaters.signal_parameters.freq),
-  },
-  {
-	0x7300,	4,
-	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, freq_spread),
-	&(device_init_paramaters.signal_parameters.freq_spread),
-  },
-  {
-	0x7400,	2,
-	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, amp_limit),
-	&(device_init_paramaters.signal_parameters.amp_limit),
-  },
-  {
-	0x7500,	2,
-	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, process_counts),
-	&(device_init_paramaters.signal_parameters.process_counts),
-  },
-  {
-	0x7600,	2,
-	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, process_interval),
-	&(device_init_paramaters.signal_parameters.process_interval),
-  },
-  {
-	0x7700,	10,
-	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, send_freq),
-	&(device_init_paramaters.signal_parameters.send_freq),
-  },
-  {
-	0x7900,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, rs485_baudrate), &(device_init_paramaters.rs485_baudrate),
-  },
-  {
-	0x8000,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gsm_signal_strength), &(device_init_paramaters.gsm_signal_strength),
-  },
-};
-
-
-RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, DEVICE_INIT_PARAMATERS *device_parameters)
-{
-  RS485_ADDRESS_INFO key, *res;
-  void *temp = NULL;
-  uint16_t crc = 0;
-  crc_16_init();
-  //接收device_id字节
-  if(receive_from_rs485((char *)&(request_frame->device_id), 1) == 1)
-	{
-	  //处理device_id
-	  if(request_frame->device_id == device_parameters->device_id)
-		{
-		  crc = crc_16((uint8_t *)&(request_frame->device_id), 1);
-		  //OSTimeDlyHMSM(0, 0, 0, 1);
-		  //接收function_id
-		  if(receive_from_rs485((char *)&(request_frame->function_id), 1) == 1)
-			{
-			  crc = crc_16((uint8_t *)&(request_frame->function_id), 1);
-			  //处理function_id
-			  temp = (void *)bsearch((void *)&(request_frame->function_id),
-									 (void *)&function_id[0],
-									 nr_of_array(function_id),
-									 sizeof(function_id[0]),
-									 comp_function_id);
-			  if(temp != NULL)
-				{
-				  //接收地址码
-				  if(receive_from_rs485((char *)&(request_frame->address), 2) == 2)
-					{
-					  crc = crc_16((uint8_t *)&(request_frame->address), 2);
-					  //处理地址码
-					  request_frame->address = __REV16(request_frame->address);
-					  //					  request_frame->address = (request_frame->address >> 8) | (request_frame->address << 8);
-					  key.address = request_frame->address;
-					  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
-														  (void *)&rs485_address_info[0],
-														  nr_of_array(rs485_address_info),
-														  sizeof(rs485_address_info[0]),
-														  comp_rs485_address_info);
-					  if(res != NULL)
-						{
-						  //接收数据长度
-						  if(receive_from_rs485((char *)&(request_frame->length_16), 2) == 2)
-							{
-							  crc = crc_16((uint8_t *)&(request_frame->length_16), 2);
-							  //处理数据长度
-							  request_frame->length_16 = __REV16(request_frame->length_16);
-							  if(request_frame->length_16 <= 100)
-								{
-								  switch(request_frame->function_id)
-									{
-									case 0x04 : {
-									  //接收CRC码
-									  if(receive_from_rs485((char *)&(request_frame->rs485_read_request_frame.crc), 2) == 2)
-										{
-										  crc = crc_16((uint8_t *)&(request_frame->rs485_read_request_frame.crc), 2);
-										  //校验帧CRC
-										  if(crc == 0x0)
-											{
-											  return request_frame;
-											}
-										  else
-											{
-											  return NULL;
-											}
-										}
-									  else
-										{
-										  return NULL;
-										}
-									  break;
-									}
-									case 0x10 : {
-									  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.length_8), 1) == 1))
-										{
-										  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.length_8), 1);
-										  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.data),
-																request_frame->rs485_set_request_frame.length_8) \
-											  == request_frame->rs485_set_request_frame.length_8))
-											{
-											  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.data), request_frame->rs485_set_request_frame.length_8);//校验帧CRC
-											  if(receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.crc), 2) == 2)
-												{
-												  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.crc), 2);//校验帧CRC
-												  if(crc == 0x0)
-													{
-													  return request_frame;
-													}
-												  else
-													{
-													  return NULL;
-													}
-												}
-											  else
-												{
-												  return NULL;
-												}
-
-											}
-										  else
-											{
-											  return NULL;
-											}
-										}
-									  else
-										{
-										  return NULL;
-										}
-									  break;
-									}
-									default:{
-									  
-									  break;
-									}
-									}
-								  return NULL;
-								}
-							  else
-								{
-								  return NULL;
-								}
-							}
-						  else
-							{
-							  return NULL;
-							}
-						  
-						}
-					  else
-						{
-						  return NULL;
-						}
-					}
-				  else
-					{
-					  return NULL;
-					}
-				}
-			  else
-				{
-				  return NULL;
-				}
-			}
-		  else
-			{
-			  return NULL;
-			}
-		}
-	  else
-		{
-		  return NULL;
-		}
-	  
-	}
-  else
-	{
-	  return NULL;
-	}
-}
 
 static void AppRS485Task(void *p_arg)
 {

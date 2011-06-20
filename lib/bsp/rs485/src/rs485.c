@@ -7,13 +7,15 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue Jun  7 14:22:46 2011
+ * Modified at:   Thu Jun 16 10:19:35 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
  ********************************************************************/
 
 #include "includes.h"
+
+extern DEVICE_INIT_PARAMATERS device_init_paramaters;
 
 #define RS485_DIR_PIN                    GPIO_Pin_1
 #define RS485_DIR_PORT                   GPIOA
@@ -52,6 +54,112 @@ const static uint32_t BAUDRATE[] = {
   115200,
   
 };
+
+uint8_t function_id[2] = {0x04, 0x10};
+
+
+RS485_ADDRESS_INFO rs485_address_info[28] = {
+  {
+	0x1100, 32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, primary_device_name), &(device_init_paramaters.primary_device_name[0]),
+  },
+  {
+	0x1200,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, slave_device_name), &(device_init_paramaters.slave_device_name[0]),
+  },
+  {
+	0x2100,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone_numbers), &(device_init_paramaters.alarm_telephone_numbers),
+  },
+  {
+	0x2200,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[0]), &(device_init_paramaters.alarm_telephone[0]),
+  },
+  {
+	0x2300,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[1]), &(device_init_paramaters.alarm_telephone[1]),
+  },
+  {
+	0x2400,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[2]), &(device_init_paramaters.alarm_telephone[2]),
+  },
+  {
+	0x2500,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[3]), &(device_init_paramaters.alarm_telephone[3]),
+  },
+  {
+	0x2600,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[4]), &(device_init_paramaters.alarm_telephone[4]),
+  },
+  {
+	0x2700,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[5]), &(device_init_paramaters.alarm_telephone[5]),
+  },
+  {
+	0x2800,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[6]), &(device_init_paramaters.alarm_telephone[6]),
+  },
+  {
+	0x2900,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[7]), &(device_init_paramaters.alarm_telephone[7]),
+  },
+  {
+	0x3000,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[8]), &(device_init_paramaters.alarm_telephone[8]),
+  },
+  {
+	0x3100,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, alarm_telephone[9]), &(device_init_paramaters.alarm_telephone[9]),
+  },
+  {
+	0x3200,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, service_center_address), &(device_init_paramaters.service_center_address[0]),
+  },
+  {
+	0x4100,	12,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, password), &(device_init_paramaters.password[0]),
+  },
+  {
+	0x4200,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, device_id), &(device_init_paramaters.device_id),
+  },
+  {
+	0x4300,	36,	0, &(device_init_paramaters.calender),
+  },
+  {
+	0x5100,	32,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gps), &(device_init_paramaters.gps[0]),
+  },
+  {
+	0x6100,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, sms_on_off), &(device_init_paramaters.sms_on_off),
+  },
+  {
+	0x7100,
+	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, interval),
+	&(device_init_paramaters.signal_parameters.interval),
+  },
+  {
+	0x7200,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, freq),
+	&(device_init_paramaters.signal_parameters.freq),
+  },
+  {
+	0x7300,	4,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, freq_spread),
+	&(device_init_paramaters.signal_parameters.freq_spread),
+  },
+  {
+	0x7400,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, amp_limit),
+	&(device_init_paramaters.signal_parameters.amp_limit),
+  },
+  {
+	0x7500,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, process_counts),
+	&(device_init_paramaters.signal_parameters.process_counts),
+  },
+  {
+	0x7600,	2,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, process_interval),
+	&(device_init_paramaters.signal_parameters.process_interval),
+  },
+  {
+	0x7700,	10,
+	OFF_SET_OF(DEVICE_INIT_PARAMATERS, signal_parameters) + OFF_SET_OF(SignalParameters, send_freq),
+	&(device_init_paramaters.signal_parameters.send_freq),
+  },
+  {
+	0x7900,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, rs485_baudrate), &(device_init_paramaters.rs485_baudrate),
+  },
+  {
+	0x8000,	2,	OFF_SET_OF(DEVICE_INIT_PARAMATERS, gsm_signal_strength), &(device_init_paramaters.gsm_signal_strength),
+  }
+};
+
 
 void rs485_init(void)
 {
@@ -313,3 +421,204 @@ void crc_16_init(void)
   uchCRCHi = 0xFF; // CRC 的高字节初始化
   uchCRCLo = 0xFF; // CRC 的低字节初始化
 }
+
+
+
+int comp_function_id(const void *m1, const void *m2)
+{
+  uint8_t *mi1 = (uint8_t *)m1;
+  uint8_t *mi2 = (uint8_t *)m2;
+  if(*mi1 > *mi2)
+	{
+	  return 1;
+	}
+  else if(*mi1 == *mi2)
+	{
+	  return 0;
+	}
+  else
+	{
+	  return -1;
+	}
+}
+
+int comp_rs485_address_info(const void *m1, const void *m2)
+{
+  RS485_ADDRESS_INFO *mi1 = (RS485_ADDRESS_INFO *)m1;
+  RS485_ADDRESS_INFO *mi2 = (RS485_ADDRESS_INFO *)m2;
+  if(mi1->address > mi2->address)
+	{
+	  return 1;
+	}
+  else if(mi1->address == mi2->address)
+	{
+	  return 0;
+	}
+  else
+	{
+	  return -1;
+	}
+}
+
+
+
+RS485_REQUEST_FRAME *receive_rs485_frame(RS485_REQUEST_FRAME *request_frame, DEVICE_INIT_PARAMATERS *device_parameters)
+{
+  RS485_ADDRESS_INFO key, *res;
+  void *temp = NULL;
+  uint16_t crc = 0;
+  crc_16_init();
+  //接收device_id字节
+  if(receive_from_rs485((char *)&(request_frame->device_id), 1) == 1)
+	{
+	  //处理device_id
+	  if(request_frame->device_id == device_parameters->device_id)
+		{
+		  crc = crc_16((uint8_t *)&(request_frame->device_id), 1);
+		  //OSTimeDlyHMSM(0, 0, 0, 1);
+		  //接收function_id
+		  if(receive_from_rs485((char *)&(request_frame->function_id), 1) == 1)
+			{
+			  crc = crc_16((uint8_t *)&(request_frame->function_id), 1);
+			  //处理function_id
+			  temp = (void *)bsearch((void *)&(request_frame->function_id),
+									 (void *)&function_id[0],
+									 nr_of_array(function_id),
+									 sizeof(function_id[0]),
+									 comp_function_id);
+			  if(temp != NULL)
+				{
+				  //接收地址码
+				  if(receive_from_rs485((char *)&(request_frame->address), 2) == 2)
+					{
+					  crc = crc_16((uint8_t *)&(request_frame->address), 2);
+					  //处理地址码
+					  request_frame->address = __REV16(request_frame->address);
+					  //					  request_frame->address = (request_frame->address >> 8) | (request_frame->address << 8);
+					  key.address = request_frame->address;
+					  res = (RS485_ADDRESS_INFO *)bsearch((void *)&key,
+														  (void *)&rs485_address_info[0],
+														  nr_of_array(rs485_address_info),
+														  sizeof(rs485_address_info[0]),
+														  comp_rs485_address_info);
+					  if(res != NULL)
+						{
+						  //接收数据长度
+						  if(receive_from_rs485((char *)&(request_frame->length_16), 2) == 2)
+							{
+							  crc = crc_16((uint8_t *)&(request_frame->length_16), 2);
+							  //处理数据长度
+							  request_frame->length_16 = __REV16(request_frame->length_16);
+							  if(request_frame->length_16 <= 100)
+								{
+								  switch(request_frame->function_id)
+									{
+									case 0x04 : {
+									  //接收CRC码
+									  if(receive_from_rs485((char *)&(request_frame->rs485_read_request_frame.crc), 2) == 2)
+										{
+										  crc = crc_16((uint8_t *)&(request_frame->rs485_read_request_frame.crc), 2);
+										  //校验帧CRC
+										  if(crc == 0x0)
+											{
+											  return request_frame;
+											}
+										  else
+											{
+											  return NULL;
+											}
+										}
+									  else
+										{
+										  return NULL;
+										}
+									  break;
+									}
+									case 0x10 : {
+									  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.length_8), 1) == 1))
+										{
+										  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.length_8), 1);
+										  if((receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.data),
+																request_frame->rs485_set_request_frame.length_8) \
+											  == request_frame->rs485_set_request_frame.length_8))
+											{
+											  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.data), request_frame->rs485_set_request_frame.length_8);//校验帧CRC
+											  if(receive_from_rs485((char *)&(request_frame->rs485_set_request_frame.crc), 2) == 2)
+												{
+												  crc = crc_16((uint8_t *)&(request_frame->rs485_set_request_frame.crc), 2);//校验帧CRC
+												  if(crc == 0x0)
+													{
+													  return request_frame;
+													}
+												  else
+													{
+													  return NULL;
+													}
+												}
+											  else
+												{
+												  return NULL;
+												}
+
+											}
+										  else
+											{
+											  return NULL;
+											}
+										}
+									  else
+										{
+										  return NULL;
+										}
+									  break;
+									}
+									default:{
+									  
+									  break;
+									}
+									}
+								  return NULL;
+								}
+							  else
+								{
+								  return NULL;
+								}
+							}
+						  else
+							{
+							  return NULL;
+							}
+						  
+						}
+					  else
+						{
+						  return NULL;
+						}
+					}
+				  else
+					{
+					  return NULL;
+					}
+				}
+			  else
+				{
+				  return NULL;
+				}
+			}
+		  else
+			{
+			  return NULL;
+			}
+		}
+	  else
+		{
+		  return NULL;
+		}
+	  
+	}
+  else
+	{
+	  return NULL;
+	}
+}
+

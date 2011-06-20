@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu May  5 17:24:38 2011
+ * Modified at:   Mon Jun 20 10:38:03 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -31,9 +31,18 @@
 #define sFLASH_CS_GPIO_CLK               RCC_APB2Periph_GPIOB
 
 
-#define sFLASH_CMD_WRITE          0x82  // Write to Memory instruction
+#define sFLASH_CMD_WRITE_TO_BUFFER1          0x84  // Write to buffer instruction
+#define sFLASH_CMD_WRITE_TO_BUFFER2          0x87  // Write to buffer instruction
 
-#define sFLASH_CMD_READ           0x03  // Read from Memory instruction
+#define sFLASH_CMD_READ_FROM_BUFFER1           0xD4  // Read from buffer instruction
+#define sFLASH_CMD_READ_FROM_BUFFER2           0xD6  // Read from buffer instruction
+
+#define sFLASH_CMD_BUFFER1_TO_FLASH_WITH_ERASE 0x83  // buffer to flash instruction
+#define sFLASH_CMD_BUFFER2_TO_FLASH_WITH_ERASE 0x86  // buffer to flash instruction
+
+#define sFLASH_CMD_FLASH_TO_BUFFER1 0x53 // sflash to buffer instruction
+#define sFLASH_CMD_FLASH_TO_BUFFER2 0x55 // sflash to buffer instruction
+
 #define sFLASH_CMD_RDSR           0xD7  // Read Status Register instruction
 #define sFLASH_CMD_RDID           0x9F  // Read identification
 
@@ -103,11 +112,7 @@ void sFLASH_Init(void)
   SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
   SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
 
-#if defined (STM32F10X_LD_VL) || defined (STM32F10X_MD_VL) || defined (STM32F10X_HD_VL)
-  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
-#else
-  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
-#endif
+  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
 
   SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
   SPI_InitStructure.SPI_CRCPolynomial = 7;
@@ -167,21 +172,43 @@ void sFLASH_PageSizeSet(void)
  *    Write a buffer to sFLASH
  *
  */
-static void sFLASH_WritePage(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite)
+static void sFLASH_WritePage(uint8_t *pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite)
 {
+  /*  uint16_t addr_pages, addr_page_offset;
+
+  addr_pages = WriteAddr / sFLASH_SPI_PAGESIZE;
+  addr_page_offset = WriteAddr % sFLASH_SPI_PAGESIZE;
+
+  WriteAddr = (addr_pages & 0xfff) << 9;
+  WriteAddr += addr_page_offset & 0x1ff;
+  */
+  // flash to buffer1
   sFLASH_CS_LOW();  // Select the FLASH: Chip Select low
-  sFLASH_SendByte(sFLASH_CMD_WRITE);  // Send "Write to Memory " instruction
-
-  sFLASH_SendByte((WriteAddr & 0xFF0000) >> 16);  // Send WriteAddr high nibble address byte to write to
-  sFLASH_SendByte((WriteAddr & 0xFF00) >> 8);  // Send WriteAddr medium nibble address byte to write to
+  sFLASH_SendByte(sFLASH_CMD_FLASH_TO_BUFFER1);  // 读页数据到buffer1
+  sFLASH_SendByte((WriteAddr >> 16) & 0xff);  // Send WriteAddr high nibble address byte to write to
+  sFLASH_SendByte((WriteAddr >> 8) & 0xff);  // Send WriteAddr medium nibble address byte to write to
   sFLASH_SendByte(WriteAddr & 0xFF);// Send WriteAddr low nibble address byte to write to
-
+  sFLASH_CS_HIGH();//  Deselect the FLASH: Chip Select high
+  sFLASH_WaitForWriteEnd();// Wait the end of Flash writing
+  // write to buffer1
+  sFLASH_CS_LOW();  // Select the FLASH: Chip Select low
+  sFLASH_SendByte(sFLASH_CMD_WRITE_TO_BUFFER1);  // 写页数据到buffer1
+  sFLASH_SendByte((WriteAddr >> 16) & 0xff);  // Send WriteAddr high nibble address byte to write to
+  sFLASH_SendByte((WriteAddr >> 8) & 0xff);  // Send WriteAddr medium nibble address byte to write to
+  sFLASH_SendByte(WriteAddr & 0xFF);// Send WriteAddr low nibble address byte to write to
   while (NumByteToWrite--)  // while there is data to be written on the FLASH
 	{
 	  sFLASH_SendByte(*pBuffer);	  // Send the current byte
 	  pBuffer++;// Point on the next byte to be written
 	}
-
+  sFLASH_CS_HIGH();//  Deselect the FLASH: Chip Select high
+  sFLASH_WaitForWriteEnd();// Wait the end of Flash writing
+  // write to buffer1
+  sFLASH_CS_LOW();  // Select the FLASH: Chip Select low
+  sFLASH_SendByte(sFLASH_CMD_BUFFER1_TO_FLASH_WITH_ERASE);  // 写buffer1到flash
+  sFLASH_SendByte((WriteAddr >> 16) & 0xff);  // Send WriteAddr high nibble address byte to write to
+  sFLASH_SendByte((WriteAddr >> 8) & 0xff);  // Send WriteAddr medium nibble address byte to write to
+  sFLASH_SendByte(WriteAddr & 0xFF);// Send WriteAddr low nibble address byte to write to
   sFLASH_CS_HIGH();//  Deselect the FLASH: Chip Select high
   sFLASH_WaitForWriteEnd();// Wait the end of Flash writing
 }
@@ -260,7 +287,7 @@ void sFLASH_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t NumByteTo
 /*
  * Function sFLASH_ReadBuffer (pBuffer, ReadAddr, NumByteToRead)
  *
- *    Write a buffer to sFLASH
+ *    Read a buffer from sFLASH
  *
  */
 void sFLASH_ReadBuffer(uint8_t* pBuffer, uint32_t ReadAddr, uint32_t NumByteToRead)
@@ -269,19 +296,19 @@ void sFLASH_ReadBuffer(uint8_t* pBuffer, uint32_t ReadAddr, uint32_t NumByteToRe
   sFLASH_CS_LOW();
 
   /*!< Send "Read from Memory " instruction */
-  sFLASH_SendByte(sFLASH_CMD_READ);
+  sFLASH_SendByte(0x03);
 
   /*!< Send ReadAddr high nibble address byte to read from */
   sFLASH_SendByte((ReadAddr & 0xFF0000) >> 16);
   /*!< Send ReadAddr medium nibble address byte to read from */
-  sFLASH_SendByte((ReadAddr& 0xFF00) >> 8);
+  sFLASH_SendByte((ReadAddr & 0xFF00) >> 8);
   /*!< Send ReadAddr low nibble address byte to read from */
   sFLASH_SendByte(ReadAddr & 0xFF);
 
   while (NumByteToRead--) /*!< while there is data to be read */
   {
     /*!< Read a byte from the FLASH */
-    *pBuffer = sFLASH_SendByte(sFLASH_DUMMY_BYTE);
+    *pBuffer = sFLASH_ReadByte();
     /*!< Point to the next location where the byte read will be saved */
     pBuffer++;
   }
@@ -329,7 +356,7 @@ uint32_t sFLASH_ReadID(void)
  *    Receive a byte data from sFLASH.
  *
  */
-static uint8_t sFLASH_ReadByte(void)
+static inline uint8_t sFLASH_ReadByte(void)
 {
   return (sFLASH_SendByte(sFLASH_DUMMY_BYTE));
 }
