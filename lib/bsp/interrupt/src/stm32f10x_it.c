@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue May 24 09:54:10 2011
+ * Modified at:   Tue Jun 21 11:39:33 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -16,10 +16,14 @@
 #include "includes.h"
 // 定义向量表
 
+#define SIGNAL_SEND_COUNT_VALUE 10
+
 __IO uint16_t signal_send_freq_capture = 0;
 __IO uint16_t signal_receive_freq_capture = 0;
 
 
+static uint8_t signal_send_receive_flag = SET;
+static uint16_t signal_send_count = 0;
 
 extern unsigned long _etext;
 extern unsigned long _data;
@@ -154,7 +158,10 @@ void TIM3_IRQHandler(void)
   OS_ENTER_CRITICAL();  /* Tell uC/OS-II that we are starting an ISR*/
   OSIntNesting++;
   OS_EXIT_CRITICAL();	  
-
+  
+  signal_send_receive_flag = RESET;//重置收发标志
+  signal_send_count = 0;
+  
   static __IO uint8_t capture_number = 0;
   static __IO uint16_t read_value1 = 0;
   static __IO uint16_t read_value2 = 0;
@@ -202,6 +209,20 @@ void TIM4_IRQHandler(void)
   static __IO uint16_t read_value1 = 0;
   static __IO uint16_t read_value2 = 0;
 
+
+  if(signal_send_receive_flag == RESET)
+	{
+	  signal_send_receive_flag = SET;//重置收发标志
+	}
+  else
+	{
+	  if(signal_send_count++ > SIGNAL_SEND_COUNT_VALUE)
+		{
+		  signal_receive_freq_capture = 0;
+		  signal_send_count = 0;
+		}
+	}
+  
   if(TIM_GetITStatus(TIM4, TIM_IT_CC1) == SET)
   {
     /* Clear TIM3 Capture compare interrupt pending bit */

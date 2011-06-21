@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Jun 16 15:02:20 2011
+ * Modified at:   Tue Jun 21 11:33:02 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -15,6 +15,7 @@
 
 #include "includes.h"
 extern DEVICE_INIT_PARAMATERS device_init_paramaters;
+extern DEVICE_INIT_PARAMATERS device_init_paramaters_const;
 //int16_t temperature = 0;
 
 static void systick_config(void);
@@ -262,7 +263,18 @@ static void sflash_config(void)
 	{
 	  led_on(LED_SFLASH);//sflash test success
 	}
+  // 全局变量初始化
+  sFLASH_ReadBuffer((uint8_t *)&device_init_paramaters,
+					SFLASH_DEVICE_INIT_PARAMATERS_START,
+					sizeof(DEVICE_INIT_PARAMATERS));
 
+  if(memcmp(device_init_paramaters.device_name, device_init_paramaters_const.device_name, DEVICE_NAME_MAX_LENGTH))
+	{
+	  device_init_paramaters = device_init_paramaters_const;
+	  sFLASH_WriteBuffer((uint8_t *)&device_init_paramaters,  
+						 SFLASH_DEVICE_INIT_PARAMATERS_START, 
+						 sizeof(DEVICE_INIT_PARAMATERS));
+	}
 }
 
 static void temperature_config(void)

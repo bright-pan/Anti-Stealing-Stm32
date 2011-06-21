@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon Jun 20 10:48:56 2011
+ * Modified at:   Tue Jun 21 11:41:41 2011
  *                
  * Description:   application main program
  * Copyright (C) 2010-2011,  Bright Pan
@@ -308,23 +308,6 @@ static  void  AppStartTask (void *p_arg)
   SEM_SMS_MSG_INDICATOR = OSSemCreate(0);
 
   AppTaskCreate();                                            /* Create application tasks                                 */
-  // 全局变量初始化
-  OSMutexPend(MUTEX_SFLASH, 0, &err);
-
-  sFLASH_ReadBuffer((uint8_t *)&device_init_paramaters, \
-					SFLASH_DEVICE_INIT_PARAMATERS_START, \
-					sizeof(DEVICE_INIT_PARAMATERS));
-
-
-  if(memcmp(device_init_paramaters.device_name, device_init_paramaters_const.device_name, DEVICE_NAME_MAX_LENGTH))
-	{
-	  device_init_paramaters = device_init_paramaters_const;
-	  sFLASH_WriteBuffer((uint8_t *)&device_init_paramaters,  \
-						 SFLASH_DEVICE_INIT_PARAMATERS_START, \
-						 sizeof(DEVICE_INIT_PARAMATERS));
-	}
-  
-  OSMutexPost(MUTEX_SFLASH);
 
   while(DEF_TRUE)
 	{  
@@ -434,7 +417,7 @@ static  void  AppStartTask (void *p_arg)
 		}
 	  //读取时间
 	  calender_get(&(device_init_paramaters.calender));
-	  OSTimeDlyHMSM(0,0,0,800);
+	  OSTimeDlyHMSM(0,0,0,300);
 	  /*	  
 	    sFLASH_ReadBuffer((uint8_t *)&device_init_paramaters, \
 					SFLASH_DEVICE_INIT_PARAMATERS_START, \
