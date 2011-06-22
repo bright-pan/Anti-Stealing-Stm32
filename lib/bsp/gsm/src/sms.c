@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon Jun 13 11:10:04 2011
+ * Modified at:   Wed Jun 22 11:10:11 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -230,8 +230,6 @@ void Alarm_Mail_Data_To_UCS(uint16_t *UCS, SMS_ALARM_FRAME *sms_alarm_mail, uint
   temp = sms_alarm_mail->time.tm_sec;
   *UCS++ = NUM_UCS_MAP[temp / 10];
   *UCS++ = NUM_UCS_MAP[temp % 10];
-  *UCS++ = SECOND;// 秒;
-  
   *UCS++ = SECOND;// 秒;
   *UCS_Len += 20;
   *UCS++ = FAN;
