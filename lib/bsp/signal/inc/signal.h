@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Thu Jun  9 11:32:47 2011
+ * Modified at:   Mon Jul  4 10:27:21 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -45,7 +45,11 @@ typedef struct {
 
 */
 typedef enum {
-  SIGNAL_FREQ_4000 = 0,
+  SIGNAL_FREQ_40 = 0,
+  SIGNAL_FREQ_120,
+  SIGNAL_FREQ_480,
+  SIGNAL_FREQ_960,
+  SIGNAL_FREQ_4000,
   SIGNAL_FREQ_8000,
   SIGNAL_FREQ_12000,
   SIGNAL_FREQ_16000,

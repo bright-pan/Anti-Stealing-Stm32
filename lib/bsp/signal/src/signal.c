@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Tue Jun 14 10:44:10 2011
+ * Modified at:   Mon Jul  4 10:43:11 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -65,6 +65,10 @@
 
 //信号频率数组
 const static uint32_t signal_freq[] = {
+  40,
+  120,
+  480,
+  960,
   4000,
   8000,
   12000,
@@ -453,7 +457,7 @@ FunctionalState signal_send(FunctionalState state)
 
 void signal_frequency_set(SignalFreq freq)
 {
-  if(freq < SIGNAL_FREQ_4000 || freq > SIGNAL_FREQ_64000)
+  if(freq < SIGNAL_FREQ_40 || freq > SIGNAL_FREQ_64000)
 	{
 	  freq = SIGNAL_FREQ_30000;
 	}
