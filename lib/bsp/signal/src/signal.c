@@ -7,7 +7,7 @@
  *                
  *                
  * Modified by:   Bright Pan <loststriker@gmail.com>
- * Modified at:   Mon Jul  4 10:43:11 2011
+ * Modified at:   Wed Jul  6 14:08:11 2011
  *                
  * Description:   
  * Copyright (C) 2010-2011,  Bright Pan
@@ -220,6 +220,8 @@ void signal_freq_test_init(void)
   //TIM初始化结构体定义
   GPIO_InitTypeDef GPIO_InitStructure;
   TIM_ICInitTypeDef  TIM_ICInitStructure;
+  uint16_t PrescalerValue = (uint16_t)(SystemCoreClock / 12000000) - 1;
+
   //发送频率检测引脚时钟
   RCC_APB2PeriphClockCmd(SIGNAL_SEND_FREQ_CLK, ENABLE);
   //设置成浮空输入
@@ -236,6 +238,8 @@ void signal_freq_test_init(void)
   TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
   TIM_ICInitStructure.TIM_ICFilter = 0x0;
   TIM_ICInit(TIM4, &TIM_ICInitStructure);
+  //设置TIM4的计数器基准频率为6M
+  TIM_PrescalerConfig(TIM4, PrescalerValue, TIM_PSCReloadMode_Immediate);
   // Enable the CC1 Interrupt Request
   TIM_ITConfig(TIM4, TIM_IT_CC1, ENABLE);
   // TIM enable counter
@@ -260,6 +264,8 @@ void signal_freq_test_init(void)
   TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
   TIM_ICInitStructure.TIM_ICFilter = 0x0;
   TIM_ICInit(TIM3, &TIM_ICInitStructure);
+  //设置TIM3的计数器基准频率为6M
+  TIM_PrescalerConfig(TIM3, PrescalerValue, TIM_PSCReloadMode_Immediate);
   // Enable the CC2 Interrupt Request
   TIM_ITConfig(TIM3, TIM_IT_CC2, ENABLE);
   // TIM enable counter
@@ -365,7 +371,7 @@ void signal_send_init(void)
   TIM_TimeBaseInitTypeDef    TIM_TimeBaseStructure;
   //DMA初始化结构体定义
   DMA_InitTypeDef            DMA_InitStructure;
-  GPIO_InitTypeDef GPIO_InitStructure;
+  //GPIO_InitTypeDef GPIO_InitStructure;
 
   //DAC信号产生
   //DMA时钟使能
